@@ -1,0 +1,55 @@
+################################ frontend ################################
+
+FROM node:22.22.2-bookworm AS frontend-build-stage
+RUN npm i -g npm@~10.9.7
+
+# Create app directory
+WORKDIR /usr/workspace
+
+# Install app dependencies
+COPY frontend/package*.json frontend/.npmrc ./
+RUN npm clean-install
+
+# Copy all app file
+COPY frontend .
+
+RUN npm run build
+
+################################ backend #################################
+
+FROM node:22.22.2-bookworm AS backend-build-stage
+RUN npm i -g npm@~10.9.7
+
+# Create app directory
+WORKDIR /usr/workspace
+
+# Install app dependencies
+COPY backend/package*.json backend/.npmrc ./
+RUN npm config set depth 0 && \
+    npm clean-install --omit=dev --ignore-scripts && \
+    cp -pR node_modules /usr/node_modules_production && \
+    npm clean-install
+
+# Copy all app file
+COPY backend .
+
+RUN npm run build
+
+################################## runtime ##################################
+
+FROM node:22.22.2-alpine3.22 AS runtime
+
+# Create app directory
+WORKDIR /usr/workspace
+
+# frontend
+COPY --from=frontend-build-stage /usr/workspace/build ./frontend/build/
+
+# backend
+COPY --from=backend-build-stage /usr/workspace/package.json ./backend/package.json
+COPY --from=backend-build-stage /usr/node_modules_production ./backend/node_modules
+COPY --from=backend-build-stage /usr/workspace/dist ./backend/dist
+COPY --from=backend-build-stage /usr/workspace/public ./backend/public
+
+EXPOSE 3000
+CMD [ "/bin/sh", "-c", "cd /usr/workspace/backend && npm run start:prod" ]

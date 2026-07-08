@@ -1,0 +1,21 @@
+services:
+  application:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USERNAME: ${USER}
+        USER_UID: 1000 # id -u
+        USER_GID: 1000 # id -g
+        TimeZone: Asia/Taipei
+    image: 'course-withdrawal/development:latest'
+    container_name: course-withdrawal-development
+    volumes:
+      - ..:/usr/workspace
+      - vscode-extensions:/home/${USER}/.vscode-server/extensions
+      - vscode-extensions:/home/${USER}/.vscode-server-insiders/extensions
+    command: sleep infinity
+
+volumes:
+  vscode-extensions:
+    name: course-withdrawal-vscode-extensions

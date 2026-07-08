@@ -1,0 +1,29 @@
+version: "3.5"
+services:
+ application:
+   build:
+     args:
+       USERNAME: ${USER}
+       USER_UID: 1001 # id -u
+       USER_GID: 1001 # id -g
+   container_name: course-withdrawal-development
+   environment:
+     NODE_OPTIONS: "--max_old_space_size=8192"
+   volumes:
+     - ~/.gitconfig:/home/${USER}/.gitconfig:ro
+     # - ~/.bashrc:/home/${USER}/.bashrc:ro
+     # - ~/.bash_aliases:/home/${USER}/.bash_aliases:ro
+     # - ~/.bash_profile:/home/${USER}/.bash_profile:ro
+     # - ~/.inputrc:/home/${USER}/.inputrc:ro
+     # - ~/.dircolors:/home/${USER}/.dircolors:ro
+     - ~/.npmrc:/home/${USER}/.npmrc:ro
+   networks:
+     - local-infra
+   ports:
+     - 22200:3000 # setting traefik port forwarding
+     - 33300:3001 # setting traefik port forwarding
+
+networks:
+ local-infra:
+   external: true
+   name: local-infra-network
