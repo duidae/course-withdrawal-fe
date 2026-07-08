@@ -1,0 +1,113 @@
+trigger: 
+  - none
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: COOL-LTI/azure-pipeline-templates
+      ref: refs/tags/v1.2.1
+
+parameters:
+- name: deployRedis
+  displayName: Deploy Redis?
+  type: boolean
+  default: false
+
+variables:
+- template: branch-check-variables.yml@templates
+
+- template: join-variables.yml@templates
+  parameters:
+    variableName: "joinedEnvVariables"
+    variableList:
+      # variables are set in COOL-LTI-Common variable group
+      - APP_PORT
+      - CONSOLE_LOG_LEVEL
+      - ENABLE_CORS
+      - ENABLE_SWAGGER
+      - FILE_LOG_LEVEL
+      - KEY_DIRECTORY
+      - LOG_DIRECTORY
+      # variables are set in <project>-<environment> variable group
+
+- template: join-variables.yml@templates
+  parameters:
+    variableName: "joinedVolumeVariables"
+    variableList:
+      - LOG_DIRECTORY #=> EXTERNAL_LOG_DIRECTORY
+      - KEY_DIRECTORY #=> EXTERNAL_KEY_DIRECTORY
+
+# Project variables
+- name: projectName
+  value: 'course-withdrawal'
+
+- name: acrConnection
+  value: 'ntucool-acr'
+
+- name: containerRegistry
+  value: 'ntucool.azurecr.io'
+
+- name: containerTag
+  value: ${{ replace(variables['Build.SourceBranchName'], 'v', '') }}
+
+- name: backendNpmrcPath
+  value: './backend/.npmrc'
+
+- name: frontendNpmrcPath
+  value: './frontend/.npmrc'
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+- stage: SonarQube
+  displayName: SonarQube stage
+  condition: eq(variables.isRelease, 'true')
+  jobs:
+  - template: sonarqube-job.yml@templates
+    parameters: 
+      projectKey: ntu-cool:course-withdrawal
+      projectVersion: $(Build.SourceBranchName)
+
+- stage: Publish
+  displayName: Publish stage
+  dependsOn: SonarQube
+  condition: and(succeeded(), or(eq(variables.isRelease, 'true'), eq(variables.isVersionTag, 'true')))
+  jobs:
+    - job: Publish
+      displayName: Build and push Docker image to ACR
+      steps:
+        - template: multi-npm-auth.yml@templates
+          parameters: 
+            npmrcPaths: 
+            - ${{ variables.backendNpmrcPath }}
+            - ${{ variables.frontendNpmrcPath }}
+
+        - task: Docker@2
+          inputs:
+            containerRegistry: $(acrConnection)
+            repository: $(projectName)
+            command: 'buildAndPush'
+            Dockerfile: '**/Dockerfile.runtime'
+            tags: $(containerTag)
+
+- template: web-app-deploy-stage.yml@templates
+  parameters:
+    projectName: ${{ variables.projectName }}
+    registryConnection: $(acrConnection)
+    containerRegistry: $(containerRegistry)
+    imageTag: $(containerTag)
+    deployRedis: ${{ parameters.deployRedis }}
+    argList:
+    - ${{ each envVar in split(variables.joinedEnvVariables, ';') }}:
+      - ${{ format('--env {0}="$({1})"', envVar, envVar) }}
+    - ${{ each volumeVar in split(variables.joinedVolumeVariables, ';') }}:
+      - ${{ format('--volume $(EXTERNAL_{0}):$({1})', volumeVar, volumeVar) }}
+    deployStages:
+      - stage: Testing
+        dependsOn: Publish
+      - stage: Staging
+        dependsOn: Testing
+      - stage: Production
+        dependsOn: Staging
