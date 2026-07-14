@@ -27,6 +27,7 @@
     "@nestjs/core": "^9.4.3",
     "@nestjs/passport": "^9.0.0",
     "@nestjs/platform-express": "^9.4.3",
+    "@nestjs/serve-static": "~3.0.1",
     "@ntucool/nestjs-canvas-api": "~2.4.0",
     "@ntucool/nestjs-canvas-lms-auth": "~7.0.0",
     "@ntucool/nestjs-logger": "~4.0.0",
