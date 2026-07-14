@@ -1,9 +1,11 @@
 import { Module, RequestMethod } from '@nestjs/common';
+import { APP_FILTER } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from '@ntucool/nestjs-logger';
 import { LoggerModuleOptions } from '@ntucool/nestjs-logger/dist/interfaces';
 
 import { AppConfig, LoggerConfig } from './app.config';
+import { ResponseErrorFilter } from './shared/errors';
 
 import { AuthModule } from './auth/auth.module';
 import { CanvasApiModule } from './canvas-api/canvas-api.module';
@@ -42,6 +44,11 @@ import { CourseWithdrawalDbModule } from './database/course-withdrawal-db/course
     CourseWithdrawalDbModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: ResponseErrorFilter,
+    },
+  ],
 })
 export class AppModule {}
