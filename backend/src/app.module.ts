@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from '@ntucool/nestjs-logger';
 import { LoggerModuleOptions } from '@ntucool/nestjs-logger/dist/interfaces';
 
-import { LoggerConfig } from './app.config';
+import { AppConfig, LoggerConfig } from './app.config';
 
 import { AuthModule } from './auth/auth.module';
 import { CanvasApiModule } from './canvas-api/canvas-api.module';
@@ -15,6 +15,8 @@ import { CourseWithdrawalDbModule } from './database/course-withdrawal-db/course
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forFeature(AppConfig),
     LoggerModule.forRootAsync({
       imports: [ConfigModule.forFeature(LoggerConfig)],
       useFactory: (configService: ConfigService): LoggerModuleOptions => {
