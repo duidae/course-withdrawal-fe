@@ -25,11 +25,34 @@ variables:
       - APP_PORT
       - CONSOLE_LOG_LEVEL
       - ENABLE_CORS
-      - ENABLE_SWAGGER
       - FILE_LOG_LEVEL
       - KEY_DIRECTORY
       - LOG_DIRECTORY
       # variables are set in <project>-<environment> variable group
+      - APP_HOST
+      - CANVAS_ADMIN_ACCESS_TOKEN
+      - CANVAS_HOST
+      - COURSE_WITHDRAWAL_DB_DATABASE
+      - COURSE_WITHDRAWAL_DB_HOST
+      - COURSE_WITHDRAWAL_DB_PASSWORD
+      - COURSE_WITHDRAWAL_DB_PORT
+      - COURSE_WITHDRAWAL_DB_USERNAME
+      - EXTERNAL_SIS_DB_DATABASE
+      - EXTERNAL_SIS_DB_HOST
+      - EXTERNAL_SIS_DB_PASSWORD
+      - EXTERNAL_SIS_DB_PORT
+      - EXTERNAL_SIS_DB_USERNAME
+      - HTTPS_CERT
+      - HTTPS_KEY
+      - REDIS_HOST
+      - REDIS_PASSWORD
+      - REDIS_PORT
+      - SESSION_SECRET
+      - SIS_DB_DATABASE
+      - SIS_DB_HOST
+      - SIS_DB_PASSWORD
+      - SIS_DB_PORT
+      - SIS_DB_USERNAME
 
 - template: join-variables.yml@templates
   parameters:
