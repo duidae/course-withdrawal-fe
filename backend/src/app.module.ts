@@ -5,6 +5,7 @@ import { LoggerModuleOptions } from '@ntucool/nestjs-logger/dist/interfaces';
 
 import { LoggerConfig } from './app.config';
 
+import { AuthModule } from './auth/auth.module';
 import { CanvasApiModule } from './canvas-api/canvas-api.module';
 import { FrontendModule } from './frontend/frontend.module';
 import { SessionModule } from './session/session.module';
@@ -30,6 +31,7 @@ import { CourseWithdrawalDbModule } from './database/course-withdrawal-db/course
       },
       inject: [ConfigService],
     }),
+    AuthModule,
     CanvasApiModule,
     FrontendModule,
     SessionModule,
