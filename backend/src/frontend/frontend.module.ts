@@ -11,6 +11,9 @@ import path from 'path';
 
 const excludeApiPaths = ['/api/(.*)', '/ltiv1p1/(.*)', '/ltiv1p3/(.*)', '/oauth2/(.*)'];
 
+// TODO: Update frontendPaths for course-withdrawal pages
+const frontendPaths = ['/withdrawal'];
+
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -35,7 +38,6 @@ export class FrontendModule implements NestModule {
 
     consumer
       .apply(FrontendMiddleware)
-      .exclude(...excludeApiPaths.map((path) => ({ path, method: RequestMethod.ALL })))
-      .forRoutes({ path: '/**', method: RequestMethod.GET });
+      .forRoutes(...frontendPaths.map((path) => ({ path, method: RequestMethod.GET })));
   }
 }
