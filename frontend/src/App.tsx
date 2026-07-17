@@ -1,16 +1,22 @@
+import { type FC, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ErrorBoundary } from "./cool-ui/components/error-boundary/ErrorBoundary";
+import { useIntl } from "react-intl";
 
-function App() {
+export const App: FC = () => {
+  const { formatMessage: f } = useIntl();
+  const appName = f({ id: "app.name" });
+
+  useEffect(() => {
+    document.title = appName;
+  }, [appName]);
+
   return (
-    <ErrorBoundary>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<h1>Course-Withdrawal</h1>} />
-        </Routes>
-      </BrowserRouter>
-    </ErrorBoundary>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<h1>Course-Withdrawal</h1>} />
+      </Routes>
+    </BrowserRouter>
   );
-}
+};
 
 export default App;
