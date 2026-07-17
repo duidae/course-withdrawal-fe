@@ -1,0 +1,20 @@
+@use "palette" as *;
+
+$font-family:
+  "Roboto", "Helvetica", "Arial", "Microsoft JhengHei", "Ubuntu", sans-serif;
+
+body {
+  font-family: $font-family;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: $text-primary-color;
+}
+
+code {
+  // Instructure UI default fontFamily monospace setting
+  font-family: "Menlo", "Consolas", "Monaco", "Andale Mono", monospace;
+}
+
+#root {
+  font-family: $font-family;
+}

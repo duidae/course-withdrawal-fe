@@ -1,0 +1,20 @@
+@use "../../theme/palette" as *;
+
+.dropzone-outer {
+  border-radius: 0.5rem;
+  border-width: 0.125rem;
+  border-style: dashed;
+  border-color: $grey-500-color;
+  transition: border-color 300ms;
+  height: 100%;
+  width: 100%;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $primary-main-color;
+  }
+
+  &.active {
+    border-color: $primary-main-color;
+  }
+}

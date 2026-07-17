@@ -1,0 +1,168 @@
+@use "sass:list";
+@use "../../theme/palette" as *;
+
+$max-indent-level: 10;
+
+@mixin common-style {
+  .ql-container {
+    border: 1px solid $grey-300-color;
+    border-radius: 5px;
+    padding: 0;
+  }
+
+  .ql-toolbar {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom: 1px solid $grey-300-color;
+    padding: 0;
+  }
+
+  .ql-container .ql-editor {
+    padding: 8px;
+  }
+
+  *:not(img):not(.ql-formula span) {
+    margin: 4px 0;
+  }
+
+  p {
+    white-space: pre-wrap;
+  }
+
+  img {
+    border-radius: 5px;
+    vertical-align: middle;
+    width: 125px;
+
+    // "latex-blot" only use for legacy LaTeX images
+    &.latex-blot {
+      width: auto;
+      max-width: 125px;
+      margin: 3px;
+    }
+  }
+
+  a {
+    color: $primary-main-color;
+    text-decoration: underline;
+  }
+}
+
+// quill customize style
+.quill {
+  .ql-toolbar.error {
+    border-bottom: 1px solid $error-main-color;
+  }
+
+  .ql-container.error {
+    border: 0 solid $error-main-color;
+    border-width: 0 1px 1px;
+  }
+
+  .ql-container .ql-editor {
+    @include common-style;
+
+    font-size: 0.875rem;
+
+    .ql-ui {
+      position: relative;
+    }
+
+    .ql-ui:before {
+      text-align: center;
+    }
+
+    ol {
+      padding: 0;
+
+      li[class^="ql-indent-"][data-list="ordered"],
+      li[class^="ql-indent-"][data-list="bullet"] {
+        $base-padding: 1.5em;
+        $padding-increment: 1.5em;
+
+        @for $i from 1 through $max-indent-level {
+          &.ql-indent-#{$i} {
+            padding-left: $base-padding + ($padding-increment * $i);
+          }
+        }
+      }
+    }
+  }
+}
+
+// Reset all counters from level $from-level to $to-level
+@function reset-counters($from-level, $to-level) {
+  $result: "";
+  @for $j from $from-level through $to-level {
+    $result: $result + " list-#{$j}";
+  }
+  @return $result;
+}
+
+@mixin list-styling($list-type) {
+  $padding-increment: 1.5em;
+  $ordered-list-styles: decimal, lower-alpha, lower-roman;
+
+  counter-reset: #{reset-counters(1, $max-indent-level)};
+  counter-increment: list-0;
+
+  @for $i from 1 through $max-indent-level {
+    &.ql-indent-#{$i} {
+      padding-left: $padding-increment * $i;
+
+      counter-reset: #{reset-counters($i + 1, $max-indent-level)};
+      counter-increment: list-#{$i};
+
+      &::marker {
+        content: none;
+      }
+
+      &::before {
+        @if $list-type == "ordered" {
+          $style-index: ($i % list.length($ordered-list-styles)) + 1;
+          $list-style-type: list.nth($ordered-list-styles, $style-index);
+          content: counter(list-#{$i}, $list-style-type) ".";
+        } @else if $list-type == "bullet" {
+          content: "•";
+        }
+        display: inline-block;
+        width: 16.8px;
+        padding-right: 4.2px;
+        text-align: center;
+      }
+    }
+  }
+
+  &::marker {
+    content: none;
+  }
+
+  &::before {
+    @if $list-type == "ordered" {
+      content: counter(list-0, decimal) ".";
+    } @else if $list-type == "bullet" {
+      content: "•";
+    }
+    display: inline-block;
+    width: 16.8px;
+    padding-right: 4.2px;
+    text-align: center;
+  }
+}
+
+@mixin quill-content {
+  @include common-style;
+
+  ol,
+  ul {
+    padding-left: 0;
+
+    li[data-list="ordered"] {
+      @include list-styling("ordered");
+    }
+
+    li[data-list="bullet"] {
+      @include list-styling("bullet");
+    }
+  }
+}

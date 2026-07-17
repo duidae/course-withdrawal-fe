@@ -1,0 +1,59 @@
+@use "palette" as *;
+
+:export {
+  // Primary & Info
+  primaryMainColor: $primary-main-color;
+  primaryLightColor: $primary-light-color;
+  primaryDarkColor: $primary-dark-color;
+  primaryContrastTextColor: $primary-contrastText-color;
+  infoMainColor: $info-main-color;
+  infoLightColor: $info-light-color;
+  infoDarKColor: $info-dark-color;
+  infoContrastTextColor: $info-contrastText-color;
+
+  // Secondary
+  secondaryMainColor: $secondary-main-color;
+  secondaryLightColor: $secondary-light-color;
+  secondaryDarkColor: $secondary-dark-color;
+  secondaryContrastTextColor: $secondary-contrastText-color;
+
+  // Text
+  textPrimaryColor: $text-primary-color;
+  textSecondaryColor: $text-secondary-color;
+  textDisabledColor: $text-disabled-color;
+
+  // Error
+  errorMainColor: $error-main-color;
+  errorLightColor: $error-light-color;
+  errorDarkColor: $error-dark-color;
+  errorContrastTextColor: $error-contrastText-color;
+
+  // Warning
+  warningMainColor: $warning-main-color;
+  warningLightColor: $warning-light-color;
+  warningDarkColor: $warning-dark-color;
+  warningContrastTextColor: $warning-contrastText-color;
+
+  // Success
+  successMainColor: $success-main-color;
+  successLightColor: $success-light-color;
+  successDarkColor: $success-dark-color;
+  successContrastTextColor: $success-contrastText-color;
+
+  // Grey
+  grey900Color: $grey-900-color;
+  grey800Color: $grey-800-color;
+  grey700Color: $grey-700-color;
+  grey600Color: $grey-600-color;
+  grey500Color: $grey-500-color;
+  grey400Color: $grey-400-color;
+  grey300Color: $grey-300-color;
+  grey200Color: $grey-200-color;
+  grey100Color: $grey-100-color;
+  grey50Color: $grey-50-color;
+  whiteColor: $white-color;
+  blackColor: $black-color;
+
+  // Other
+  dividerColor: $divider-color;
+}

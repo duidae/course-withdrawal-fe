@@ -1,0 +1,94 @@
+@use "../../theme/palette" as *;
+
+// rct root style
+.react-checkbox-tree {
+  width: 100%;
+
+  // root-level option
+  ol {
+    width: 100%;
+    padding: 0; // Remove padding
+
+    // inner-level option
+    ol {
+      width: calc(100% - 16px);
+      padding-left: 16px; // Customize indent width
+    }
+  }
+
+  // Option Label Disable
+  // Set the label to flex to align the checkbox and text
+  .rct-bare-label {
+    display: flex;
+    align-items: center;
+    width: calc(
+      100% - 40px - 16px
+    ); // 40px for collapse button, 16px for indent
+    color: $grey-500-color;
+    cursor: default;
+  }
+
+  // Option Label Enable
+  // Set the label to flex to align the checkbox and text
+  label {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    height: 40px;
+    width: calc(
+      100% - 40px - 16px
+    ); // 40px for collapse button, 16px for indent
+
+    &:hover {
+      background: none; // Remove hover background
+    }
+
+    &:active,
+    &:focus {
+      background: none; //Remove active background
+    }
+  }
+}
+
+// rct-text contain the components of the label
+// rct-text -> rct-bare-label && label -> rct-title
+.rct-text {
+  width: 100%;
+}
+
+.rct-title {
+  display: inline-block;
+  padding: 0; // Remove padding
+  width: 100%;
+}
+
+// Checkbox
+// Set the checkbox to flex to align the checkbox and text
+.rct-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0;
+}
+
+.rct-node-icon {
+  padding: 0; //Remove padding
+}
+
+// Collapse Region
+.rct-collapse {
+  height: 40px;
+  width: 40px;
+  padding: 0;
+}
+
+// Collapse Button
+.expand-icon {
+  padding: 5px;
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    border-radius: 50%;
+  }
+}
