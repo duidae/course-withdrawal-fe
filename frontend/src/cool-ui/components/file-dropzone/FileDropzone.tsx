@@ -22,7 +22,13 @@ export const FileDropzone = ({
   return (
     <Box {...getRootProps()} className={outerStyle}>
       <input type="hidden" {...getInputProps()} />
-      <Stack height="100%" alignItems="center" justifyContent="center">
+      <Stack
+        sx={{
+          height: "100%",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         {children}
       </Stack>
     </Box>

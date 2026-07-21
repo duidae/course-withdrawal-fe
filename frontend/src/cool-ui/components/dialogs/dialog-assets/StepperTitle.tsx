@@ -16,7 +16,7 @@ export const StepperTitle: FC<StepperTitleProps> = (
       {steps.map((label) => {
         return (
           <Step key={label}>
-            <StepLabel StepIconComponent={StepIcon}>{label}</StepLabel>
+            <StepLabel slots={{ stepIcon: StepIcon }}>{label}</StepLabel>
           </Step>
         );
       })}

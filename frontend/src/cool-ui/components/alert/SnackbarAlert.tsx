@@ -34,7 +34,9 @@ const SnackbarAlert = forwardRef<HTMLDivElement, CustomContentProps>(
     return (
       <SnackbarContent ref={ref}>
         <Alert severity={variant as AlertSeverity} onClose={handleDismiss}>
-          <Typography whiteSpace="pre-line">{message}</Typography>
+          <Typography component="span" sx={{ whiteSpace: "pre-line" }}>
+            {message}
+          </Typography>
         </Alert>
       </SnackbarContent>
     );

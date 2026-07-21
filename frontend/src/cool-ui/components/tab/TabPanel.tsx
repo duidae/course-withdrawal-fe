@@ -28,8 +28,7 @@ export const TabPanel: FC<TabPanelProps> = (props: TabPanelProps) => {
     <Box
       role="tabpanel"
       hidden={panel !== currentPanel}
-      width="100%"
-      height="100%"
+      sx={{ width: "100%", height: "100%" }}
     >
       {children}
     </Box>

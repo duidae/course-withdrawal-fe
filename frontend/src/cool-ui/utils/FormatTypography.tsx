@@ -22,8 +22,11 @@ export const FormatTypography: FC<FormatTypographyProps> = (
   const { formatMessage: f } = useIntl();
   return (
     <Box
-      whiteSpace="pre-line"
-      sx={{ overflowWrap: "break-word", textAlign: props.textAlign }}
+      sx={{
+        whiteSpace: "pre-line",
+        overflowWrap: "break-word",
+        textAlign: props.textAlign,
+      }}
     >
       {f({ id: props.id }, textFormatter)}
     </Box>

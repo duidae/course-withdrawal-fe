@@ -66,9 +66,12 @@ export const ExecutionFooter: FC<ExecutionFooterProps> = (
   return (
     <Stack
       direction="row"
-      justifyContent="flex-end"
-      alignItems="center"
-      sx={{ width: "100%", height: "36px" }}
+      sx={{
+        width: "100%",
+        height: "36px",
+        justifyContent: "flex-end",
+        alignItems: "center",
+      }}
     >
       {isShowFooter && isCancelButtonShow && (
         <Button variant="text" onClick={onCancel}>

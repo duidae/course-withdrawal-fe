@@ -76,11 +76,13 @@ export const SimpleSelect: FC<SimpleSelectProps> = (
   }, []);
 
   const MenuProps = {
-    PaperProps: {
-      style: {
-        maxHeight: ITEM_HEIGHT * maxShowingItems + ITEM_PADDING_TOP,
-        width: menuWidth,
-        minWidth: menuWidth,
+    slotProps: {
+      paper: {
+        style: {
+          maxHeight: ITEM_HEIGHT * maxShowingItems + ITEM_PADDING_TOP,
+          width: menuWidth,
+          minWidth: menuWidth,
+        },
       },
     },
   };

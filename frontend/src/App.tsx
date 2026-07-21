@@ -1,6 +1,12 @@
 import { type FC, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useIntl } from "react-intl";
+import { TeacherDashboard } from "./pages/TeacherDashboard";
+/*
+import { NotFound } from "./components/NotFound";
+import { StudentDashboard } from "./pages/StudentDashboard";
+import { AdminDashboard } from "./pages/AdminDashboard";
+*/
 
 export const App: FC = () => {
   const { formatMessage: f } = useIntl();
@@ -13,7 +19,40 @@ export const App: FC = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<h1>Course-Withdrawal</h1>} />
+        <Route path="/teacher/:id" element={<TeacherDashboard />} />
+        {/*
+        <Route
+          path="/student/:id"
+          element={
+            <StudentDashboard
+              application={{ status: "未申請", reason: "" }}
+              onSubmit={() => {}}
+              courseSettings={courseSettings}
+            />
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <AdminDashboard
+              courses={adminCourses}
+              setCourses={setAdminCourses}
+              semester={adminSemester}
+              setSemester={setAdminSemester}
+              cSearch={adminCSearch}
+              setCSearch={setAdminCSearch}
+              onEdit={(c) => {
+                setAdminCurCourse(c);
+                setAdminView("edit");
+              }}
+              onAdd={() => setAdminAddOpen(true)}
+              onToggle={adminToggleCourse}
+              appCounts={adminAppCounts}
+            />
+          }
+        />
+        <Route path="*" element={<NotFound />} />
+         */}
       </Routes>
     </BrowserRouter>
   );

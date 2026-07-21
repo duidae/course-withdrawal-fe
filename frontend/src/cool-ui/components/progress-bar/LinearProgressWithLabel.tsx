@@ -1,10 +1,14 @@
-import { Box, LinearProgress, Typography } from "@mui/material";
-import type { Variant } from "@mui/material/styles/createTypography";
+import {
+  Box,
+  LinearProgress,
+  Typography,
+  type TypographyProps,
+} from "@mui/material";
 import type { FC } from "react";
 
 type LinearProgressWithLabelProps = {
   value: number;
-  variant?: Variant;
+  variant?: TypographyProps["variant"];
   height?: number;
   width?: string;
   borderRadius?: number;

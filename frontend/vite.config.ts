@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
       port: Number(env.PORT) || 5173,
     },
     build: {
-      outDir: "build",
+      outDir: "dist",
     },
   };
 });

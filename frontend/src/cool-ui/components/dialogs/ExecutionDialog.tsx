@@ -153,9 +153,11 @@ export const ExecutionDialog: FC<ExecutionDialogProps> = (
       open={open}
       fullWidth={true}
       maxWidth={size || "md"}
-      PaperProps={{
-        sx: {
-          height: dialogHeightMap.get(size || "md"),
+      slotProps={{
+        paper: {
+          sx: {
+            height: dialogHeightMap.get(size || "md"),
+          },
         },
       }}
       onClose={handleClose}

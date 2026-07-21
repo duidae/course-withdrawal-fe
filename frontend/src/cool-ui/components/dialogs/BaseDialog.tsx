@@ -63,9 +63,11 @@ export const BaseDialog: FC<BaseDialogProps> = (props: BaseDialogProps) => {
         open={props.open}
         fullWidth={true}
         maxWidth={props.size ?? "sm"}
-        PaperProps={{
-          sx: {
-            height: dialogHeightMap.get(props.size ?? "sm"),
+        slotProps={{
+          paper: {
+            sx: {
+              height: dialogHeightMap.get(props.size ?? "sm"),
+            },
           },
         }}
       >
@@ -74,10 +76,12 @@ export const BaseDialog: FC<BaseDialogProps> = (props: BaseDialogProps) => {
         <DialogContent dividers>
           {mode === BaseDialogMode.Loading ? (
             <Box
-              display="flex"
-              height="100%"
-              justifyContent="center"
-              alignItems="center"
+              sx={{
+                display: "flex",
+                height: "100%",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
             >
               <CircularProgress size="4rem" thickness={6} />
             </Box>

@@ -105,9 +105,11 @@ export const StepperDialog: FC<StepperDialogProps> = (
       open={open}
       fullWidth={true}
       maxWidth={size || "md"}
-      PaperProps={{
-        sx: {
-          height: dialogHeightMap.get(size || "md"),
+      slotProps={{
+        paper: {
+          sx: {
+            height: dialogHeightMap.get(size || "md"),
+          },
         },
       }}
       onClose={handleClose}

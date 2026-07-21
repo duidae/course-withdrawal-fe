@@ -61,9 +61,12 @@ export const StepperFooter: FC<StepperFooterProps> = (
   return (
     <Stack
       direction="row"
-      justifyContent="space-between"
-      alignItems="center"
-      sx={{ width: "100%", height: "36px" }}
+      sx={{
+        width: "100%",
+        height: "36px",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
     >
       {isShowFooter && isCancelButtonShow && (
         <Button variant="text" onClick={onCancel}>
