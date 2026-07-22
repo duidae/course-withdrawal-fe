@@ -323,25 +323,6 @@ export const TeacherDashboard: FC = () => {
     else setSelected([]);
   };
 
-  const batchClick = (status: string) => {
-    if (selected.length === 0) return;
-    setStudents((prev) =>
-      prev.map((student) =>
-        selected.includes(student.id)
-          ? {
-              ...student,
-              status,
-              approvalTime: student.approvalTime || "2026/05/11 00:00",
-              approver:
-                student.approver ||
-                f({ id: "teacherDashboard.defaultApprover" }),
-            }
-          : student,
-      ),
-    );
-    setSelected([]);
-  };
-
   const toggleSelect = (id: number) => {
     setSelected((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
@@ -393,7 +374,22 @@ export const TeacherDashboard: FC = () => {
   };
 
   const batchApprove = () => {
-    console.log("batch approve");
+    if (selected.length === 0) return;
+    setStudents((prev) =>
+      prev.map((student) =>
+        selected.includes(student.id)
+          ? {
+              ...student,
+              status,
+              approvalTime: student.approvalTime || "2026/05/11 00:00",
+              approver:
+                student.approver ||
+                f({ id: "teacherDashboard.defaultApprover" }),
+            }
+          : student,
+      ),
+    );
+    setSelected([]);
   };
 
   const batchDecline = () => {
