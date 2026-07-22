@@ -356,7 +356,7 @@ export const TeacherDashboard: FC = () => {
       f({ id: "teacherDashboard.field.studentId" }),
       f({ id: "teacherDashboard.field.applyTime" }),
       f({ id: "teacherDashboard.field.reason" }),
-      f({ id: "teacherDashboard.field.reviewResult" }),
+      f({ id: "teacherDashboard.field.decision" }),
       f({ id: "teacherDashboard.field.deadline" }),
       f({ id: "teacherDashboard.field.approvalTime" }),
       f({ id: "teacherDashboard.field.approver" }),
@@ -472,7 +472,7 @@ export const TeacherDashboard: FC = () => {
             width={220}
           />
           <SelectField
-            label={f({ id: "teacherDashboard.field.reviewResult" })}
+            label={f({ id: "teacherDashboard.field.decision" })}
             value={statusFilter}
             onChange={(v) => setStatusFilter(v)}
             options={statusOptions}
@@ -627,8 +627,8 @@ export const TeacherDashboard: FC = () => {
                 width: 160,
               },
               {
-                key: "reviewResult",
-                label: "teacherDashboard.field.reviewResult",
+                key: "decision",
+                label: "teacherDashboard.field.decision",
                 width: 100,
               },
               {

@@ -11,7 +11,7 @@ export const messages_Zh: Record<string, string> = {
   "teacherDashboard.field.studentId": "學號",
   "teacherDashboard.field.applyTime": "申請時間",
   "teacherDashboard.field.reason": "停修原因",
-  "teacherDashboard.field.reviewResult": "審核結果",
+  "teacherDashboard.field.decision": "審核結果",
   "teacherDashboard.field.deadline": "審核期限",
   "teacherDashboard.field.approvalTime": "審核時間",
   "teacherDashboard.field.approver": "審核人",
