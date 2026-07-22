@@ -225,21 +225,8 @@ function TruncatedReason({ text, onReadMore }: TruncatedReasonProps) {
   );
 }
 
-function ExportSplitButton() {
-  const [open, setOpen] = useState(false);
-  const [selectedIdx, setSelectedIdx] = useState(0);
+const ExportButton = () => {
   const ref = useRef<HTMLDivElement | null>(null);
-
-  const options = ["匯出整份名單", "匯出目前的顯示內容"];
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node))
-        setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
 
   const base = {
     color: "#0099cc",
@@ -267,71 +254,12 @@ function ExportSplitButton() {
             borderRight: "1px solid rgba(0,153,204,0.5)",
           }}
         >
-          {options[selectedIdx]}
-        </button>
-        <button
-          onClick={() => setOpen((p) => !p)}
-          style={{
-            ...base,
-            padding: "4px 8px",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <span style={{ fontSize: 18, lineHeight: 1, display: "block" }}>
-            ▾
-          </span>
+          {"匯出整份名單"}
         </button>
       </div>
-      {open && (
-        <div
-          style={{
-            position: "absolute",
-            top: "calc(100% + 2px)",
-            right: 0,
-            background: "white",
-            borderRadius: 4,
-            boxShadow:
-              "0px 5px 5px -3px rgba(0,0,0,0.2), 0px 8px 10px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12)",
-            zIndex: 9999,
-            padding: "8px 0",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {options.map((opt, i) => (
-            <div
-              key={opt}
-              onMouseDown={() => {
-                setSelectedIdx(i);
-                setOpen(false);
-              }}
-              style={{
-                padding: "6px 16px",
-                fontSize: 14,
-                color: "#333",
-                cursor: "pointer",
-                background:
-                  i === selectedIdx ? "rgba(0,153,204,0.04)" : "transparent",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background =
-                  i === selectedIdx
-                    ? "rgba(0,153,204,0.08)"
-                    : "rgba(0,0,0,0.04)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background =
-                  i === selectedIdx ? "rgba(0,153,204,0.04)" : "transparent")
-              }
-            >
-              {opt}
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
-}
+};
 
 const statusOrder: Record<string, number> = {
   待審核: 1,
@@ -551,7 +479,7 @@ export const TeacherDashboard: FC = () => {
               <RefreshIcon /> 重新整理
             </button>
           )}
-          <ExportSplitButton />
+          <ExportButton />
         </div>
       </div>
 
