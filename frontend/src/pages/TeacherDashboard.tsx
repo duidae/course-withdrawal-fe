@@ -13,6 +13,13 @@ import {
   TextField,
   InputLabel,
   MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Checkbox,
 } from "@mui/material";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import EditIcon from "@mui/icons-material/Edit";
@@ -560,252 +567,202 @@ export const TeacherDashboard: FC = () => {
     </Box>
   );
 
+  const columns = [
+    {
+      key: "studentName",
+      label: "teacherDashboard.field.studentName",
+      width: 100,
+    },
+    {
+      key: "class",
+      label: "teacherDashboard.field.class",
+      width: 110,
+    },
+    {
+      key: "studentId",
+      label: "teacherDashboard.field.studentId",
+      width: 128,
+    },
+    {
+      key: "applyTime",
+      label: "teacherDashboard.field.applyTime",
+      width: 96,
+    },
+    {
+      key: "reason",
+      label: "teacherDashboard.field.reason",
+      width: 160,
+    },
+    {
+      key: "decision",
+      label: "teacherDashboard.field.decision",
+      width: 100,
+    },
+    {
+      key: "deadline",
+      label: "teacherDashboard.field.deadline",
+      width: 96,
+    },
+    {
+      key: "approvalTime",
+      label: "teacherDashboard.field.approvalTime",
+      width: 96,
+    },
+    {
+      key: "approver",
+      label: "teacherDashboard.field.approver",
+      width: 80,
+    },
+    {
+      key: "action",
+      label: "teacherDashboard.field.action",
+      width: 50,
+    },
+  ];
+
+  const cellSx = {
+    padding: "8px",
+    borderBottom: "1px solid rgba(0,0,0,0.06)",
+  };
+
   const tableJSX = (
-    <div
-      style={{
+    <TableContainer
+      sx={{
         border: "1px solid rgba(0,0,0,0.12)",
-        overflow: "auto",
         maxHeight: "calc(100vh - 300px)",
       }}
     >
-      <table
-        style={{
-          width: "100%",
-          tableLayout: "fixed",
-          borderCollapse: "collapse",
-          minWidth: 1074,
-        }}
-      >
-        <thead>
-          <tr>
-            <th
-              style={{
+      <Table stickyHeader sx={{ tableLayout: "fixed", minWidth: 1074 }}>
+        <TableHead>
+          <TableRow>
+            <TableCell
+              align="center"
+              sx={{
                 padding: "8px",
                 width: 58,
-                textAlign: "center",
                 borderBottom: "1px solid rgba(0,0,0,0.12)",
-                background: "#f5f5f5",
-                position: "sticky",
-                top: 0,
-                zIndex: 2,
+                backgroundColor: "#f5f5f5",
               }}
             >
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={allSelected}
-                ref={(el) => {
-                  if (el) el.indeterminate = someSelected;
-                }}
+                indeterminate={someSelected}
                 onChange={handleSelectAll}
-                style={{ accentColor: "#0099cc" }}
+                sx={{
+                  "&.Mui-checked": { color: "#0099cc" },
+                }}
               />
-            </th>
-            {[
-              {
-                key: "studentName",
-                label: "teacherDashboard.field.studentName",
-                width: 100,
-              },
-              {
-                key: "class",
-                label: "teacherDashboard.field.class",
-                width: 110,
-              },
-              {
-                key: "studentId",
-                label: "teacherDashboard.field.studentId",
-                width: 128,
-              },
-              {
-                key: "applyTime",
-                label: "teacherDashboard.field.applyTime",
-                width: 96,
-              },
-              {
-                key: "reason",
-                label: "teacherDashboard.field.reason",
-                width: 160,
-              },
-              {
-                key: "decision",
-                label: "teacherDashboard.field.decision",
-                width: 100,
-              },
-              {
-                key: "deadline",
-                label: "teacherDashboard.field.deadline",
-                width: 96,
-              },
-              {
-                key: "approvalTime",
-                label: "teacherDashboard.field.approvalTime",
-                width: 96,
-              },
-              {
-                key: "approver",
-                label: "teacherDashboard.field.approver",
-                width: 80,
-              },
-              {
-                key: "action",
-                label: "teacherDashboard.field.action",
-                width: 50,
-              },
-            ].map((col) => (
-              <th
+            </TableCell>
+            {columns.map((col) => (
+              <TableCell
                 key={col.key}
-                style={{
+                align={col.key === "action" ? "center" : "left"}
+                sx={{
                   padding: "8px",
-                  textAlign: col.key === "action" ? "center" : "left",
                   fontSize: 14,
                   fontWeight: 500,
                   color: "#333",
                   borderBottom: "1px solid rgba(0,0,0,0.12)",
-                  background: "#f5f5f5",
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 2,
+                  backgroundColor: "#f5f5f5",
+                  whiteSpace: "nowrap",
                   ...(col.key === "reason"
                     ? { minWidth: col.width }
                     : { width: col.width }),
-                  whiteSpace: "nowrap",
                 }}
               >
                 {f({ id: col.label })}
-              </th>
+              </TableCell>
             ))}
-          </tr>
-        </thead>
-        <tbody>
+          </TableRow>
+        </TableHead>
+        <TableBody>
           {filtered.length === 0 ? (
-            <tr>
-              <td
+            <TableRow>
+              <TableCell
                 colSpan={11}
-                style={{
-                  padding: "32px 8px",
-                  textAlign: "center",
-                  fontSize: 14,
-                  color: "#333",
-                }}
+                align="center"
+                sx={{ padding: "32px 8px", fontSize: 14, color: "#333" }}
               >
                 {statusFilter === "待審核" &&
                 students.filter((s) => s.status === "待審核").length === 0
                   ? f({ id: "teacherDashboard.table.emptyPending" })
                   : f({ id: "teacherDashboard.table.emptyFiltered" })}
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ) : (
             filtered.map((s) => (
-              <tr
+              <TableRow
                 key={s.id}
-                style={{
+                sx={{
                   height: 72,
-                  background: isSelected(s.id)
+                  backgroundColor: isSelected(s.id)
                     ? "rgba(0,153,204,0.08)"
                     : "transparent",
                 }}
               >
-                <td
-                  style={{
-                    padding: "8px",
-                    textAlign: "center",
-                    borderBottom: "1px solid rgba(0,0,0,0.06)",
-                  }}
-                >
+                <TableCell align="center" sx={cellSx}>
                   {s.status !== "逾期審核" && (
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={isSelected(s.id)}
                       onChange={() => toggleSelect(s.id)}
-                      style={{ accentColor: "#0099cc" }}
+                      sx={{
+                        "&.Mui-checked": { color: "#0099cc" },
+                      }}
                     />
                   )}
-                </td>
-                {/* 申請學生 */}
-                <td
-                  style={{
-                    padding: "8px",
+                </TableCell>
+                <TableCell
+                  sx={{
+                    ...cellSx,
                     fontSize: 14,
                     color: "#333",
-                    borderBottom: "1px solid rgba(0,0,0,0.06)",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
                   }}
                 >
                   {s.name}
-                </td>
-                {/* 班別 — 字元過長時換行顯示，不做省略號隱藏 */}
-                <td
-                  style={{
-                    padding: "8px",
+                </TableCell>
+                <TableCell
+                  sx={{
+                    ...cellSx,
                     fontSize: 14,
                     color: "#333",
-                    borderBottom: "1px solid rgba(0,0,0,0.06)",
                     whiteSpace: "normal",
                     wordBreak: "break-word",
                     overflowWrap: "break-word",
                   }}
                 >
                   {s.school}
-                </td>
-                {/* 學號 — 字元過長時換行顯示，不做省略號隱藏 */}
-                <td
-                  style={{
-                    padding: "8px",
+                </TableCell>
+                <TableCell
+                  sx={{
+                    ...cellSx,
                     fontSize: 14,
                     color: "#333",
-                    borderBottom: "1px solid rgba(0,0,0,0.06)",
                     whiteSpace: "normal",
                     wordBreak: "break-word",
                     overflowWrap: "break-word",
                   }}
                 >
                   {s.studentId}
-                </td>
-                {/* 申請時間 */}
-                <td
-                  style={{
-                    padding: "8px",
-                    borderBottom: "1px solid rgba(0,0,0,0.06)",
-                    verticalAlign: "middle",
-                  }}
-                >
+                </TableCell>
+                <TableCell sx={{ ...cellSx, verticalAlign: "middle" }}>
                   <DateTimeCell value={s.applyTime} />
-                </td>
-                {/* 停修原因 */}
-                <td
-                  style={{
-                    padding: "8px",
-                    borderBottom: "1px solid rgba(0,0,0,0.06)",
-                    overflow: "hidden",
-                  }}
-                >
+                </TableCell>
+                <TableCell sx={{ ...cellSx, overflow: "hidden" }}>
                   <TruncatedReason
                     text={s.reason}
                     onReadMore={() => onTicketReview(s)}
                   />
-                </td>
-                {/* 審核結果 */}
-                <td
-                  style={{
-                    padding: "8px",
-                    borderBottom: "1px solid rgba(0,0,0,0.06)",
-                  }}
-                >
+                </TableCell>
+                <TableCell sx={cellSx}>
                   <StatusChip
                     status={s.status}
                     label={getStatusLabel(s.status)}
                   />
-                </td>
-                {/* 審核期限：原本就是逾期審核的學生顯示歷史截止日，其他顯示 admin 當前設定 */}
-                <td
-                  style={{
-                    padding: "8px",
-                    borderBottom: "1px solid rgba(0,0,0,0.06)",
-                    verticalAlign: "middle",
-                  }}
-                >
+                </TableCell>
+                <TableCell sx={{ ...cellSx, verticalAlign: "middle" }}>
                   <DateTimeCell
                     value={
                       s._orig === "逾期審核"
@@ -813,39 +770,25 @@ export const TeacherDashboard: FC = () => {
                         : getSecForSchool(s.school).ad
                     }
                   />
-                </td>
-                {/* 審核時間 */}
-                <td
-                  style={{
-                    padding: "8px",
-                    borderBottom: "1px solid rgba(0,0,0,0.06)",
-                    verticalAlign: "middle",
-                  }}
-                >
+                </TableCell>
+                <TableCell sx={{ ...cellSx, verticalAlign: "middle" }}>
                   <DateTimeCell value={s.approvalTime || ""} />
-                </td>
-                {/* 審核人 — 字元過長時換行顯示，不做省略號隱藏 */}
-                <td
-                  style={{
-                    padding: "8px",
+                </TableCell>
+                <TableCell
+                  sx={{
+                    ...cellSx,
                     fontSize: 14,
                     color: "#333",
-                    borderBottom: "1px solid rgba(0,0,0,0.06)",
                     whiteSpace: "normal",
                     wordBreak: "break-word",
                     overflowWrap: "break-word",
                   }}
                 >
                   {s.approver || ""}
-                </td>
-                {/* 審核 — 鉛筆 IconButton（逾期審核也顯示） */}
-                <td
-                  style={{
-                    padding: "8px",
-                    borderBottom: "1px solid rgba(0,0,0,0.06)",
-                    textAlign: "center",
-                    verticalAlign: "middle",
-                  }}
+                </TableCell>
+                <TableCell
+                  align="center"
+                  sx={{ ...cellSx, verticalAlign: "middle" }}
                 >
                   <IconButton
                     color="secondary"
@@ -854,13 +797,13 @@ export const TeacherDashboard: FC = () => {
                   >
                     <EditIcon />
                   </IconButton>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))
           )}
-        </tbody>
-      </table>
-    </div>
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 
   const ticketDialogJSX = (
