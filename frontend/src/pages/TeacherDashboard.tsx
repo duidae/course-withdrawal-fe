@@ -341,6 +341,14 @@ export const TeacherDashboard: FC = () => {
     console.log("export");
   };
 
+  const batchAgree = () => {
+    console.log("batch agree");
+  };
+
+  const batchDisagree = () => {
+    console.log("batch disagree");
+  };
+
   const hasSelections = selected.length > 0;
   const allSelected =
     selectableRows.length > 0 && selected.length === selectableRows.length;
@@ -447,40 +455,24 @@ export const TeacherDashboard: FC = () => {
         <span style={{ fontSize: 14, fontWeight: 500, color: "#333" }}>
           已選取 {selected.length} 名學生
         </span>
-        <button
+        <Button
+          size="small"
+          variant="outlined"
+          color="success"
           disabled={!hasSelections}
-          onClick={() => batchClick("同意")}
-          className="mui-btn mui-outlined-success"
-          style={{
-            color: hasSelections ? "#008a00" : "rgba(0,0,0,0.38)",
-            border: `1px solid ${hasSelections ? "rgba(0,138,0,0.5)" : "rgba(0,0,0,0.12)"}`,
-            background: "transparent",
-            borderRadius: 4,
-            padding: "4px 10px",
-            fontSize: 13,
-            fontWeight: 500,
-            cursor: hasSelections ? "pointer" : "default",
-          }}
+          onClick={batchAgree}
         >
           同意停修
-        </button>
-        <button
+        </Button>
+        <Button
+          size="small"
+          variant="outlined"
+          color="error"
           disabled={!hasSelections}
-          onClick={() => batchClick("不同意")}
-          className="mui-btn mui-outlined-error"
-          style={{
-            color: hasSelections ? "#cc0000" : "rgba(0,0,0,0.38)",
-            border: `1px solid ${hasSelections ? "rgba(204,0,0,0.5)" : "rgba(0,0,0,0.12)"}`,
-            background: "transparent",
-            borderRadius: 4,
-            padding: "4px 10px",
-            fontSize: 13,
-            fontWeight: 500,
-            cursor: hasSelections ? "pointer" : "default",
-          }}
+          onClick={batchDisagree}
         >
           不同意停修
-        </button>
+        </Button>
       </div>
     </>
   );
