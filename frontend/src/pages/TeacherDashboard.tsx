@@ -1,5 +1,5 @@
 import { type FC, useState, useEffect, useRef } from "react";
-import { Button, IconButton } from "@mui/material";
+import { Box, Button, IconButton, Typography } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
@@ -354,23 +354,13 @@ export const TeacherDashboard: FC = () => {
   ).length;
 
   const headerJSX = (
-    <>
-      <h1
-        style={{
-          fontSize: 32,
-          fontWeight: 400,
-          color: "#333",
-          marginBottom: 8,
-          letterSpacing: "-1.5px",
-        }}
-      >
-        停修申請名單
-      </h1>
-      <p style={{ fontSize: 12, color: "black", marginBottom: 16 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Typography variant="h1">停修申請名單</Typography>
+      <Typography variant="caption" component="p">
         您尚有 <span style={{ color: "#cc0000" }}>{pendingCount}</span>{" "}
         筆停修申請尚未審核（含逾期審核）
-      </p>
-    </>
+      </Typography>
+    </Box>
   );
 
   const controlJSX = (
