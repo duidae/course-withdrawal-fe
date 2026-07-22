@@ -1,5 +1,5 @@
 import { type FC, useState, useEffect, useRef } from "react";
-import { IconButton } from "@mui/material";
+import { Button, IconButton } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
@@ -225,42 +225,6 @@ function TruncatedReason({ text, onReadMore }: TruncatedReasonProps) {
   );
 }
 
-const ExportButton = () => {
-  const ref = useRef<HTMLDivElement | null>(null);
-
-  const base = {
-    color: "#0099cc",
-    background: "transparent",
-    border: "none",
-    cursor: "pointer",
-    fontFamily: "inherit",
-    fontWeight: 500,
-  };
-
-  return (
-    <div ref={ref} style={{ position: "relative", display: "inline-flex" }}>
-      <div
-        style={{
-          display: "inline-flex",
-          border: "1px solid rgba(0,153,204,0.5)",
-          borderRadius: 4,
-        }}
-      >
-        <button
-          style={{
-            ...base,
-            padding: "6px 16px",
-            fontSize: 14,
-            borderRight: "1px solid rgba(0,153,204,0.5)",
-          }}
-        >
-          {"匯出整份名單"}
-        </button>
-      </div>
-    </div>
-  );
-};
-
 const statusOrder: Record<string, number> = {
   待審核: 1,
   逾期審核: 2,
@@ -373,6 +337,10 @@ export const TeacherDashboard: FC = () => {
     ]);
   };
 
+  const exportToExcel = () => {
+    console.log("export");
+  };
+
   const hasSelections = selected.length > 0;
   const allSelected =
     selectableRows.length > 0 && selected.length === selectableRows.length;
@@ -479,7 +447,9 @@ export const TeacherDashboard: FC = () => {
               <RefreshIcon /> 重新整理
             </button>
           )}
-          <ExportButton />
+          <Button variant="outlined" onClick={exportToExcel}>
+            {"匯出整份名單"}
+          </Button>
         </div>
       </div>
 
