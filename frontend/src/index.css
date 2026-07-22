@@ -11,9 +11,6 @@ body {
 
 #root {
   height: 100%;
-  padding-inline: 24px;
-  margin-top: 24px;
-  margin-bottom: 24px;
-  margin-right: 8px;
+  padding: 24px;
   font-size: inherit;
 }

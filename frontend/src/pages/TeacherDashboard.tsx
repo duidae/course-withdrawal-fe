@@ -353,16 +353,6 @@ export const TeacherDashboard: FC = () => {
     (s: StudentRow) => s.status === "待審核" || s.status === "逾期審核",
   ).length;
 
-  const headerJSX = (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Typography variant="h1">停修申請名單</Typography>
-      <Typography variant="caption" component="p">
-        您尚有 <span style={{ color: "#cc0000" }}>{pendingCount}</span>{" "}
-        筆停修申請尚未審核（含逾期審核）
-      </Typography>
-    </Box>
-  );
-
   const controlJSX = (
     <>
       {/* Filter row */}
@@ -371,7 +361,6 @@ export const TeacherDashboard: FC = () => {
           display: "flex",
           alignItems: "flex-start",
           justifyContent: "space-between",
-          marginBottom: 12,
           gap: 12,
         }}
       >
@@ -495,6 +484,17 @@ export const TeacherDashboard: FC = () => {
         </button>
       </div>
     </>
+  );
+
+  const headerJSX = (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Typography variant="h1">停修申請名單</Typography>
+      <Typography variant="caption" component="p">
+        您尚有 <span style={{ color: "#cc0000" }}>{pendingCount}</span>{" "}
+        筆停修申請尚未審核（含逾期審核）
+      </Typography>
+      {controlJSX}
+    </Box>
   );
 
   const tableJSX = (
@@ -771,11 +771,10 @@ export const TeacherDashboard: FC = () => {
   );
 
   return (
-    <div style={{ padding: "24px 24px 64px" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       {headerJSX}
-      {controlJSX}
       {tableJSX}
-    </div>
+    </Box>
   );
 };
 
