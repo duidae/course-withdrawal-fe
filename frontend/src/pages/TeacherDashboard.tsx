@@ -7,6 +7,9 @@ import {
   Typography,
   Divider,
   Stack,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
 } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import FormControl from "@mui/material/FormControl";
@@ -256,6 +259,9 @@ export const TeacherDashboard: FC = () => {
   const [searchName, setSearchName] = useState("");
   const [searchErrorType, setSearchErrorType] = useState<string | null>(null);
   const [isTicketOpen, setIsTicketOpen] = useState<boolean>(true);
+  const [ticketDecision, setTicketDecision] = useState<"approve" | "decline">(
+    "approve",
+  );
   const [classFilter, setClassFilter] = useState("全部");
   const [statusFilter, setStatusFilter] = useState("待審核");
   const [frozenOrder, setFrozenOrder] = useState<number[] | null>(null);
@@ -871,7 +877,6 @@ export const TeacherDashboard: FC = () => {
     >
       <Stack spacing={3}>
         <Stack spacing={1}>
-          <Typography variant="h6">基礎條款</Typography>
           <Typography variant="body2">
             {f({ id: "teacherDashboard.ticket.reason.label" })}
           </Typography>
@@ -887,6 +892,24 @@ export const TeacherDashboard: FC = () => {
           <Typography variant="subtitle1">
             {f({ id: "teacherDashboard.ticket.reply.label" })}
           </Typography>
+          <RadioGroup
+            row
+            value={ticketDecision}
+            onChange={(e) =>
+              setTicketDecision(e.target.value as "approve" | "decline")
+            }
+          >
+            <FormControlLabel
+              value="approve"
+              control={<Radio />}
+              label={f({ id: "teacherDashboard.withdrawal.approve" })}
+            />
+            <FormControlLabel
+              value="decline"
+              control={<Radio />}
+              label={f({ id: "teacherDashboard.withdrawal.decline" })}
+            />
+          </RadioGroup>
           <TextField defaultValue="aaa" multiline minRows={3} fullWidth />
         </Stack>
       </Stack>
