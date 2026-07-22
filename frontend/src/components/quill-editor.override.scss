@@ -1,0 +1,9 @@
+@use "../cool-ui/components/editor/quill-editor";
+
+// Override the base Quill styles for the MainTerms & TermsEditor.
+// Adjust the font-size & line-height for better readability.
+.terms-editor-content .quill .ql-container .ql-editor,
+.main-terms-content .quill .ql-container .ql-editor {
+  font-size: 16px;
+  line-height: 1.7;
+}

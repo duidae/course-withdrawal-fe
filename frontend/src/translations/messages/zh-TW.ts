@@ -29,4 +29,7 @@ export const messages_Zh: Record<string, string> = {
   "teacherDashboard.status.approved": "同意",
   "teacherDashboard.status.disagreed": "不同意",
   "teacherDashboard.reason.readMore": "查看更多",
+  "teacherDashboard.ticket.title": "停修申請單",
+  "teacherDashboard.ticket.confirm": "送出回覆",
+  "teacherDashboard.ticket.cancel": "取消",
 };

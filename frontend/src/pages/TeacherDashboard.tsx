@@ -1,6 +1,13 @@
 import { type FC, type ReactNode, useState, useEffect, useRef } from "react";
 import { useIntl } from "react-intl";
-import { Box, Button, IconButton, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  IconButton,
+  Typography,
+  Divider,
+  Stack,
+} from "@mui/material";
 import TextField from "@mui/material/TextField";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
@@ -9,6 +16,9 @@ import MenuItem from "@mui/material/MenuItem";
 import EditIcon from "@mui/icons-material/Edit";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import * as XLSX from "xlsx";
+
+import { BaseDialog } from "../cool-ui/components/dialogs/BaseDialog";
+import { QuillContentEditor } from "../components/QuillContentEditor";
 
 import {
   INIT_STUDENTS,
@@ -246,6 +256,7 @@ export const TeacherDashboard: FC = () => {
   const [adminCS] = useState(initCS());
   const [searchName, setSearchName] = useState("");
   const [searchErrorType, setSearchErrorType] = useState<string | null>(null);
+  const [isTicketOpen, setIsTicketOpen] = useState<boolean>(false);
   const [classFilter, setClassFilter] = useState("全部");
   const [statusFilter, setStatusFilter] = useState("待審核");
   const [frozenOrder, setFrozenOrder] = useState<number[] | null>(null);
@@ -330,13 +341,7 @@ export const TeacherDashboard: FC = () => {
   };
 
   const openReview = (student: StudentRow) => {
-    setFrozenOrder([
-      student.id,
-      ...filtered
-        .filter((entry): entry is StudentRowWithOrig => entry !== undefined)
-        .filter((entry) => entry.id !== student.id)
-        .map((entry) => entry.id),
-    ]);
+    setIsTicketOpen(true);
   };
 
   const exportToExcel = () => {
@@ -394,6 +399,14 @@ export const TeacherDashboard: FC = () => {
 
   const batchDecline = () => {
     console.log("batch decline");
+  };
+
+  const onTicketConfirm = () => {
+    console.log("ticket confirm");
+  };
+
+  const onTicketCancel = () => {
+    setIsTicketOpen(false);
   };
 
   const hasSelections = selected.length > 0;
@@ -845,12 +858,37 @@ export const TeacherDashboard: FC = () => {
     </div>
   );
 
+  const ticketDialogJSX = (
+    <BaseDialog
+      open={isTicketOpen}
+      size="sm"
+      //mode={BaseDialogMode.Info}
+      title={f({ id: "teacherDashboard.ticket.title" })}
+      onConfirm={onTicketConfirm}
+      confirmBtnText={f({ id: "teacherDashboard.ticket.confirm" })}
+      onCancel={onTicketCancel}
+      cancelBtnText={f({ id: "teacherDashboard.ticket.cancel" })}
+    >
+      <Stack spacing={3}>
+        <Stack spacing={1}>
+          <Typography variant="h6">基礎條款</Typography>
+          <QuillContentEditor content={"aaa"} />
+        </Stack>
+        <Divider />
+        <Stack spacing={2}>
+          <Typography variant="h6">選擇性授權項目</Typography>
+        </Stack>
+      </Stack>
+    </BaseDialog>
+  );
+
   return (
     <Box
       sx={{ display: "flex", flexDirection: "column", gap: 3, paddingRight: 1 }}
     >
       {headerJSX}
       {tableJSX}
+      {ticketDialogJSX}
     </Box>
   );
 };

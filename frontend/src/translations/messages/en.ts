@@ -31,4 +31,7 @@ export const messages_En: Record<string, string> = {
   "teacherDashboard.status.approved": "Approved",
   "teacherDashboard.status.declined": "Declined",
   "teacherDashboard.reason.readMore": "Read more",
+  "teacherDashboard.ticket.title": "Withdrawal Application",
+  "teacherDashboard.ticket.confirm": "Confirm",
+  "teacherDashboard.ticket.cancel": "Cancel",
 };
