@@ -18,7 +18,6 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import * as XLSX from "xlsx";
 
 import { BaseDialog } from "../cool-ui/components/dialogs/BaseDialog";
-import { QuillContentEditor } from "../components/QuillContentEditor";
 
 import {
   INIT_STUDENTS,
@@ -256,7 +255,7 @@ export const TeacherDashboard: FC = () => {
   const [adminCS] = useState(initCS());
   const [searchName, setSearchName] = useState("");
   const [searchErrorType, setSearchErrorType] = useState<string | null>(null);
-  const [isTicketOpen, setIsTicketOpen] = useState<boolean>(false);
+  const [isTicketOpen, setIsTicketOpen] = useState<boolean>(true);
   const [classFilter, setClassFilter] = useState("全部");
   const [statusFilter, setStatusFilter] = useState("待審核");
   const [frozenOrder, setFrozenOrder] = useState<number[] | null>(null);
@@ -873,11 +872,22 @@ export const TeacherDashboard: FC = () => {
       <Stack spacing={3}>
         <Stack spacing={1}>
           <Typography variant="h6">基礎條款</Typography>
-          <QuillContentEditor content={"aaa"} />
+          <Typography variant="body2">
+            {f({ id: "teacherDashboard.ticket.reason.label" })}
+          </Typography>
+          <TextField
+            value="aaa"
+            multiline
+            minRows={3}
+            fullWidth
+            slotProps={{ input: { readOnly: true } }}
+          />
         </Stack>
-        <Divider />
         <Stack spacing={2}>
-          <Typography variant="h6">選擇性授權項目</Typography>
+          <Typography variant="subtitle1">
+            {f({ id: "teacherDashboard.ticket.reply.label" })}
+          </Typography>
+          <TextField defaultValue="aaa" multiline minRows={3} fullWidth />
         </Stack>
       </Stack>
     </BaseDialog>
