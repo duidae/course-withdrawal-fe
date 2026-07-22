@@ -1,4 +1,5 @@
-import { type FC, useState, useEffect, useRef } from "react";
+import { type FC, type ReactNode, useState, useEffect, useRef } from "react";
+import { useIntl } from "react-intl";
 import { Box, Button, IconButton, Typography } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import FormControl from "@mui/material/FormControl";
@@ -124,6 +125,7 @@ const StatusChip = ({ status, label: labelOverride }: StatusChipProps) => {
 };
 
 function TruncatedReason({ text, onReadMore }: TruncatedReasonProps) {
+  const { formatMessage: f } = useIntl();
   const measRef = useRef<HTMLDivElement | null>(null);
   const [isOver, setIsOver] = useState(false);
 
@@ -205,7 +207,7 @@ function TruncatedReason({ text, onReadMore }: TruncatedReasonProps) {
                 whiteSpace: "nowrap",
               }}
             >
-              &lt;查看更多&gt;
+              &lt;{f({ id: "teacherDashboard.reason.readMore" })}&gt;
             </button>
           </span>
           {text}
@@ -233,6 +235,12 @@ const statusOrder: Record<string, number> = {
   不同意: 4,
 };
 
+const pendingCountFormatter = {
+  red: (chunks: ReactNode[]) => (
+    <span style={{ color: "#cc0000" }}>{chunks}</span>
+  ),
+};
+
 export const TeacherDashboard: FC = () => {
   const [students, setStudents] = useState<StudentRow[]>(INIT_STUDENTS);
   const [adminCS] = useState(initCS());
@@ -242,6 +250,7 @@ export const TeacherDashboard: FC = () => {
   const [statusFilter, setStatusFilter] = useState("待審核");
   const [frozenOrder, setFrozenOrder] = useState<number[] | null>(null);
   const [selected, setSelected] = useState<number[]>([]);
+  const { formatMessage: f } = useIntl();
 
   const getSecForSchool = (school: string) => {
     const secs = adminCS["1"] || [];
@@ -261,6 +270,15 @@ export const TeacherDashboard: FC = () => {
     const deadline = new Date(sec.ad.replace(/\//g, "-").replace(" ", "T"));
     return deadline < new Date() ? "逾期審核" : student.status;
   };
+
+  const statusLabelIds: Record<string, string> = {
+    待審核: "teacherDashboard.status.pending",
+    逾期審核: "teacherDashboard.status.overdue",
+    同意: "teacherDashboard.status.approved",
+    不同意: "teacherDashboard.status.declined",
+  };
+  const getStatusLabel = (status: string) =>
+    statusLabelIds[status] ? f({ id: statusLabelIds[status] }) : status;
 
   const effectiveStudents: StudentRowWithOrig[] = students.map((s) => {
     const eff = getEffectiveStatus(s);
@@ -314,7 +332,9 @@ export const TeacherDashboard: FC = () => {
               ...student,
               status,
               approvalTime: student.approvalTime || "2026/05/11 00:00",
-              approver: student.approver || "教師",
+              approver:
+                student.approver ||
+                f({ id: "teacherDashboard.defaultApprover" }),
             }
           : student,
       ),
@@ -340,15 +360,15 @@ export const TeacherDashboard: FC = () => {
 
   const exportToExcel = () => {
     const headers = [
-      "學生姓名",
-      "班別",
-      "學號",
-      "申請時間",
-      "停修原因",
-      "審核結果",
-      "審核期限",
-      "審核時間",
-      "審核人",
+      f({ id: "teacherDashboard.field.studentName" }),
+      f({ id: "teacherDashboard.field.class" }),
+      f({ id: "teacherDashboard.field.studentId" }),
+      f({ id: "teacherDashboard.field.applyTime" }),
+      f({ id: "teacherDashboard.field.reason" }),
+      f({ id: "teacherDashboard.field.reviewResult" }),
+      f({ id: "teacherDashboard.field.deadline" }),
+      f({ id: "teacherDashboard.field.approvalTime" }),
+      f({ id: "teacherDashboard.field.approver" }),
     ];
     const rows = effectiveStudents.map((s) => {
       const deadline =
@@ -359,24 +379,25 @@ export const TeacherDashboard: FC = () => {
         s.studentId,
         s.applyTime,
         s.reason,
-        s.status,
+        getStatusLabel(s.status),
         deadline,
         s.approvalTime || "",
         s.approver || "",
       ];
     });
+    const title = f({ id: "teacherDashboard.title" });
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "停修申請名單");
-    XLSX.writeFile(workbook, "停修申請名單.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, title);
+    XLSX.writeFile(workbook, `${title}.xlsx`);
   };
 
-  const batchAgree = () => {
-    console.log("batch agree");
+  const batchApprove = () => {
+    console.log("batch approve");
   };
 
-  const batchDisagree = () => {
-    console.log("batch disagree");
+  const batchDecline = () => {
+    console.log("batch decline");
   };
 
   const hasSelections = selected.length > 0;
@@ -404,7 +425,7 @@ export const TeacherDashboard: FC = () => {
       >
         <div style={{ display: "flex", gap: 24, alignItems: "flex-start" }}>
           <TextField
-            label="學生姓名"
+            label={f({ id: "teacherDashboard.filter.studentName" })}
             value={searchName}
             onChange={(e) => {
               const val = e.target.value;
@@ -422,22 +443,22 @@ export const TeacherDashboard: FC = () => {
             error={!!searchErrorType}
             helperText={
               searchErrorType === "invalidChars"
-                ? "請輸入中文或英文姓名"
+                ? f({ id: "teacherDashboard.filter.nameInvalidChars" })
                 : searchErrorType === "tooLong"
-                  ? "字數上限為 50 字"
+                  ? f({ id: "teacherDashboard.filter.nameTooLong" })
                   : ""
             }
             style={{ width: 220 }}
           />
           <SelectField
-            label="班別"
+            label={f({ id: "teacherDashboard.field.class" })}
             value={classFilter}
             onChange={(v) => setClassFilter(v)}
             options={classOptions}
             width={220}
           />
           <SelectField
-            label="審核結果"
+            label={f({ id: "teacherDashboard.field.reviewResult" })}
             value={statusFilter}
             onChange={(v) => setStatusFilter(v)}
             options={statusOptions}
@@ -465,11 +486,11 @@ export const TeacherDashboard: FC = () => {
                 gap: 6,
               }}
             >
-              <RefreshIcon /> 重新整理
+              <RefreshIcon /> {f({ id: "teacherDashboard.actions.refresh" })}
             </button>
           )}
           <Button variant="outlined" onClick={exportToExcel}>
-            {"匯出整份名單"}
+            {f({ id: "teacherDashboard.actions.exportAll" })}
           </Button>
         </div>
       </div>
@@ -483,25 +504,28 @@ export const TeacherDashboard: FC = () => {
         }}
       >
         <span style={{ fontSize: 14, fontWeight: 500, color: "#333" }}>
-          已選取 {selected.length} 名學生
+          {f(
+            { id: "teacherDashboard.selection.count" },
+            { count: selected.length },
+          )}
         </span>
         <Button
           size="small"
           variant="outlined"
           color="success"
           disabled={!hasSelections}
-          onClick={batchAgree}
+          onClick={batchApprove}
         >
-          同意停修
+          {f({ id: "teacherDashboard.withdrawal.approve" })}
         </Button>
         <Button
           size="small"
           variant="outlined"
           color="error"
           disabled={!hasSelections}
-          onClick={batchDisagree}
+          onClick={batchDecline}
         >
-          不同意停修
+          {f({ id: "teacherDashboard.withdrawal.decline" })}
         </Button>
       </div>
     </>
@@ -509,10 +533,14 @@ export const TeacherDashboard: FC = () => {
 
   const headerJSX = (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Typography variant="h1">停修申請名單</Typography>
+      <Typography variant="h1">
+        {f({ id: "teacherDashboard.title" })}
+      </Typography>
       <Typography variant="caption" component="p">
-        您尚有 <span style={{ color: "#cc0000" }}>{pendingCount}</span>{" "}
-        筆停修申請尚未審核（含逾期審核）
+        {f(
+          { id: "teacherDashboard.pending.count" },
+          { count: pendingCount, ...pendingCountFormatter },
+        )}
       </Typography>
       {controlJSX}
     </Box>
@@ -559,22 +587,62 @@ export const TeacherDashboard: FC = () => {
               />
             </th>
             {[
-              ["學生姓名", 100],
-              ["班別", 110],
-              ["學號", 128],
-              ["申請時間", 96],
-              ["停修原因", 160],
-              ["審核結果", 100],
-              ["審核期限", 96],
-              ["審核時間", 96],
-              ["審核人", 80],
-              ["審核", 50],
-            ].map(([h, w]) => (
+              {
+                key: "studentName",
+                label: "teacherDashboard.field.studentName",
+                width: 100,
+              },
+              {
+                key: "class",
+                label: "teacherDashboard.field.class",
+                width: 110,
+              },
+              {
+                key: "studentId",
+                label: "teacherDashboard.field.studentId",
+                width: 128,
+              },
+              {
+                key: "applyTime",
+                label: "teacherDashboard.field.applyTime",
+                width: 96,
+              },
+              {
+                key: "reason",
+                label: "teacherDashboard.field.reason",
+                width: 160,
+              },
+              {
+                key: "reviewResult",
+                label: "teacherDashboard.field.reviewResult",
+                width: 100,
+              },
+              {
+                key: "deadline",
+                label: "teacherDashboard.field.deadline",
+                width: 96,
+              },
+              {
+                key: "approvalTime",
+                label: "teacherDashboard.field.approvalTime",
+                width: 96,
+              },
+              {
+                key: "approver",
+                label: "teacherDashboard.field.approver",
+                width: 80,
+              },
+              {
+                key: "action",
+                label: "teacherDashboard.field.action",
+                width: 50,
+              },
+            ].map((col) => (
               <th
-                key={h}
+                key={col.key}
                 style={{
                   padding: "8px",
-                  textAlign: h === "審核" ? "center" : "left",
+                  textAlign: col.key === "action" ? "center" : "left",
                   fontSize: 14,
                   fontWeight: 500,
                   color: "#333",
@@ -583,11 +651,13 @@ export const TeacherDashboard: FC = () => {
                   position: "sticky",
                   top: 0,
                   zIndex: 2,
-                  ...(h === "停修原因" ? { minWidth: w } : { width: w }),
+                  ...(col.key === "reason"
+                    ? { minWidth: col.width }
+                    : { width: col.width }),
                   whiteSpace: "nowrap",
                 }}
               >
-                {h}
+                {f({ id: col.label })}
               </th>
             ))}
           </tr>
@@ -606,8 +676,8 @@ export const TeacherDashboard: FC = () => {
               >
                 {statusFilter === "待審核" &&
                 students.filter((s) => s.status === "待審核").length === 0
-                  ? "目前沒有需審核的學生"
-                  : "找不到符合條件的學生"}
+                  ? f({ id: "teacherDashboard.table.emptyPending" })
+                  : f({ id: "teacherDashboard.table.emptyFiltered" })}
               </td>
             </tr>
           ) : (
@@ -710,20 +780,8 @@ export const TeacherDashboard: FC = () => {
                   }}
                 >
                   <StatusChip
-                    status={
-                      s.status === "同意"
-                        ? "同意"
-                        : s.status === "不同意"
-                          ? "不同意"
-                          : s.status
-                    }
-                    label={
-                      s.status === "同意"
-                        ? "同意"
-                        : s.status === "不同意"
-                          ? "不同意"
-                          : s.status
-                    }
+                    status={s.status}
+                    label={getStatusLabel(s.status)}
                   />
                 </td>
                 {/* 審核期限：原本就是逾期審核的學生顯示歷史截止日，其他顯示 admin 當前設定 */}
@@ -777,7 +835,7 @@ export const TeacherDashboard: FC = () => {
                 >
                   <IconButton
                     color="secondary"
-                    aria-label="add an alarm"
+                    aria-label={f({ id: "teacherDashboard.field.action" })}
                     onClick={() => openReview(s)}
                   >
                     <EditIcon />
