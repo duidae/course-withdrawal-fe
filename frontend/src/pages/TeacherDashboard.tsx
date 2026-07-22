@@ -7,6 +7,7 @@ import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import EditIcon from "@mui/icons-material/Edit";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import * as XLSX from "xlsx";
 
 import {
   INIT_STUDENTS,
@@ -338,7 +339,36 @@ export const TeacherDashboard: FC = () => {
   };
 
   const exportToExcel = () => {
-    console.log("export");
+    const headers = [
+      "學生姓名",
+      "班別",
+      "學號",
+      "申請時間",
+      "停修原因",
+      "審核結果",
+      "審核期限",
+      "審核時間",
+      "審核人",
+    ];
+    const rows = effectiveStudents.map((s) => {
+      const deadline =
+        s._orig === "逾期審核" ? s.deadline : getSecForSchool(s.school).ad;
+      return [
+        s.name,
+        s.school,
+        s.studentId,
+        s.applyTime,
+        s.reason,
+        s.status,
+        deadline,
+        s.approvalTime || "",
+        s.approver || "",
+      ];
+    });
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "停修申請名單");
+    XLSX.writeFile(workbook, "停修申請名單.xlsx");
   };
 
   const batchAgree = () => {
