@@ -28,7 +28,6 @@ export const chipSt = {
 };
 
 export const statusOptions = [
-  { value: "全部", label: "全部" },
   { value: "待審核", label: "待審核" },
   { value: "逾期審核", label: "逾期審核" },
   { value: "同意停修", label: "同意停修" },
@@ -36,7 +35,6 @@ export const statusOptions = [
 ];
 
 export const classOptions = [
-  { value: "全部", label: "全部" },
   { value: "國立臺灣大學", label: "國立臺灣大學" },
   { value: "國立臺灣科技大學", label: "國立臺灣科技大學" },
   { value: "國立清華大學", label: "國立清華大學" },

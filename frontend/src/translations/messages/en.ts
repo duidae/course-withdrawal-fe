@@ -3,6 +3,7 @@ export const messages_En: Record<string, string> = {
   "teacherDashboard.title": "Withdrawal Application",
   "teacherDashboard.pending.count":
     "You have <red>{count}</red> pending withdrawal application(s) awaiting review (including overdue ones)",
+  "teacherDashboard.filter.all": "All",
   "teacherDashboard.filter.studentName": "Student Name",
   "teacherDashboard.filter.nameInvalidChars":
     "Please enter a Chinese or English name",

@@ -3,6 +3,7 @@ export const messages_Zh: Record<string, string> = {
   "teacherDashboard.title": "停修申請",
   "teacherDashboard.pending.count":
     "您尚有 <red>{count}</red> 筆停修申請尚未審核（含逾期審核）",
+  "teacherDashboard.filter.all": "全部",
   "teacherDashboard.filter.studentName": "學生姓名",
   "teacherDashboard.filter.nameInvalidChars": "請輸入中文或英文姓名",
   "teacherDashboard.filter.nameTooLong": "字數上限為 50 字",

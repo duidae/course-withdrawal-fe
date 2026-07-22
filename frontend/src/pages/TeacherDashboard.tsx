@@ -32,8 +32,8 @@ import { BaseDialog } from "../cool-ui/components/dialogs/BaseDialog";
 import {
   INIT_STUDENTS,
   initCS,
-  classOptions,
-  statusOptions,
+  classOptions as classUniversityOptions,
+  statusOptions as statusIndividualOptions,
   chipSt,
 } from "../apis/mockup";
 
@@ -261,6 +261,7 @@ const pendingCountFormatter = {
 };
 
 export const TeacherDashboard: FC = () => {
+  const { formatMessage: f } = useIntl();
   const [students, setStudents] = useState<StudentRow[]>(INIT_STUDENTS);
   const [adminCS] = useState(initCS());
   const [searchName, setSearchName] = useState("");
@@ -269,11 +270,28 @@ export const TeacherDashboard: FC = () => {
   const [ticketDecision, setTicketDecision] = useState<"approve" | "decline">(
     "approve",
   );
-  const [classFilter, setClassFilter] = useState("全部");
+  const [classFilter, setClassFilter] = useState(
+    f({ id: "teacherDashboard.filter.all" }),
+  );
   const [statusFilter, setStatusFilter] = useState("待審核");
   const [frozenOrder, setFrozenOrder] = useState<number[] | null>(null);
   const [selected, setSelected] = useState<number[]>([]);
-  const { formatMessage: f } = useIntl();
+
+  const classOptions = [
+    {
+      value: f({ id: "teacherDashboard.filter.all" }),
+      label: f({ id: "teacherDashboard.filter.all" }),
+    },
+    ...classUniversityOptions,
+  ];
+
+  const statusOptions = [
+    {
+      value: f({ id: "teacherDashboard.filter.all" }),
+      label: f({ id: "teacherDashboard.filter.all" }),
+    },
+    ...statusIndividualOptions,
+  ];
 
   const getSecForSchool = (school: string) => {
     const secs = adminCS["1"] || [];
@@ -313,9 +331,11 @@ export const TeacherDashboard: FC = () => {
       searchName === "" ||
       searchErrorType !== null ||
       s.name.includes(searchName);
-    const cl = classFilter === "全部" || s.school === classFilter;
+    const cl =
+      classFilter === f({ id: "teacherDashboard.filter.all" }) ||
+      s.school === classFilter;
     const st =
-      statusFilter === "全部" ||
+      statusFilter === f({ id: "teacherDashboard.filter.all" }) ||
       (statusFilter === "待審核" && s.status === "待審核") ||
       (statusFilter === "逾期審核" && s.status === "逾期審核") ||
       (statusFilter === "同意停修" && s.status === "同意") ||
