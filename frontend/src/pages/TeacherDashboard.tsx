@@ -442,7 +442,6 @@ export const TeacherDashboard: FC = () => {
           display: "flex",
           alignItems: "center",
           gap: 16,
-          marginBottom: 12,
         }}
       >
         <span style={{ fontSize: 14, fontWeight: 500, color: "#333" }}>
@@ -771,7 +770,9 @@ export const TeacherDashboard: FC = () => {
   );
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+    <Box
+      sx={{ display: "flex", flexDirection: "column", gap: 3, paddingRight: 1 }}
+    >
       {headerJSX}
       {tableJSX}
     </Box>
