@@ -1,6 +1,10 @@
 import { type FC, useState, useEffect, useRef } from "react";
 import { IconButton } from "@mui/material";
 import TextField from "@mui/material/TextField";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select, { type SelectChangeEvent } from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import EditIcon from "@mui/icons-material/Edit";
 import RefreshIcon from "@mui/icons-material/Refresh";
 
@@ -52,45 +56,32 @@ type FilterSelectProps = {
   width: number;
 };
 
-function SelectField({
+const SelectField = ({
   label,
   value,
   onChange,
   options,
   width,
-}: FilterSelectProps) {
+}: FilterSelectProps) => {
+  const labelId = `select-field-${label}`;
   return (
-    <label
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 4,
-        width,
-        fontSize: 12,
-        color: "#333",
-      }}
-    >
-      <span>{label}</span>
-      <select
+    <FormControl size="small" style={{ width }}>
+      <InputLabel id={labelId}>{label}</InputLabel>
+      <Select
+        labelId={labelId}
+        label={label}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        style={{
-          padding: "8px 10px",
-          borderRadius: 4,
-          border: "1px solid rgba(0,0,0,0.23)",
-          fontSize: 14,
-          background: "white",
-        }}
+        onChange={(e: SelectChangeEvent) => onChange(e.target.value)}
       >
         {options.map((option) => (
-          <option key={option.value} value={option.value}>
+          <MenuItem key={option.value} value={option.value}>
             {option.label}
-          </option>
+          </MenuItem>
         ))}
-      </select>
-    </label>
+      </Select>
+    </FormControl>
   );
-}
+};
 
 function DateTimeCell({ value }: { value?: string }) {
   if (!value) return <span />;
