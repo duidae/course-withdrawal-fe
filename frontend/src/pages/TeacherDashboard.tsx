@@ -20,6 +20,7 @@ import {
   TableHead,
   TableRow,
   Checkbox,
+  Chip,
 } from "@mui/material";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import EditIcon from "@mui/icons-material/Edit";
@@ -125,20 +126,20 @@ const StatusChip = ({ status, label: labelOverride }: StatusChipProps) => {
   const s = chipSt[status as keyof typeof chipSt] || chipSt["未申請"];
   const label = labelOverride ?? status;
   return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        padding: "2px 10px",
-        borderRadius: 100,
-        fontSize: 13,
+    <Chip
+      label={label}
+      size="small"
+      variant="outlined"
+      sx={{
         height: 24,
+        fontSize: 13,
         whiteSpace: "nowrap",
-        ...s,
+        color: s.color,
+        backgroundColor: s.background,
+        border: s.border,
+        ...("opacity" in s ? { opacity: s.opacity } : {}),
       }}
-    >
-      {label}
-    </span>
+    />
   );
 };
 
