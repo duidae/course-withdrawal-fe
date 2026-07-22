@@ -340,8 +340,9 @@ export const TeacherDashboard: FC = () => {
     );
   };
 
-  const openReview = (student: StudentRow) => {
+  const onTicketReview = (student: StudentRow) => {
     setIsTicketOpen(true);
+    console.log(student);
   };
 
   const exportToExcel = () => {
@@ -778,7 +779,7 @@ export const TeacherDashboard: FC = () => {
                 >
                   <TruncatedReason
                     text={s.reason}
-                    onReadMore={() => openReview(s)}
+                    onReadMore={() => onTicketReview(s)}
                   />
                 </td>
                 {/* 審核結果 */}
@@ -845,7 +846,7 @@ export const TeacherDashboard: FC = () => {
                   <IconButton
                     color="secondary"
                     aria-label={f({ id: "teacherDashboard.field.action" })}
-                    onClick={() => openReview(s)}
+                    onClick={() => onTicketReview(s)}
                   >
                     <EditIcon />
                   </IconButton>
