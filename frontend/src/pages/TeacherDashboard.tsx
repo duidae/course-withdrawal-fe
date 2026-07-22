@@ -353,8 +353,8 @@ export const TeacherDashboard: FC = () => {
     (s: StudentRow) => s.status === "待審核" || s.status === "逾期審核",
   ).length;
 
-  return (
-    <div style={{ padding: "24px 24px 64px" }}>
+  const headerJSX = (
+    <>
       <h1
         style={{
           fontSize: 32,
@@ -370,7 +370,11 @@ export const TeacherDashboard: FC = () => {
         您尚有 <span style={{ color: "#cc0000" }}>{pendingCount}</span>{" "}
         筆停修申請尚未審核（含逾期審核）
       </p>
+    </>
+  );
 
+  const controlJSX = (
+    <>
       {/* Filter row */}
       <div
         style={{
@@ -500,278 +504,287 @@ export const TeacherDashboard: FC = () => {
           不同意停修
         </button>
       </div>
+    </>
+  );
 
-      {/* Table — column order: 申請學生 班別 學號 申請時間 停修原因 審核結果 審核期限 核准時間 核准人 */}
-      <div
+  const tableJSX = (
+    <div
+      style={{
+        border: "1px solid rgba(0,0,0,0.12)",
+        overflow: "auto",
+        maxHeight: "calc(100vh - 300px)",
+      }}
+    >
+      <table
         style={{
-          border: "1px solid rgba(0,0,0,0.12)",
-          overflow: "auto",
-          maxHeight: "calc(100vh - 300px)",
+          width: "100%",
+          tableLayout: "fixed",
+          borderCollapse: "collapse",
+          minWidth: 1074,
         }}
       >
-        <table
-          style={{
-            width: "100%",
-            tableLayout: "fixed",
-            borderCollapse: "collapse",
-            minWidth: 1074,
-          }}
-        >
-          <thead>
-            <tr>
+        <thead>
+          <tr>
+            <th
+              style={{
+                padding: "8px",
+                width: 58,
+                textAlign: "center",
+                borderBottom: "1px solid rgba(0,0,0,0.12)",
+                background: "#f5f5f5",
+                position: "sticky",
+                top: 0,
+                zIndex: 2,
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={allSelected}
+                ref={(el) => {
+                  if (el) el.indeterminate = someSelected;
+                }}
+                onChange={handleSelectAll}
+                style={{ accentColor: "#0099cc" }}
+              />
+            </th>
+            {[
+              ["學生姓名", 100],
+              ["班別", 110],
+              ["學號", 128],
+              ["申請時間", 96],
+              ["停修原因", 160],
+              ["審核結果", 100],
+              ["審核期限", 96],
+              ["審核時間", 96],
+              ["審核人", 80],
+              ["審核", 50],
+            ].map(([h, w]) => (
               <th
+                key={h}
                 style={{
                   padding: "8px",
-                  width: 58,
-                  textAlign: "center",
+                  textAlign: h === "審核" ? "center" : "left",
+                  fontSize: 14,
+                  fontWeight: 500,
+                  color: "#333",
                   borderBottom: "1px solid rgba(0,0,0,0.12)",
                   background: "#f5f5f5",
                   position: "sticky",
                   top: 0,
                   zIndex: 2,
+                  ...(h === "停修原因" ? { minWidth: w } : { width: w }),
+                  whiteSpace: "nowrap",
                 }}
               >
-                <input
-                  type="checkbox"
-                  checked={allSelected}
-                  ref={(el) => {
-                    if (el) el.indeterminate = someSelected;
-                  }}
-                  onChange={handleSelectAll}
-                  style={{ accentColor: "#0099cc" }}
-                />
+                {h}
               </th>
-              {[
-                ["學生姓名", 100],
-                ["班別", 110],
-                ["學號", 128],
-                ["申請時間", 96],
-                ["停修原因", 160],
-                ["審核結果", 100],
-                ["審核期限", 96],
-                ["審核時間", 96],
-                ["審核人", 80],
-                ["審核", 50],
-              ].map(([h, w]) => (
-                <th
-                  key={h}
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {filtered.length === 0 ? (
+            <tr>
+              <td
+                colSpan={11}
+                style={{
+                  padding: "32px 8px",
+                  textAlign: "center",
+                  fontSize: 14,
+                  color: "#333",
+                }}
+              >
+                {statusFilter === "待審核" &&
+                students.filter((s) => s.status === "待審核").length === 0
+                  ? "目前沒有需審核的學生"
+                  : "找不到符合條件的學生"}
+              </td>
+            </tr>
+          ) : (
+            filtered.map((s) => (
+              <tr
+                key={s.id}
+                style={{
+                  height: 72,
+                  background: isSelected(s.id)
+                    ? "rgba(0,153,204,0.08)"
+                    : "transparent",
+                }}
+              >
+                <td
                   style={{
                     padding: "8px",
-                    textAlign: h === "審核" ? "center" : "left",
+                    textAlign: "center",
+                    borderBottom: "1px solid rgba(0,0,0,0.06)",
+                  }}
+                >
+                  {s.status !== "逾期審核" && (
+                    <input
+                      type="checkbox"
+                      checked={isSelected(s.id)}
+                      onChange={() => toggleSelect(s.id)}
+                      style={{ accentColor: "#0099cc" }}
+                    />
+                  )}
+                </td>
+                {/* 申請學生 */}
+                <td
+                  style={{
+                    padding: "8px",
                     fontSize: 14,
-                    fontWeight: 500,
                     color: "#333",
-                    borderBottom: "1px solid rgba(0,0,0,0.12)",
-                    background: "#f5f5f5",
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 2,
-                    ...(h === "停修原因" ? { minWidth: w } : { width: w }),
+                    borderBottom: "1px solid rgba(0,0,0,0.06)",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
                   }}
                 >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.length === 0 ? (
-              <tr>
+                  {s.name}
+                </td>
+                {/* 班別 — 字元過長時換行顯示，不做省略號隱藏 */}
                 <td
-                  colSpan={11}
                   style={{
-                    padding: "32px 8px",
-                    textAlign: "center",
+                    padding: "8px",
                     fontSize: 14,
                     color: "#333",
+                    borderBottom: "1px solid rgba(0,0,0,0.06)",
+                    whiteSpace: "normal",
+                    wordBreak: "break-word",
+                    overflowWrap: "break-word",
                   }}
                 >
-                  {statusFilter === "待審核" &&
-                  students.filter((s) => s.status === "待審核").length === 0
-                    ? "目前沒有需審核的學生"
-                    : "找不到符合條件的學生"}
+                  {s.school}
+                </td>
+                {/* 學號 — 字元過長時換行顯示，不做省略號隱藏 */}
+                <td
+                  style={{
+                    padding: "8px",
+                    fontSize: 14,
+                    color: "#333",
+                    borderBottom: "1px solid rgba(0,0,0,0.06)",
+                    whiteSpace: "normal",
+                    wordBreak: "break-word",
+                    overflowWrap: "break-word",
+                  }}
+                >
+                  {s.studentId}
+                </td>
+                {/* 申請時間 */}
+                <td
+                  style={{
+                    padding: "8px",
+                    borderBottom: "1px solid rgba(0,0,0,0.06)",
+                    verticalAlign: "middle",
+                  }}
+                >
+                  <DateTimeCell value={s.applyTime} />
+                </td>
+                {/* 停修原因 */}
+                <td
+                  style={{
+                    padding: "8px",
+                    borderBottom: "1px solid rgba(0,0,0,0.06)",
+                    overflow: "hidden",
+                  }}
+                >
+                  <TruncatedReason
+                    text={s.reason}
+                    onReadMore={() => openReview(s)}
+                  />
+                </td>
+                {/* 審核結果 */}
+                <td
+                  style={{
+                    padding: "8px",
+                    borderBottom: "1px solid rgba(0,0,0,0.06)",
+                  }}
+                >
+                  <StatusChip
+                    status={
+                      s.status === "同意"
+                        ? "同意"
+                        : s.status === "不同意"
+                          ? "不同意"
+                          : s.status
+                    }
+                    label={
+                      s.status === "同意"
+                        ? "同意"
+                        : s.status === "不同意"
+                          ? "不同意"
+                          : s.status
+                    }
+                  />
+                </td>
+                {/* 審核期限：原本就是逾期審核的學生顯示歷史截止日，其他顯示 admin 當前設定 */}
+                <td
+                  style={{
+                    padding: "8px",
+                    borderBottom: "1px solid rgba(0,0,0,0.06)",
+                    verticalAlign: "middle",
+                  }}
+                >
+                  <DateTimeCell
+                    value={
+                      s._orig === "逾期審核"
+                        ? s.deadline
+                        : getSecForSchool(s.school).ad
+                    }
+                  />
+                </td>
+                {/* 審核時間 */}
+                <td
+                  style={{
+                    padding: "8px",
+                    borderBottom: "1px solid rgba(0,0,0,0.06)",
+                    verticalAlign: "middle",
+                  }}
+                >
+                  <DateTimeCell value={s.approvalTime || ""} />
+                </td>
+                {/* 審核人 — 字元過長時換行顯示，不做省略號隱藏 */}
+                <td
+                  style={{
+                    padding: "8px",
+                    fontSize: 14,
+                    color: "#333",
+                    borderBottom: "1px solid rgba(0,0,0,0.06)",
+                    whiteSpace: "normal",
+                    wordBreak: "break-word",
+                    overflowWrap: "break-word",
+                  }}
+                >
+                  {s.approver || ""}
+                </td>
+                {/* 審核 — 鉛筆 IconButton（逾期審核也顯示） */}
+                <td
+                  style={{
+                    padding: "8px",
+                    borderBottom: "1px solid rgba(0,0,0,0.06)",
+                    textAlign: "center",
+                    verticalAlign: "middle",
+                  }}
+                >
+                  <IconButton
+                    color="secondary"
+                    aria-label="add an alarm"
+                    onClick={() => openReview(s)}
+                  >
+                    <EditIcon />
+                  </IconButton>
                 </td>
               </tr>
-            ) : (
-              filtered.map((s) => (
-                <tr
-                  key={s.id}
-                  style={{
-                    height: 72,
-                    background: isSelected(s.id)
-                      ? "rgba(0,153,204,0.08)"
-                      : "transparent",
-                  }}
-                >
-                  <td
-                    style={{
-                      padding: "8px",
-                      textAlign: "center",
-                      borderBottom: "1px solid rgba(0,0,0,0.06)",
-                    }}
-                  >
-                    {s.status !== "逾期審核" && (
-                      <input
-                        type="checkbox"
-                        checked={isSelected(s.id)}
-                        onChange={() => toggleSelect(s.id)}
-                        style={{ accentColor: "#0099cc" }}
-                      />
-                    )}
-                  </td>
-                  {/* 申請學生 */}
-                  <td
-                    style={{
-                      padding: "8px",
-                      fontSize: 14,
-                      color: "#333",
-                      borderBottom: "1px solid rgba(0,0,0,0.06)",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {s.name}
-                  </td>
-                  {/* 班別 — 字元過長時換行顯示，不做省略號隱藏 */}
-                  <td
-                    style={{
-                      padding: "8px",
-                      fontSize: 14,
-                      color: "#333",
-                      borderBottom: "1px solid rgba(0,0,0,0.06)",
-                      whiteSpace: "normal",
-                      wordBreak: "break-word",
-                      overflowWrap: "break-word",
-                    }}
-                  >
-                    {s.school}
-                  </td>
-                  {/* 學號 — 字元過長時換行顯示，不做省略號隱藏 */}
-                  <td
-                    style={{
-                      padding: "8px",
-                      fontSize: 14,
-                      color: "#333",
-                      borderBottom: "1px solid rgba(0,0,0,0.06)",
-                      whiteSpace: "normal",
-                      wordBreak: "break-word",
-                      overflowWrap: "break-word",
-                    }}
-                  >
-                    {s.studentId}
-                  </td>
-                  {/* 申請時間 */}
-                  <td
-                    style={{
-                      padding: "8px",
-                      borderBottom: "1px solid rgba(0,0,0,0.06)",
-                      verticalAlign: "middle",
-                    }}
-                  >
-                    <DateTimeCell value={s.applyTime} />
-                  </td>
-                  {/* 停修原因 */}
-                  <td
-                    style={{
-                      padding: "8px",
-                      borderBottom: "1px solid rgba(0,0,0,0.06)",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <TruncatedReason
-                      text={s.reason}
-                      onReadMore={() => openReview(s)}
-                    />
-                  </td>
-                  {/* 審核結果 */}
-                  <td
-                    style={{
-                      padding: "8px",
-                      borderBottom: "1px solid rgba(0,0,0,0.06)",
-                    }}
-                  >
-                    <StatusChip
-                      status={
-                        s.status === "同意"
-                          ? "同意"
-                          : s.status === "不同意"
-                            ? "不同意"
-                            : s.status
-                      }
-                      label={
-                        s.status === "同意"
-                          ? "同意"
-                          : s.status === "不同意"
-                            ? "不同意"
-                            : s.status
-                      }
-                    />
-                  </td>
-                  {/* 審核期限：原本就是逾期審核的學生顯示歷史截止日，其他顯示 admin 當前設定 */}
-                  <td
-                    style={{
-                      padding: "8px",
-                      borderBottom: "1px solid rgba(0,0,0,0.06)",
-                      verticalAlign: "middle",
-                    }}
-                  >
-                    <DateTimeCell
-                      value={
-                        s._orig === "逾期審核"
-                          ? s.deadline
-                          : getSecForSchool(s.school).ad
-                      }
-                    />
-                  </td>
-                  {/* 審核時間 */}
-                  <td
-                    style={{
-                      padding: "8px",
-                      borderBottom: "1px solid rgba(0,0,0,0.06)",
-                      verticalAlign: "middle",
-                    }}
-                  >
-                    <DateTimeCell value={s.approvalTime || ""} />
-                  </td>
-                  {/* 審核人 — 字元過長時換行顯示，不做省略號隱藏 */}
-                  <td
-                    style={{
-                      padding: "8px",
-                      fontSize: 14,
-                      color: "#333",
-                      borderBottom: "1px solid rgba(0,0,0,0.06)",
-                      whiteSpace: "normal",
-                      wordBreak: "break-word",
-                      overflowWrap: "break-word",
-                    }}
-                  >
-                    {s.approver || ""}
-                  </td>
-                  {/* 審核 — 鉛筆 IconButton（逾期審核也顯示） */}
-                  <td
-                    style={{
-                      padding: "8px",
-                      borderBottom: "1px solid rgba(0,0,0,0.06)",
-                      textAlign: "center",
-                      verticalAlign: "middle",
-                    }}
-                  >
-                    <IconButton
-                      color="secondary"
-                      aria-label="add an alarm"
-                      onClick={() => openReview(s)}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  return (
+    <div style={{ padding: "24px 24px 64px" }}>
+      {headerJSX}
+      {controlJSX}
+      {tableJSX}
     </div>
   );
 };
