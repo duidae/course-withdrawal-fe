@@ -2,7 +2,7 @@ export const messages_En: Record<string, string> = {
   "app.name": "Course Withdrawal",
   "teacherDashboard.title": "Withdrawal Application",
   "teacherDashboard.pending.count":
-    "You have <red>{count}</red> pending withdrawal application(s) awaiting review (including overdue ones)",
+    "You have <red>{count}</red> pending withdrawal application(s) awaiting your review, including some that are overdue.",
   "teacherDashboard.filter.all": "All",
   "teacherDashboard.filter.studentName": "Student Name",
   "teacherDashboard.filter.nameInvalidChars":
