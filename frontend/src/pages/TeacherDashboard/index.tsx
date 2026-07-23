@@ -149,8 +149,8 @@ export const TeacherDashboard: FC = () => {
     );
   };
 
-  const onTicketReview = (student: StudentRow) => {
-    setReviewTicket(student);
+  const onTicketReview = (withdrawal: Withdrawal) => {
+    setReviewTicket(withdrawal);
   };
 
   const exportToExcel = () => {
