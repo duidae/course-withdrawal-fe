@@ -116,11 +116,11 @@ export const TeacherDashboard: FC = () => {
     return deadline < new Date() ? "逾期審核" : withdrawal.status;
   };
 
-  const effectiveStudents: Withdrawal[] = withdrawals.map((w) => {
+  const effectiveWithdrawals: Withdrawal[] = withdrawals.map((w) => {
     const eff = getEffectiveStatus(w);
     return { ...w, status: eff, _orig: w.status };
   });
-  const baseFiltered = effectiveStudents.filter((s: Withdrawal) => {
+  const baseFiltered = effectiveWithdrawals.filter((s: Withdrawal) => {
     const nm =
       searchName === "" ||
       searchErrorType !== null ||
@@ -175,7 +175,7 @@ export const TeacherDashboard: FC = () => {
       f({ id: "teacherDashboard.field.reviewTime" }),
       f({ id: "teacherDashboard.field.approver" }),
     ];
-    const rows = effectiveStudents.map((s) => {
+    const rows = effectiveWithdrawals.map((s) => {
       const deadline =
         s._orig === WithdrawalStatus.OVERDUE
           ? s.deadline
@@ -238,7 +238,7 @@ export const TeacherDashboard: FC = () => {
   const someSelected =
     selected.length > 0 && selected.length < selectableRows.length;
 
-  const pendingCount = effectiveStudents.filter(
+  const pendingCount = effectiveWithdrawals.filter(
     (s: StudentRow) =>
       s.status === WithdrawalStatus.PENDING ||
       s.status === WithdrawalStatus.OVERDUE,
