@@ -14,7 +14,7 @@ import {
 
 import { statusOrder, pendingCountFormatter } from "./constants";
 import { FilterBar } from "./FilterBar";
-import { StudentTable, type StudentTableRow } from "./StudentTable";
+import { WithdrawalTable, type StudentTableRow } from "./WithdrawalTable";
 import { TicketDialog } from "./TicketDialog";
 import { type StudentRow, type StudentRowWithOrig } from "./types";
 import { type Withdrawal } from "../../models";
@@ -272,7 +272,7 @@ export const TeacherDashboard: FC = () => {
         />
       </Box>
 
-      <StudentTable
+      <WithdrawalTable
         rows={tableRows}
         isLoading={isLoading}
         showEmptyPendingMessage={statusFilter === "待審核" && noPendingStudents}

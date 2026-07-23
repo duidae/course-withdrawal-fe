@@ -33,7 +33,7 @@ type StudentTableProps = {
   onReview: (student: StudentRow) => void;
 };
 
-export function StudentTable({
+export const WithdrawalTable = ({
   rows,
   isLoading,
   showEmptyPendingMessage,
@@ -43,7 +43,7 @@ export function StudentTable({
   isSelected,
   onToggleSelect,
   onReview,
-}: StudentTableProps) {
+}: StudentTableProps) => {
   const { formatMessage: f } = useIntl();
 
   return (
@@ -66,6 +66,7 @@ export function StudentTable({
               }}
             >
               <Checkbox
+                disabled={!!isLoading}
                 checked={allSelected}
                 indeterminate={someSelected}
                 onChange={onSelectAll}
@@ -228,4 +229,4 @@ export function StudentTable({
       </Table>
     </TableContainer>
   );
-}
+};
