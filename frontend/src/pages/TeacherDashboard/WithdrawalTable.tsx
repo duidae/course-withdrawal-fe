@@ -1,11 +1,13 @@
-import { type ChangeEvent } from "react";
+import { type ChangeEvent, useState } from "react";
 import { useIntl } from "react-intl";
+import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import TablePagination from "@mui/material/TablePagination";
 import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -45,188 +47,218 @@ export const WithdrawalTable = ({
   onReview,
 }: StudentTableProps) => {
   const { formatMessage: f } = useIntl();
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const pageCount = Math.max(1, Math.ceil(rows.length / rowsPerPage));
+  const currentPage = Math.min(page, pageCount - 1);
+  const pagedRows = rows.slice(
+    currentPage * rowsPerPage,
+    currentPage * rowsPerPage + rowsPerPage,
+  );
+
+  const handleChangePage = (_: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (e: ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(Number.parseInt(e.target.value, 10));
+    setPage(0);
+  };
 
   return (
-    <TableContainer
-      sx={{
-        border: "1px solid rgba(0,0,0,0.12)",
-        maxHeight: "calc(100vh - 300px)",
-      }}
-    >
-      <Table stickyHeader sx={{ tableLayout: "fixed", minWidth: 1074 }}>
-        <TableHead>
-          <TableRow>
-            <TableCell
-              align="center"
-              sx={{
-                padding: "8px",
-                width: 58,
-                borderBottom: "1px solid rgba(0,0,0,0.12)",
-                backgroundColor: "#f5f5f5",
-              }}
-            >
-              <Checkbox
-                disabled={!!isLoading}
-                checked={allSelected}
-                indeterminate={someSelected}
-                onChange={onSelectAll}
-                sx={{
-                  "&.Mui-checked": { color: "#0099cc" },
-                }}
-              />
-            </TableCell>
-            {columns.map((col) => (
+    <Box className="flex flex-col">
+      <TableContainer
+        sx={{
+          border: "1px solid rgba(0,0,0,0.12)",
+          borderBottom: "none",
+          maxHeight: "calc(100vh - 300px)",
+        }}
+      >
+        <Table stickyHeader sx={{ tableLayout: "fixed", minWidth: 1074 }}>
+          <TableHead>
+            <TableRow>
               <TableCell
-                key={col.key}
-                align={col.key === "action" ? "center" : "left"}
+                align="center"
                 sx={{
                   padding: "8px",
-                  fontSize: 14,
-                  fontWeight: 500,
-                  color: "#333",
+                  width: 58,
                   borderBottom: "1px solid rgba(0,0,0,0.12)",
                   backgroundColor: "#f5f5f5",
-                  whiteSpace: "nowrap",
-                  ...(col.key === "reason"
-                    ? { minWidth: col.width }
-                    : { width: col.width }),
                 }}
               >
-                {f({ id: col.label })}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {isLoading && (
-            <TableRow>
-              <TableCell
-                colSpan={11}
-                align="center"
-                sx={{ padding: "32px 8px" }}
-              >
-                <CircularProgress size={32} />
-              </TableCell>
-            </TableRow>
-          )}
-          {!isLoading && rows.length === 0 && (
-            <TableRow>
-              <TableCell
-                colSpan={11}
-                align="center"
-                sx={{ padding: "32px 8px", fontSize: 14, color: "#333" }}
-              >
-                {showEmptyPendingMessage
-                  ? f({ id: "teacherDashboard.table.emptyPending" })
-                  : f({ id: "teacherDashboard.table.emptyFiltered" })}
-              </TableCell>
-            </TableRow>
-          )}
-          {!isLoading &&
-            rows.length > 0 &&
-            rows.map((s) => (
-              <TableRow
-                key={s.id}
-                sx={{
-                  height: 72,
-                  backgroundColor: isSelected(s.id)
-                    ? "rgba(0,153,204,0.08)"
-                    : "transparent",
-                }}
-              >
-                <TableCell align="center" sx={cellSx}>
-                  {s.status !== "逾期審核" && (
-                    <Checkbox
-                      checked={isSelected(s.id)}
-                      onChange={() => onToggleSelect(s.id)}
-                      sx={{
-                        "&.Mui-checked": { color: "#0099cc" },
-                      }}
-                    />
-                  )}
-                </TableCell>
-                <TableCell
+                <Checkbox
+                  disabled={!!isLoading}
+                  checked={allSelected}
+                  indeterminate={someSelected}
+                  onChange={onSelectAll}
                   sx={{
-                    ...cellSx,
+                    "&.Mui-checked": { color: "#0099cc" },
+                  }}
+                />
+              </TableCell>
+              {columns.map((col) => (
+                <TableCell
+                  key={col.key}
+                  align={col.key === "action" ? "center" : "left"}
+                  sx={{
+                    padding: "8px",
                     fontSize: 14,
+                    fontWeight: 500,
                     color: "#333",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
+                    borderBottom: "1px solid rgba(0,0,0,0.12)",
+                    backgroundColor: "#f5f5f5",
                     whiteSpace: "nowrap",
+                    ...(col.key === "reason"
+                      ? { minWidth: col.width }
+                      : { width: col.width }),
                   }}
                 >
-                  {s.name}
+                  {f({ id: col.label })}
                 </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {isLoading && (
+              <TableRow>
                 <TableCell
-                  sx={{
-                    ...cellSx,
-                    fontSize: 14,
-                    color: "#333",
-                    whiteSpace: "normal",
-                    wordBreak: "break-word",
-                    overflowWrap: "break-word",
-                  }}
-                >
-                  {s.school}
-                </TableCell>
-                <TableCell
-                  sx={{
-                    ...cellSx,
-                    fontSize: 14,
-                    color: "#333",
-                    whiteSpace: "normal",
-                    wordBreak: "break-word",
-                    overflowWrap: "break-word",
-                  }}
-                >
-                  {s.studentId}
-                </TableCell>
-                <TableCell sx={{ ...cellSx, verticalAlign: "middle" }}>
-                  <DateTimeCell value={s.applyTime} />
-                </TableCell>
-                <TableCell sx={{ ...cellSx, overflow: "hidden" }}>
-                  <TruncatedReason
-                    text={s.reason}
-                    onReadMore={() => onReview(s)}
-                  />
-                </TableCell>
-                <TableCell sx={cellSx}>
-                  <StatusChip status={s.status} label={s.statusLabel} />
-                </TableCell>
-                <TableCell sx={{ ...cellSx, verticalAlign: "middle" }}>
-                  <DateTimeCell value={s.displayDeadline} />
-                </TableCell>
-                <TableCell sx={{ ...cellSx, verticalAlign: "middle" }}>
-                  <DateTimeCell value={s.approvalTime || ""} />
-                </TableCell>
-                <TableCell
-                  sx={{
-                    ...cellSx,
-                    fontSize: 14,
-                    color: "#333",
-                    whiteSpace: "normal",
-                    wordBreak: "break-word",
-                    overflowWrap: "break-word",
-                  }}
-                >
-                  {s.approver || ""}
-                </TableCell>
-                <TableCell
+                  colSpan={11}
                   align="center"
-                  sx={{ ...cellSx, verticalAlign: "middle" }}
+                  sx={{ padding: "32px 8px" }}
                 >
-                  <IconButton
-                    color="secondary"
-                    aria-label={f({ id: "teacherDashboard.field.action" })}
-                    onClick={() => onReview(s)}
-                  >
-                    <EditIcon />
-                  </IconButton>
+                  <CircularProgress size={32} />
                 </TableCell>
               </TableRow>
-            ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+            )}
+            {!isLoading && rows.length === 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={11}
+                  align="center"
+                  sx={{ padding: "32px 8px", fontSize: 14, color: "#333" }}
+                >
+                  {showEmptyPendingMessage
+                    ? f({ id: "teacherDashboard.table.emptyPending" })
+                    : f({ id: "teacherDashboard.table.emptyFiltered" })}
+                </TableCell>
+              </TableRow>
+            )}
+            {!isLoading &&
+              rows.length > 0 &&
+              pagedRows.map((s) => (
+                <TableRow
+                  key={s.id}
+                  sx={{
+                    height: 72,
+                    backgroundColor: isSelected(s.id)
+                      ? "rgba(0,153,204,0.08)"
+                      : "transparent",
+                  }}
+                >
+                  <TableCell align="center" sx={cellSx}>
+                    {s.status !== "逾期審核" && (
+                      <Checkbox
+                        checked={isSelected(s.id)}
+                        onChange={() => onToggleSelect(s.id)}
+                        sx={{
+                          "&.Mui-checked": { color: "#0099cc" },
+                        }}
+                      />
+                    )}
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      ...cellSx,
+                      fontSize: 14,
+                      color: "#333",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {s.name}
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      ...cellSx,
+                      fontSize: 14,
+                      color: "#333",
+                      whiteSpace: "normal",
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word",
+                    }}
+                  >
+                    {s.school}
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      ...cellSx,
+                      fontSize: 14,
+                      color: "#333",
+                      whiteSpace: "normal",
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word",
+                    }}
+                  >
+                    {s.studentId}
+                  </TableCell>
+                  <TableCell sx={{ ...cellSx, verticalAlign: "middle" }}>
+                    <DateTimeCell value={s.applyTime} />
+                  </TableCell>
+                  <TableCell sx={{ ...cellSx, overflow: "hidden" }}>
+                    <TruncatedReason
+                      text={s.reason}
+                      onReadMore={() => onReview(s)}
+                    />
+                  </TableCell>
+                  <TableCell sx={cellSx}>
+                    <StatusChip status={s.status} label={s.statusLabel} />
+                  </TableCell>
+                  <TableCell sx={{ ...cellSx, verticalAlign: "middle" }}>
+                    <DateTimeCell value={s.displayDeadline} />
+                  </TableCell>
+                  <TableCell sx={{ ...cellSx, verticalAlign: "middle" }}>
+                    <DateTimeCell value={s.approvalTime || ""} />
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      ...cellSx,
+                      fontSize: 14,
+                      color: "#333",
+                      whiteSpace: "normal",
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word",
+                    }}
+                  >
+                    {s.approver || ""}
+                  </TableCell>
+                  <TableCell
+                    align="center"
+                    sx={{ ...cellSx, verticalAlign: "middle" }}
+                  >
+                    <IconButton
+                      color="secondary"
+                      aria-label={f({ id: "teacherDashboard.field.action" })}
+                      onClick={() => onReview(s)}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        component="div"
+        count={rows.length}
+        page={currentPage}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[10, 25, 50]}
+      />
+    </Box>
   );
 };

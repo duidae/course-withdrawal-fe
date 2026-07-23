@@ -25,7 +25,7 @@ const getWithdrawals = async (
   //  "/api/withdrawal-list",
   //  { params: { page, pageSize } },
   //);
-  await new Promise((resolve) => setTimeout(resolve, 1500));
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   const start = (page - 1) * pageSize;
   const data = INIT_STUDENTS.slice(start, start + pageSize);
   return { data, total: INIT_STUDENTS.length, page, pageSize };
