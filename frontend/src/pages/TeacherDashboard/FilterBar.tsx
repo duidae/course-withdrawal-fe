@@ -4,6 +4,15 @@ import TextField from "@mui/material/TextField";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { SelectField } from "./SelectField";
 import { type SelectOption } from "./types";
+import { BaseWithdrawalStatus } from "../../models";
+
+export const WithdrawalStatus = {
+  ALL: "all",
+  ...BaseWithdrawalStatus,
+} as const;
+
+export type WithdrawalStatus =
+  (typeof WithdrawalStatus)[keyof typeof WithdrawalStatus];
 
 type FilterBarProps = {
   disabled?: boolean;
@@ -14,8 +23,8 @@ type FilterBarProps = {
   classFilter: string;
   onClassFilterChange: (value: string) => void;
   classOptions: SelectOption[];
-  statusFilter: string;
-  onStatusFilterChange: (value: string) => void;
+  statusFilter: WithdrawalStatus;
+  onStatusFilterChange: (value: WithdrawalStatus) => void;
   statusOptions: SelectOption[];
   showRefresh: boolean;
   onRefresh: () => void;
@@ -99,7 +108,9 @@ export const FilterBar = ({
             disabled={disabled}
             label={f({ id: "teacherDashboard.field.decision" })}
             value={statusFilter}
-            onChange={onStatusFilterChange}
+            onChange={(value) =>
+              onStatusFilterChange(value as WithdrawalStatus)
+            }
             options={statusOptions}
             width={220}
           />

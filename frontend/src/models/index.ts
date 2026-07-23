@@ -1,3 +1,10 @@
+export const BaseWithdrawalStatus = {
+  PENDING: "pending",
+  OVERDUE: "overdue",
+  APPROVED: "approved",
+  DECLINED: "declined",
+} as const;
+
 export type Withdrawal = {
   id: number;
   name: string;

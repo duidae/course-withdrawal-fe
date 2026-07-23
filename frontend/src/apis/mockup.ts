@@ -142,7 +142,7 @@ export const INIT_STUDENTS = [
     deadline: "2026/05/11 08:00",
     reason:
       "本課程《大型語言模型與資訊安全系統》內容極具前瞻性，惟修讀後發現個人在 Transformer 架構與對抗性攻擊（Adversarial Attacks）的數學基礎尚不完備，導致在實作 LLM 弱點掃描與防禦機制時，進度明顯落後。為確保學習品質，本人決定先補強相關先修知識，待準備充分後再行挑戰，故申請停修。",
-    status: "待審核",
+    status: "pending",
   },
   {
     id: 2,
@@ -154,7 +154,7 @@ export const INIT_STUDENTS = [
     deadline: "2026/05/13 23:59",
     reason:
       "本課程涉及大量的 Transformer 架構理論與 GPU 平行運算技巧，但本人在數學證明與 CUDA 程式撰寫上遭遇瓶頸，多次嘗試仍無法跟上課程進度，為避免影響學習成效，故申請停修。",
-    status: "待審核",
+    status: "pending",
   },
   {
     id: 3,
@@ -165,7 +165,7 @@ export const INIT_STUDENTS = [
     applyTime: "2026/04/20 00:00",
     deadline: "2026/04/29 23:59",
     reason: "老師我累累ㄉ...",
-    status: "逾期審核",
+    status: "overdue",
   },
   {
     id: 4,
@@ -177,7 +177,7 @@ export const INIT_STUDENTS = [
     deadline: "2026/05/13 23:59",
     reason:
       "本課程之期末專題需頻繁操作 GPU 伺服器進行深度學習模型訓練，但因個人電腦設備限制，加上近期家中突發狀況，無法投入足夠時間完成專題，故申請停修。",
-    status: "同意",
+    status: "approved",
     approvalTime: "2026/05/08 13:52",
     approver: "林俊叡 (教師)",
     lastModified: new Date("2026/05/08 13:52").getTime(),
@@ -192,7 +192,7 @@ export const INIT_STUDENTS = [
     deadline: "2026/05/25 23:59",
     reason:
       "本人目前正參與外部資安實驗室的專案開發，時間衝突導致無法兼顧本課程，且評估後認為該專案經驗對未來職涯發展更具價值，故申請停修本課程。",
-    status: "不同意",
+    status: "declined",
     approvalTime: "2026/05/08 13:52",
     approver: "林俊叡 (教師)",
     lastModified: new Date("2026/05/08 13:52").getTime(),
@@ -207,7 +207,7 @@ export const INIT_STUDENTS = [
     deadline: "2026/05/13 23:59",
     reason:
       "因本學期同時修習多門進階課程，課業負擔過重，經評估後決定集中資源於其他必修科目，故申請停修本課程。",
-    status: "同意",
+    status: "approved",
     approvalTime: "2026/05/10 09:15",
     approver: "林俊叡 (教師)",
     lastModified: new Date("2026/05/10 09:15").getTime(),
@@ -222,7 +222,7 @@ export const INIT_STUDENTS = [
     deadline: "2026/05/13 23:59",
     reason:
       "本課程在 GPU 資源分配上，常需等候數小時才能取得運算資源進行實驗，嚴重影響學習進度，且評估短期內難以改善，故申請停修。",
-    status: "不同意",
+    status: "declined",
     approvalTime: "2026/05/08 13:52",
     approver: "林俊叡 (教師)",
     lastModified: new Date("2026/05/08 13:52").getTime(),
@@ -237,7 +237,7 @@ export const INIT_STUDENTS = [
     deadline: "2026/05/13 23:59",
     reason:
       "近期因身體健康因素，需配合醫療排程，無法正常出席課程及完成作業，故申請停修。",
-    status: "待審核",
+    status: "pending",
   },
   {
     id: 9,
@@ -249,7 +249,7 @@ export const INIT_STUDENTS = [
     deadline: "2026/05/13 23:59",
     reason:
       "選課時對課程深度評估不足，修讀後發現先修知識不足以跟上課程節奏，為維持學習品質，故申請停修。",
-    status: "待審核",
+    status: "pending",
   },
   {
     id: 10,
@@ -261,7 +261,7 @@ export const INIT_STUDENTS = [
     deadline: "2026/05/13 23:59",
     reason:
       "本人因每日通勤往返超過四小時，加上工讀兼職，無法妥善安排課後複習與實作時間，學習成效不佳，故申請停修。",
-    status: "同意",
+    status: "approved",
     approvalTime: "2026/05/09 11:00",
     approver: "林俊叡 (教師)",
     lastModified: new Date("2026/05/09 11:00").getTime(),
@@ -276,7 +276,7 @@ export const INIT_STUDENTS = [
     deadline: "2026/05/13 23:59",
     reason:
       "課程作業量遠超預期，目前已落後進度三週，自評無法在期末前完成所有要求，故申請停修。",
-    status: "待審核",
+    status: "pending",
   },
   {
     id: 12,
@@ -288,7 +288,7 @@ export const INIT_STUDENTS = [
     deadline: "2026/05/13 23:59",
     reason:
       "本人研究所論文進入關鍵撰寫階段，指導教授要求專注研究，難以分心修習本課程，故申請停修。",
-    status: "不同意",
+    status: "declined",
     approvalTime: "2026/05/10 16:30",
     approver: "林俊叡 (教師)",
     lastModified: new Date("2026/05/10 16:30").getTime(),
@@ -302,7 +302,7 @@ export const INIT_STUDENTS = [
     applyTime: "2026/04/18 22:00",
     deadline: "2026/04/27 23:59",
     reason: "課程進度與個人學習節奏不合，長期跟不上，故申請停修。",
-    status: "逾期審核",
+    status: "overdue",
   },
   {
     id: 14,
@@ -314,7 +314,7 @@ export const INIT_STUDENTS = [
     deadline: "2026/05/13 23:59",
     reason:
       "本課程程式作業需大量時間 debug，本人程式設計基礎薄弱，投入大量時間後仍難以達到課程要求，故申請停修。",
-    status: "待審核",
+    status: "pending",
   },
   {
     id: 15,
@@ -326,7 +326,7 @@ export const INIT_STUDENTS = [
     deadline: "2026/05/13 23:59",
     reason:
       "系上必修實驗課與本課程時段重疊，學期中才發現衝突，為能完成必修課程，故申請停修。",
-    status: "同意",
+    status: "approved",
     approvalTime: "2026/05/08 10:20",
     approver: "林俊叡 (教師)",
     lastModified: new Date("2026/05/08 10:20").getTime(),

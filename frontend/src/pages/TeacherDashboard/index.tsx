@@ -9,11 +9,10 @@ import { getWithdrawals } from "../../apis/course-withdrawal.api";
 import {
   initCS,
   classOptions as classUniversityOptions,
-  statusOptions as statusIndividualOptions,
 } from "../../apis/mockup";
 
 import { statusOrder, pendingCountFormatter } from "./constants";
-import { FilterBar } from "./FilterBar";
+import { WithdrawalStatus, FilterBar } from "./FilterBar";
 import { WithdrawalTable, type StudentTableRow } from "./WithdrawalTable";
 import { TicketDialog } from "./TicketDialog";
 import { type StudentRow, type StudentRowWithOrig } from "./types";
@@ -34,10 +33,45 @@ export const TeacherDashboard: FC = () => {
   const [classFilter, setClassFilter] = useState(
     f({ id: "teacherDashboard.filter.all" }),
   );
-  const [statusFilter, setStatusFilter] = useState("待審核");
+  const [statusFilter, setStatusFilter] = useState<WithdrawalStatus>(
+    WithdrawalStatus.PENDING,
+  );
   const [frozenOrder, setFrozenOrder] = useState<number[] | null>(null);
   const [selected, setSelected] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const getStatusLabel = (status: string) => {
+    const statusLabelIds: Record<string, string> = {
+      [WithdrawalStatus.PENDING]: "teacherDashboard.status.pending",
+      [WithdrawalStatus.OVERDUE]: "teacherDashboard.status.overdue",
+      [WithdrawalStatus.APPROVED]: "teacherDashboard.status.approved",
+      [WithdrawalStatus.DECLINED]: "teacherDashboard.status.declined",
+    };
+    return statusLabelIds[status] ? f({ id: statusLabelIds[status] }) : status;
+  };
+
+  const statusOptions = [
+    {
+      value: WithdrawalStatus.ALL,
+      label: f({ id: "teacherDashboard.filter.all" }),
+    },
+    {
+      value: WithdrawalStatus.PENDING,
+      label: f({ id: "teacherDashboard.status.pending" }),
+    },
+    {
+      value: WithdrawalStatus.OVERDUE,
+      label: f({ id: "teacherDashboard.status.overdue" }),
+    },
+    {
+      value: WithdrawalStatus.APPROVED,
+      label: f({ id: "teacherDashboard.status.approved" }),
+    },
+    {
+      value: WithdrawalStatus.DECLINED,
+      label: f({ id: "teacherDashboard.status.declined" }),
+    },
+  ];
 
   useEffect(() => {
     const fetchWithdrawals = async () => {
@@ -62,14 +96,6 @@ export const TeacherDashboard: FC = () => {
     ...classUniversityOptions,
   ];
 
-  const statusOptions = [
-    {
-      value: f({ id: "teacherDashboard.filter.all" }),
-      label: f({ id: "teacherDashboard.filter.all" }),
-    },
-    ...statusIndividualOptions,
-  ];
-
   const getSecForSchool = (school: string) => {
     const secs = adminCS["1"] || [];
     return (
@@ -81,29 +107,20 @@ export const TeacherDashboard: FC = () => {
       }
     );
   };
-  const getEffectiveStatus = (student: StudentRow) => {
-    if (student.status !== "待審核") return student.status;
-    const sec = getSecForSchool(student.school);
-    if (!sec.ad) return student.status;
+  const getEffectiveStatus = (withdrawal: Withdrawal) => {
+    if (withdrawal.status !== WithdrawalStatus.PENDING)
+      return withdrawal.status;
+    const sec = getSecForSchool(withdrawal.school);
+    if (!sec.ad) return withdrawal.status;
     const deadline = new Date(sec.ad.replace(/\//g, "-").replace(" ", "T"));
-    return deadline < new Date() ? "逾期審核" : student.status;
+    return deadline < new Date() ? "逾期審核" : withdrawal.status;
   };
-
-  const statusLabelIds: Record<string, string> = {
-    待審核: "teacherDashboard.status.pending",
-    逾期審核: "teacherDashboard.status.overdue",
-    同意: "teacherDashboard.status.approved",
-    不同意: "teacherDashboard.status.declined",
-  };
-  const getStatusLabel = (status: string) =>
-    statusLabelIds[status] ? f({ id: statusLabelIds[status] }) : status;
 
   const effectiveStudents: StudentRowWithOrig[] = withdrawals.map((w) => {
     const eff = getEffectiveStatus(w);
     return { ...w, status: eff, _orig: w.status };
   });
   const baseFiltered = effectiveStudents.filter((s: StudentRowWithOrig) => {
-    // When search has validation error, don't apply name filter
     const nm =
       searchName === "" ||
       searchErrorType !== null ||
@@ -112,11 +129,7 @@ export const TeacherDashboard: FC = () => {
       classFilter === f({ id: "teacherDashboard.filter.all" }) ||
       s.school === classFilter;
     const st =
-      statusFilter === f({ id: "teacherDashboard.filter.all" }) ||
-      (statusFilter === "待審核" && s.status === "待審核") ||
-      (statusFilter === "逾期審核" && s.status === "逾期審核") ||
-      (statusFilter === "同意停修" && s.status === "同意") ||
-      (statusFilter === "不同意停修" && s.status === "不同意");
+      statusFilter === WithdrawalStatus.ALL || statusFilter === s.status;
     return nm && cl && st;
   });
   const filtered = frozenOrder
@@ -136,7 +149,8 @@ export const TeacherDashboard: FC = () => {
         return d;
       });
   const selectableRows = filtered.filter(
-    (s): s is StudentRowWithOrig => s !== undefined && s.status !== "逾期審核",
+    (s): s is StudentRowWithOrig =>
+      s !== undefined && s.status !== WithdrawalStatus.OVERDUE,
   );
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) setSelected(selectableRows.map((s) => s.id));
@@ -282,7 +296,9 @@ export const TeacherDashboard: FC = () => {
       <WithdrawalTable
         rows={tableRows}
         isLoading={isLoading}
-        showEmptyPendingMessage={statusFilter === "待審核" && noPendingStudents}
+        showEmptyPendingMessage={
+          statusFilter === WithdrawalStatus.PENDING && noPendingStudents
+        }
         allSelected={allSelected}
         someSelected={someSelected}
         onSelectAll={handleSelectAll}
