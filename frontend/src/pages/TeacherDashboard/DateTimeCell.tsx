@@ -1,4 +1,4 @@
-export function DateTimeCell({ value }: { value?: string }) {
+export const DateTimeCell = ({ value }: { value?: string }) => {
   if (!value) return <span />;
   const sp = value.indexOf(" ");
   if (sp === -1)
@@ -14,4 +14,4 @@ export function DateTimeCell({ value }: { value?: string }) {
       {value.slice(sp + 1)}
     </span>
   );
-}
+};

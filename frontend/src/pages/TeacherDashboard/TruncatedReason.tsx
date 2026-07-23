@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useIntl } from "react-intl";
 import { type TruncatedReasonProps } from "./types";
 
-export function TruncatedReason({ text, onReadMore }: TruncatedReasonProps) {
+export const TruncatedReason = ({ text, onReadMore }: TruncatedReasonProps) => {
   const { formatMessage: f } = useIntl();
   const measRef = useRef<HTMLDivElement | null>(null);
   const [isOver, setIsOver] = useState(false);
@@ -104,4 +104,4 @@ export function TruncatedReason({ text, onReadMore }: TruncatedReasonProps) {
       )}
     </div>
   );
-}
+};

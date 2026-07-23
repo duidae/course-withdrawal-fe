@@ -26,7 +26,7 @@ type FilterBarProps = {
   onDecline: () => void;
 };
 
-export function FilterBar({
+export const FilterBar = ({
   disabled,
   searchName,
   searchErrorType,
@@ -45,7 +45,7 @@ export function FilterBar({
   hasSelections,
   onApprove,
   onDecline,
-}: FilterBarProps) {
+}: FilterBarProps) => {
   const { formatMessage: f } = useIntl();
 
   return (
@@ -166,4 +166,4 @@ export function FilterBar({
       </div>
     </>
   );
-}
+};

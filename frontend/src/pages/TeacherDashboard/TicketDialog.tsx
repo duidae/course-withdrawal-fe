@@ -15,13 +15,13 @@ type TicketDialogProps = {
   onCancel: () => void;
 };
 
-export function TicketDialog({
+export const TicketDialog = ({
   open,
   decision,
   onDecisionChange,
   onConfirm,
   onCancel,
-}: TicketDialogProps) {
+}: TicketDialogProps) => {
   const { formatMessage: f } = useIntl();
 
   return (
@@ -74,4 +74,4 @@ export function TicketDialog({
       </Stack>
     </BaseDialog>
   );
-}
+};
