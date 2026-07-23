@@ -15,11 +15,6 @@ export type StudentRow = {
 
 export type StudentRowWithOrig = StudentRow & { _orig: string };
 
-export type StatusChipProps = {
-  status: string;
-  label?: string;
-};
-
 export type TruncatedReasonProps = {
   text: string;
   onReadMore: () => void;
