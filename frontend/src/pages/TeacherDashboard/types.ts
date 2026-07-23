@@ -36,4 +36,5 @@ export type FilterSelectProps = {
   onChange: (value: string) => void;
   options: SelectOption[];
   width: number;
+  disabled?: boolean;
 };

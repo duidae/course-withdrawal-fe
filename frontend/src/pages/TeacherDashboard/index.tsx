@@ -25,7 +25,7 @@ export const TeacherDashboard: FC = () => {
   const [adminCS] = useState(initCS());
   const [searchName, setSearchName] = useState("");
   const [searchErrorType, setSearchErrorType] = useState<string | null>(null);
-  const [isTicketOpen, setIsTicketOpen] = useState<boolean>(true);
+  const [isTicketOpen, setIsTicketOpen] = useState<boolean>(false);
   const [ticketDecision, setTicketDecision] = useState<"approve" | "decline">(
     "approve",
   );
@@ -35,11 +35,13 @@ export const TeacherDashboard: FC = () => {
   const [statusFilter, setStatusFilter] = useState("待審核");
   const [frozenOrder, setFrozenOrder] = useState<number[] | null>(null);
   const [selected, setSelected] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchWithdrawals = async () => {
       const data = await getWithdrawals();
       setStudents(data);
+      setIsLoading(false);
     };
     fetchWithdrawals();
   }, []);
@@ -246,6 +248,7 @@ export const TeacherDashboard: FC = () => {
           )}
         </Typography>
         <FilterBar
+          disabled={isLoading}
           searchName={searchName}
           searchErrorType={searchErrorType}
           onSearchNameChange={setSearchName}
@@ -271,6 +274,7 @@ export const TeacherDashboard: FC = () => {
 
       <StudentTable
         rows={tableRows}
+        isLoading={isLoading}
         showEmptyPendingMessage={statusFilter === "待審核" && noPendingStudents}
         allSelected={allSelected}
         someSelected={someSelected}

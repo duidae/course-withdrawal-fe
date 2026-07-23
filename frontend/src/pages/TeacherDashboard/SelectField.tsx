@@ -10,10 +10,11 @@ export const SelectField = ({
   onChange,
   options,
   width,
+  disabled,
 }: FilterSelectProps) => {
   const labelId = `select-field-${label}`;
   return (
-    <FormControl size="small" style={{ width }}>
+    <FormControl size="small" style={{ width }} disabled={disabled}>
       <InputLabel id={labelId}>{label}</InputLabel>
       <Select
         labelId={labelId}

@@ -8,6 +8,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
+import CircularProgress from "@mui/material/CircularProgress";
 import EditIcon from "@mui/icons-material/Edit";
 import { columns, cellSx } from "./constants";
 import { DateTimeCell } from "./DateTimeCell";
@@ -22,6 +23,7 @@ export type StudentTableRow = StudentRowWithOrig & {
 
 type StudentTableProps = {
   rows: StudentTableRow[];
+  isLoading?: boolean;
   showEmptyPendingMessage: boolean;
   allSelected: boolean;
   someSelected: boolean;
@@ -33,6 +35,7 @@ type StudentTableProps = {
 
 export function StudentTable({
   rows,
+  isLoading,
   showEmptyPendingMessage,
   allSelected,
   someSelected,
@@ -94,7 +97,18 @@ export function StudentTable({
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.length === 0 ? (
+          {isLoading && (
+            <TableRow>
+              <TableCell
+                colSpan={11}
+                align="center"
+                sx={{ padding: "32px 8px" }}
+              >
+                <CircularProgress size={32} />
+              </TableCell>
+            </TableRow>
+          )}
+          {!isLoading && rows.length === 0 && (
             <TableRow>
               <TableCell
                 colSpan={11}
@@ -106,7 +120,9 @@ export function StudentTable({
                   : f({ id: "teacherDashboard.table.emptyFiltered" })}
               </TableCell>
             </TableRow>
-          ) : (
+          )}
+          {!isLoading &&
+            rows.length > 0 &&
             rows.map((s) => (
               <TableRow
                 key={s.id}
@@ -207,8 +223,7 @@ export function StudentTable({
                   </IconButton>
                 </TableCell>
               </TableRow>
-            ))
-          )}
+            ))}
         </TableBody>
       </Table>
     </TableContainer>

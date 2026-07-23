@@ -6,6 +6,7 @@ import { SelectField } from "./SelectField";
 import { type SelectOption } from "./types";
 
 type FilterBarProps = {
+  disabled?: boolean;
   searchName: string;
   searchErrorType: string | null;
   onSearchNameChange: (value: string) => void;
@@ -26,6 +27,7 @@ type FilterBarProps = {
 };
 
 export function FilterBar({
+  disabled,
   searchName,
   searchErrorType,
   onSearchNameChange,
@@ -59,6 +61,7 @@ export function FilterBar({
       >
         <div style={{ display: "flex", gap: 24, alignItems: "flex-start" }}>
           <TextField
+            disabled={disabled}
             label={f({ id: "teacherDashboard.filter.studentName" })}
             value={searchName}
             onChange={(e) => {
@@ -85,6 +88,7 @@ export function FilterBar({
             style={{ width: 220 }}
           />
           <SelectField
+            disabled={disabled}
             label={f({ id: "teacherDashboard.field.class" })}
             value={classFilter}
             onChange={onClassFilterChange}
@@ -92,6 +96,7 @@ export function FilterBar({
             width={220}
           />
           <SelectField
+            disabled={disabled}
             label={f({ id: "teacherDashboard.field.decision" })}
             value={statusFilter}
             onChange={onStatusFilterChange}
