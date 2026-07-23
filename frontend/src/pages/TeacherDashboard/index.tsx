@@ -13,13 +13,9 @@ import {
 
 import { statusOrder, pendingCountFormatter } from "./constants";
 import { FilterBar } from "./FilterBar";
-import { WithdrawalTable, type StudentTableRow } from "./WithdrawalTable";
+import { WithdrawalTable, type WithdrawalTableRow } from "./WithdrawalTable";
 import { TicketDialog } from "./TicketDialog";
-import {
-  type StudentRow,
-  type StudentRowWithOrig,
-  WithdrawalStatus,
-} from "./types";
+import { type StudentRow, WithdrawalStatus } from "./types";
 import { type Withdrawal } from "../../models";
 
 export const TeacherDashboard: FC = () => {
@@ -120,11 +116,11 @@ export const TeacherDashboard: FC = () => {
     return deadline < new Date() ? "逾期審核" : withdrawal.status;
   };
 
-  const effectiveStudents: StudentRowWithOrig[] = withdrawals.map((w) => {
+  const effectiveStudents: Withdrawal[] = withdrawals.map((w) => {
     const eff = getEffectiveStatus(w);
     return { ...w, status: eff, _orig: w.status };
   });
-  const baseFiltered = effectiveStudents.filter((s: StudentRowWithOrig) => {
+  const baseFiltered = effectiveStudents.filter((s: Withdrawal) => {
     const nm =
       searchName === "" ||
       searchErrorType !== null ||
@@ -139,13 +135,9 @@ export const TeacherDashboard: FC = () => {
   const filtered = frozenOrder
     ? [
         ...frozenOrder
-          .map((id) =>
-            baseFiltered.find((s: StudentRowWithOrig) => s.id === id),
-          )
-          .filter((entry): entry is StudentRowWithOrig => entry !== undefined),
-        ...baseFiltered.filter(
-          (s: StudentRowWithOrig) => !frozenOrder.includes(s.id),
-        ),
+          .map((id) => baseFiltered.find((s: Withdrawal) => s.id === id))
+          .filter((entry): entry is Withdrawal => entry !== undefined),
+        ...baseFiltered.filter((s: Withdrawal) => !frozenOrder.includes(s.id)),
       ]
     : [...baseFiltered].sort((a, b) => {
         const d = statusOrder[a.status] - statusOrder[b.status];
@@ -153,7 +145,7 @@ export const TeacherDashboard: FC = () => {
         return d;
       });
   const selectableRows = filtered.filter(
-    (s): s is StudentRowWithOrig =>
+    (s): s is Withdrawal =>
       s !== undefined && s.status !== WithdrawalStatus.OVERDUE,
   );
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -256,7 +248,7 @@ export const TeacherDashboard: FC = () => {
     withdrawals.filter((s) => s.status === WithdrawalStatus.PENDING).length ===
     0;
 
-  const tableRows: StudentTableRow[] = filtered.map((s) => ({
+  const tableRows: WithdrawalTableRow[] = filtered.map((s) => ({
     ...s,
     displayDeadline:
       s._orig === WithdrawalStatus.OVERDUE

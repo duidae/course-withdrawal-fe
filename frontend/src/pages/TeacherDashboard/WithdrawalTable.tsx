@@ -16,19 +16,16 @@ import { columns, cellSx } from "./constants";
 import { DateTimeCell } from "./DateTimeCell";
 import { TruncatedReason } from "./TruncatedReason";
 import { StatusChip } from "./StatusChip";
-import {
-  type StudentRow,
-  type StudentRowWithOrig,
-  WithdrawalStatus,
-} from "./types";
+import { WithdrawalStatus } from "./types";
+import { type Withdrawal } from "../../models";
 
-export type StudentTableRow = StudentRowWithOrig & {
+export type WithdrawalTableRow = Withdrawal & {
   displayDeadline: string;
   statusLabel: string;
 };
 
-type StudentTableProps = {
-  rows: StudentTableRow[];
+type WithdrawalTableProps = {
+  rows: WithdrawalTableRow[];
   isLoading?: boolean;
   showEmptyPendingMessage: boolean;
   allSelected: boolean;
@@ -36,7 +33,7 @@ type StudentTableProps = {
   onSelectAll: (e: ChangeEvent<HTMLInputElement>) => void;
   isSelected: (id: number) => boolean;
   onToggleSelect: (id: number) => void;
-  onReview: (student: StudentRow) => void;
+  onReview: (withdrawal: Withdrawal) => void;
 };
 
 export const WithdrawalTable = ({
@@ -49,7 +46,7 @@ export const WithdrawalTable = ({
   isSelected,
   onToggleSelect,
   onReview,
-}: StudentTableProps) => {
+}: WithdrawalTableProps) => {
   const { formatMessage: f } = useIntl();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
