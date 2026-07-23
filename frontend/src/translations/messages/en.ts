@@ -22,6 +22,7 @@ export const messages_En: Record<string, string> = {
   "teacherDashboard.table.emptyPending":
     "No applications currently need review",
   "teacherDashboard.table.emptyFiltered": "No students match the criteria",
+  "teacherDashboard.table.rowsPerPage": "Rows per page",
   "teacherDashboard.actions.refresh": "Refresh",
   "teacherDashboard.actions.exportAll": "Export Full List",
   "teacherDashboard.selection.count": "{count} student(s) selected",

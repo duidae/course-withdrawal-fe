@@ -16,5 +16,5 @@ export const Locale_En: Locale = {
   messages: { ...messages_En, ...coolui_Messages_En },
 };
 
-export const defaultLocale: Locale = Locale_En;
+export const defaultLocale: Locale = Locale_Zh;
 export const supportLocales: Locale[] = [Locale_Zh, Locale_En];

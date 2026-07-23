@@ -1,6 +1,7 @@
 import { type ChangeEvent, useState } from "react";
 import { useIntl } from "react-intl";
 import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -36,6 +37,8 @@ type WithdrawalTableProps = {
   onReview: (withdrawal: Withdrawal) => void;
 };
 
+const defaultPageSize = 10;
+
 export const WithdrawalTable = ({
   rows,
   isLoading,
@@ -49,7 +52,7 @@ export const WithdrawalTable = ({
 }: WithdrawalTableProps) => {
   const { formatMessage: f } = useIntl();
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(defaultPageSize);
 
   const pageCount = Math.max(1, Math.ceil(rows.length / rowsPerPage));
   const currentPage = Math.min(page, pageCount - 1);
@@ -63,7 +66,7 @@ export const WithdrawalTable = ({
   };
 
   const handleChangeRowsPerPage = (e: ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(Number.parseInt(e.target.value, 10));
+    setRowsPerPage(Number.parseInt(e.target.value, defaultPageSize));
     setPage(0);
   };
 
@@ -258,7 +261,12 @@ export const WithdrawalTable = ({
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-        rowsPerPageOptions={[10, 25, 50]}
+        rowsPerPageOptions={[10, 25, 50]} // TODO
+        labelRowsPerPage={
+          <Typography variant="body2" component="span" color="textSecondary">
+            {f({ id: "teacherDashboard.table.rowsPerPage" })}
+          </Typography>
+        }
       />
     </Box>
   );

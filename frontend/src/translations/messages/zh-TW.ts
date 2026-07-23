@@ -20,6 +20,7 @@ export const messages_Zh: Record<string, string> = {
   "teacherDashboard.field.action": "審核",
   "teacherDashboard.table.emptyPending": "目前沒有需審核的學生",
   "teacherDashboard.table.emptyFiltered": "找不到符合條件的學生",
+  "teacherDashboard.table.rowsPerPage": "每頁顯示筆數",
   "teacherDashboard.actions.refresh": "重新整理",
   "teacherDashboard.actions.exportAll": "匯出整份名單",
   "teacherDashboard.selection.count": "已選取 {count} 名學生",
