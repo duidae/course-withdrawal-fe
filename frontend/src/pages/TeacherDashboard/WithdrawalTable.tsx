@@ -16,7 +16,11 @@ import { columns, cellSx } from "./constants";
 import { DateTimeCell } from "./DateTimeCell";
 import { TruncatedReason } from "./TruncatedReason";
 import { StatusChip } from "./StatusChip";
-import { type StudentRow, type StudentRowWithOrig } from "./types";
+import {
+  type StudentRow,
+  type StudentRowWithOrig,
+  WithdrawalStatus,
+} from "./types";
 
 export type StudentTableRow = StudentRowWithOrig & {
   displayDeadline: string;
@@ -157,7 +161,7 @@ export const WithdrawalTable = ({
                   }}
                 >
                   <TableCell align="center" sx={cellSx}>
-                    {s.status !== "逾期審核" && (
+                    {s.status !== WithdrawalStatus.OVERDUE && (
                       <Checkbox
                         checked={isSelected(s.id)}
                         onChange={() => onToggleSelect(s.id)}

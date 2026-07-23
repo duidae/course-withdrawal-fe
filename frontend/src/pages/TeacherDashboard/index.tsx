@@ -12,10 +12,14 @@ import {
 } from "../../apis/mockup";
 
 import { statusOrder, pendingCountFormatter } from "./constants";
-import { WithdrawalStatus, FilterBar } from "./FilterBar";
+import { FilterBar } from "./FilterBar";
 import { WithdrawalTable, type StudentTableRow } from "./WithdrawalTable";
 import { TicketDialog } from "./TicketDialog";
-import { type StudentRow, type StudentRowWithOrig } from "./types";
+import {
+  type StudentRow,
+  type StudentRowWithOrig,
+  WithdrawalStatus,
+} from "./types";
 import { type Withdrawal } from "../../models";
 
 export const TeacherDashboard: FC = () => {
@@ -181,7 +185,9 @@ export const TeacherDashboard: FC = () => {
     ];
     const rows = effectiveStudents.map((s) => {
       const deadline =
-        s._orig === "逾期審核" ? s.deadline : getSecForSchool(s.school).ad;
+        s._orig === WithdrawalStatus.OVERDUE
+          ? s.deadline
+          : getSecForSchool(s.school).ad;
       return [
         s.name,
         s.school,
@@ -241,16 +247,21 @@ export const TeacherDashboard: FC = () => {
     selected.length > 0 && selected.length < selectableRows.length;
 
   const pendingCount = effectiveStudents.filter(
-    (s: StudentRow) => s.status === "待審核" || s.status === "逾期審核",
+    (s: StudentRow) =>
+      s.status === WithdrawalStatus.PENDING ||
+      s.status === WithdrawalStatus.OVERDUE,
   ).length;
 
   const noPendingStudents =
-    withdrawals.filter((s) => s.status === "待審核").length === 0;
+    withdrawals.filter((s) => s.status === WithdrawalStatus.PENDING).length ===
+    0;
 
   const tableRows: StudentTableRow[] = filtered.map((s) => ({
     ...s,
     displayDeadline:
-      s._orig === "逾期審核" ? s.deadline : getSecForSchool(s.school).ad,
+      s._orig === WithdrawalStatus.OVERDUE
+        ? s.deadline
+        : getSecForSchool(s.school).ad,
     statusLabel: getStatusLabel(s.status),
   }));
 

@@ -20,6 +20,23 @@ export type TruncatedReasonProps = {
   onReadMore: () => void;
 };
 
+import { BaseWithdrawalStatus } from "../../models";
+
+export const statusOrder: Record<string, number> = {
+  待審核: 1,
+  逾期審核: 2,
+  同意: 3,
+  不同意: 4,
+};
+
+export const WithdrawalStatus = {
+  ALL: "all",
+  ...BaseWithdrawalStatus,
+} as const;
+
+export type WithdrawalStatus =
+  (typeof WithdrawalStatus)[keyof typeof WithdrawalStatus];
+
 export type SelectOption = {
   value: string;
   label: string;

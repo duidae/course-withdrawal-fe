@@ -3,16 +3,7 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { SelectField } from "./SelectField";
-import { type SelectOption } from "./types";
-import { BaseWithdrawalStatus } from "../../models";
-
-export const WithdrawalStatus = {
-  ALL: "all",
-  ...BaseWithdrawalStatus,
-} as const;
-
-export type WithdrawalStatus =
-  (typeof WithdrawalStatus)[keyof typeof WithdrawalStatus];
+import { type SelectOption, WithdrawalStatus } from "./types";
 
 type FilterBarProps = {
   disabled?: boolean;
