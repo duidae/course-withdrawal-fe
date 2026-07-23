@@ -41,8 +41,14 @@ export const TeacherDashboard: FC = () => {
 
   useEffect(() => {
     const fetchWithdrawals = async () => {
-      const data = await getWithdrawals();
-      setWithdrawals(data);
+      const first = await getWithdrawals({ page: 1 });
+      const all = [...first.data];
+      const totalPages = Math.ceil(first.total / first.pageSize);
+      for (let page = 2; page <= totalPages; page++) {
+        const next = await getWithdrawals({ page });
+        all.push(...next.data);
+      }
+      setWithdrawals(all);
       setIsLoading(false);
     };
     fetchWithdrawals();
