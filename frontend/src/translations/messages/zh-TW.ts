@@ -15,7 +15,7 @@ export const messages_Zh: Record<string, string> = {
   "teacherDashboard.field.reason": "停修原因",
   "teacherDashboard.field.decision": "審核結果",
   "teacherDashboard.field.deadline": "審核期限",
-  "teacherDashboard.field.approvalTime": "審核時間",
+  "teacherDashboard.field.reviewTime": "審核時間",
   "teacherDashboard.field.approver": "審核人",
   "teacherDashboard.field.action": "審核",
   "teacherDashboard.table.emptyPending": "目前沒有需審核的學生",

@@ -116,7 +116,7 @@ type StudentDashboardProps = {
     applyTime?: string;
     comment?: string;
     approver?: string;
-    approvalTime?: string;
+    reviewTime?: string;
   };
   onSubmit?: (value: string) => void;
   courseSettings?: CourseSettings;
@@ -431,7 +431,7 @@ export const StudentDashboard = ({
                             - 審核人 {application.approver}
                           </p>
                         )}
-                        {application.approvalTime && (
+                        {application.reviewTime && (
                           <p
                             style={{
                               fontSize: 12,
@@ -439,7 +439,7 @@ export const StudentDashboard = ({
                               lineHeight: 1.66,
                             }}
                           >
-                            - 審核時間：{application.approvalTime}
+                            - 審核時間：{application.reviewTime}
                           </p>
                         )}
                       </div>

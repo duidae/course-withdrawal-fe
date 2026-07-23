@@ -15,7 +15,7 @@ export type Withdrawal = {
   deadline: string;
   reason: string;
   status: string;
-  approvalTime?: string;
+  reviewTime?: string;
   approver?: string;
   lastModified?: number;
   _orig?: string;

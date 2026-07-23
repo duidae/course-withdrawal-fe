@@ -223,7 +223,7 @@ export const WithdrawalTable = ({
                     <DateTimeCell value={s.displayDeadline} />
                   </TableCell>
                   <TableCell sx={{ ...cellSx, verticalAlign: "middle" }}>
-                    <DateTimeCell value={s.approvalTime || ""} />
+                    <DateTimeCell value={s.reviewTime || ""} />
                   </TableCell>
                   <TableCell
                     sx={{

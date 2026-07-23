@@ -50,8 +50,8 @@ export const columns = [
     width: 96,
   },
   {
-    key: "approvalTime",
-    label: "teacherDashboard.field.approvalTime",
+    key: "reviewTime",
+    label: "teacherDashboard.field.reviewTime",
     width: 96,
   },
   {

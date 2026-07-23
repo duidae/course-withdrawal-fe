@@ -180,7 +180,7 @@ export const TeacherDashboard: FC = () => {
       f({ id: "teacherDashboard.field.reason" }),
       f({ id: "teacherDashboard.field.decision" }),
       f({ id: "teacherDashboard.field.deadline" }),
-      f({ id: "teacherDashboard.field.approvalTime" }),
+      f({ id: "teacherDashboard.field.reviewTime" }),
       f({ id: "teacherDashboard.field.approver" }),
     ];
     const rows = effectiveStudents.map((s) => {
@@ -196,7 +196,7 @@ export const TeacherDashboard: FC = () => {
         s.reason,
         getStatusLabel(s.status),
         deadline,
-        s.approvalTime || "",
+        s.reviewTime || "",
         s.approver || "",
       ];
     });
@@ -215,7 +215,7 @@ export const TeacherDashboard: FC = () => {
           ? {
               ...withdrawal,
               status: "同意",
-              approvalTime: withdrawal.approvalTime || "2026/05/11 00:00",
+              reviewTime: withdrawal.reviewTime || "2026/05/11 00:00",
               approver:
                 withdrawal.approver ||
                 f({ id: "teacherDashboard.defaultApprover" }),
