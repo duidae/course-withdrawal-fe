@@ -2,13 +2,14 @@ import { type FC, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useIntl } from "react-intl";
 import { TeacherDashboard } from "./pages/TeacherDashboard";
+import { CourseInfoProvider } from "./contexts/course-info.context";
 /*
 import { NotFound } from "./components/NotFound";
 import { StudentDashboard } from "./pages/StudentDashboard";
 import { AdminDashboard } from "./pages/AdminDashboard";
 */
 
-export const App: FC = () => {
+const AppRoutes: FC = () => {
   const { formatMessage: f } = useIntl();
   const appName = f({ id: "app.name" });
 
@@ -57,5 +58,11 @@ export const App: FC = () => {
     </BrowserRouter>
   );
 };
+
+export const App: FC = () => (
+  <CourseInfoProvider>
+    <AppRoutes />
+  </CourseInfoProvider>
+);
 
 export default App;

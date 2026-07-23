@@ -50,7 +50,6 @@ export const FilterBar = ({
 
   return (
     <>
-      {/* Filter row */}
       <div
         style={{
           display: "flex",
@@ -133,7 +132,6 @@ export const FilterBar = ({
         </div>
       </div>
 
-      {/* Action bar */}
       <div
         style={{
           display: "flex",

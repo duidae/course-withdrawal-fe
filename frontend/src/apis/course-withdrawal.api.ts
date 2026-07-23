@@ -1,11 +1,19 @@
 //import { request } from "./request";
 import { type Withdrawal } from "../models";
 
-import { INIT_STUDENTS } from "./mockup";
+import { INIT_COURSES, INIT_STUDENTS } from "./mockup";
 
 type GetWithdrawalsParams = {
   page?: number;
   pageSize?: number;
+};
+
+type GetCourseInfoParams = {
+  courseId: string;
+};
+
+type CourseInfo = {
+  courseName: string;
 };
 
 type PaginatedResult<T> = {
@@ -31,5 +39,22 @@ const getWithdrawals = async (
   return { data, total: INIT_STUDENTS.length, page, pageSize };
 };
 
-export { getWithdrawals };
-export type { GetWithdrawalsParams, PaginatedResult };
+const getCourseInfo = async (
+  params: GetCourseInfoParams,
+): Promise<CourseInfo> => {
+  const { courseId } = params;
+  //const response = await request.get<CourseInfo>(
+  //  `/api/courses/${courseId}`,
+  //);
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  const course = INIT_COURSES.find((c) => c.courseId === courseId);
+  return { courseName: course?.courseName ?? "" };
+};
+
+export { getWithdrawals, getCourseInfo };
+export type {
+  GetWithdrawalsParams,
+  PaginatedResult,
+  GetCourseInfoParams,
+  CourseInfo,
+};

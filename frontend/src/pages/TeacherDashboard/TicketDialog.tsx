@@ -11,6 +11,7 @@ import { BaseDialog } from "../../cool-ui/components/dialogs/BaseDialog";
 import { type Withdrawal } from "../../models";
 
 type TicketDialogProps = {
+  courseName: string;
   withdrawal: Withdrawal;
   decision: "approve" | "decline";
   onDecisionChange: (decision: "approve" | "decline") => void;
@@ -19,6 +20,7 @@ type TicketDialogProps = {
 };
 
 export const TicketDialog = ({
+  courseName,
   withdrawal,
   decision,
   onDecisionChange,
@@ -41,7 +43,7 @@ export const TicketDialog = ({
       <Stack spacing={3}>
         <Stack spacing={0.5}>
           <Typography variant="body2">
-            {f({ id: "teacherDashboard.field.courseName" })}: {withdrawal.name}
+            {f({ id: "teacherDashboard.ticket.courseName" })}: {courseName}
           </Typography>
           <Typography variant="body2">
             {f({ id: "teacherDashboard.field.studentName" })}: {withdrawal.name}
@@ -93,10 +95,12 @@ export const TicketDialog = ({
           </RadioGroup>
           <TextField
             value={reply}
+            label={f({ id: "teacherDashboard.ticket.comment" })}
             multiline
             minRows={3}
             onChange={(e) => setReply(e.target.value)}
             fullWidth
+            slotProps={{ inputLabel: { shrink: true } }}
           />
         </Stack>
       </Stack>
