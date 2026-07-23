@@ -125,7 +125,7 @@ export function FilterBar({
               <RefreshIcon /> {f({ id: "teacherDashboard.actions.refresh" })}
             </button>
           )}
-          <Button variant="outlined" onClick={onExport}>
+          <Button variant="outlined" disabled={disabled} onClick={onExport}>
             {f({ id: "teacherDashboard.actions.exportAll" })}
           </Button>
         </div>

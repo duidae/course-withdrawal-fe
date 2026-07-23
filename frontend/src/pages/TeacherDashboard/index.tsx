@@ -21,7 +21,7 @@ import { type Withdrawal } from "../../models";
 
 export const TeacherDashboard: FC = () => {
   const { formatMessage: f } = useIntl();
-  const [students, setStudents] = useState<Withdrawal[]>([]);
+  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [adminCS] = useState(initCS());
   const [searchName, setSearchName] = useState("");
   const [searchErrorType, setSearchErrorType] = useState<string | null>(null);
@@ -40,7 +40,7 @@ export const TeacherDashboard: FC = () => {
   useEffect(() => {
     const fetchWithdrawals = async () => {
       const data = await getWithdrawals();
-      setStudents(data);
+      setWithdrawals(data);
       setIsLoading(false);
     };
     fetchWithdrawals();
@@ -90,9 +90,9 @@ export const TeacherDashboard: FC = () => {
   const getStatusLabel = (status: string) =>
     statusLabelIds[status] ? f({ id: statusLabelIds[status] }) : status;
 
-  const effectiveStudents: StudentRowWithOrig[] = students.map((s) => {
-    const eff = getEffectiveStatus(s);
-    return { ...s, status: eff, _orig: s.status };
+  const effectiveStudents: StudentRowWithOrig[] = withdrawals.map((w) => {
+    const eff = getEffectiveStatus(w);
+    return { ...w, status: eff, _orig: w.status };
   });
   const baseFiltered = effectiveStudents.filter((s: StudentRowWithOrig) => {
     // When search has validation error, don't apply name filter
@@ -182,18 +182,18 @@ export const TeacherDashboard: FC = () => {
 
   const batchApprove = () => {
     if (selected.length === 0) return;
-    setStudents((prev) =>
-      prev.map((student) =>
-        selected.includes(student.id)
+    setWithdrawals((prev) =>
+      prev.map((withdrawal) =>
+        selected.includes(withdrawal.id)
           ? {
-              ...student,
+              ...withdrawal,
               status: "同意",
-              approvalTime: student.approvalTime || "2026/05/11 00:00",
+              approvalTime: withdrawal.approvalTime || "2026/05/11 00:00",
               approver:
-                student.approver ||
+                withdrawal.approver ||
                 f({ id: "teacherDashboard.defaultApprover" }),
             }
-          : student,
+          : withdrawal,
       ),
     );
     setSelected([]);
@@ -224,7 +224,7 @@ export const TeacherDashboard: FC = () => {
   ).length;
 
   const noPendingStudents =
-    students.filter((s) => s.status === "待審核").length === 0;
+    withdrawals.filter((s) => s.status === "待審核").length === 0;
 
   const tableRows: StudentTableRow[] = filtered.map((s) => ({
     ...s,
