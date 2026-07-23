@@ -40,9 +40,9 @@ export const TicketDialog = ({
       onCancel={onCancel}
       cancelBtnText={f({ id: "teacherDashboard.ticket.cancel" })}
     >
-      <Stack spacing={3}>
+      <Stack spacing={3} sx={{ gap: 2 }}>
         <Stack spacing={0.5}>
-          <Typography variant="body2">
+          <Typography variant="body1">
             {f({ id: "teacherDashboard.ticket.courseName" })}: {courseName}
           </Typography>
           <Typography variant="body2">
@@ -59,7 +59,7 @@ export const TicketDialog = ({
             {withdrawal.studentId}
           </Typography>
         </Stack>
-        <Stack spacing={1}>
+        <Stack>
           <Typography variant="body2">
             {f({ id: "teacherDashboard.ticket.reason.label" })}
           </Typography>
