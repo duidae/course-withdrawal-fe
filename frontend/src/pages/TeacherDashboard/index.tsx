@@ -1,11 +1,12 @@
-import { type FC, useState } from "react";
+import { type FC, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import * as XLSX from "xlsx";
 
+import { getWithdrawals } from "../../apis/course-withdrawal.api";
+
 import {
-  INIT_STUDENTS,
   initCS,
   classOptions as classUniversityOptions,
   statusOptions as statusIndividualOptions,
@@ -16,10 +17,11 @@ import { FilterBar } from "./FilterBar";
 import { StudentTable, type StudentTableRow } from "./StudentTable";
 import { TicketDialog } from "./TicketDialog";
 import { type StudentRow, type StudentRowWithOrig } from "./types";
+import { type Withdrawal } from "../../models";
 
 export const TeacherDashboard: FC = () => {
   const { formatMessage: f } = useIntl();
-  const [students, setStudents] = useState<StudentRow[]>(INIT_STUDENTS);
+  const [students, setStudents] = useState<Withdrawal[]>([]);
   const [adminCS] = useState(initCS());
   const [searchName, setSearchName] = useState("");
   const [searchErrorType, setSearchErrorType] = useState<string | null>(null);
@@ -33,6 +35,14 @@ export const TeacherDashboard: FC = () => {
   const [statusFilter, setStatusFilter] = useState("待審核");
   const [frozenOrder, setFrozenOrder] = useState<number[] | null>(null);
   const [selected, setSelected] = useState<number[]>([]);
+
+  useEffect(() => {
+    const fetchWithdrawals = async () => {
+      const data = await getWithdrawals();
+      setStudents(data);
+    };
+    fetchWithdrawals();
+  }, []);
 
   const classOptions = [
     {

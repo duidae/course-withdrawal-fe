@@ -19,7 +19,7 @@ export const App: FC = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/teacher/:id" element={<TeacherDashboard />} />
+        <Route path="/teacher" element={<TeacherDashboard />} />
         {/*
         <Route
           path="/student/:id"
