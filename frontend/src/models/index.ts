@@ -3,6 +3,7 @@ export type Withdrawal = {
   name: string;
   school: string;
   studentId: string;
+  loginId: string;
   applyTime: string;
   deadline: string;
   reason: string;

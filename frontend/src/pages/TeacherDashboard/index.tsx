@@ -25,7 +25,9 @@ export const TeacherDashboard: FC = () => {
   const [adminCS] = useState(initCS());
   const [searchName, setSearchName] = useState("");
   const [searchErrorType, setSearchErrorType] = useState<string | null>(null);
-  const [isTicketOpen, setIsTicketOpen] = useState<boolean>(false);
+  const [reviewTicket, setReviewTicket] = useState<Withdrawal | undefined>(
+    undefined,
+  );
   const [ticketDecision, setTicketDecision] = useState<"approve" | "decline">(
     "approve",
   );
@@ -142,8 +144,7 @@ export const TeacherDashboard: FC = () => {
   };
 
   const onTicketReview = (student: StudentRow) => {
-    setIsTicketOpen(true);
-    console.log(student);
+    setReviewTicket(student);
   };
 
   const exportToExcel = () => {
@@ -208,7 +209,7 @@ export const TeacherDashboard: FC = () => {
   };
 
   const onTicketCancel = () => {
-    setIsTicketOpen(false);
+    setReviewTicket(undefined);
   };
 
   const hasSelections = selected.length > 0;
@@ -284,13 +285,15 @@ export const TeacherDashboard: FC = () => {
         onReview={onTicketReview}
       />
 
-      <TicketDialog
-        open={isTicketOpen}
-        decision={ticketDecision}
-        onDecisionChange={setTicketDecision}
-        onConfirm={onTicketConfirm}
-        onCancel={onTicketCancel}
-      />
+      {reviewTicket !== undefined && (
+        <TicketDialog
+          withdrawal={reviewTicket}
+          decision={ticketDecision}
+          onDecisionChange={setTicketDecision}
+          onConfirm={onTicketConfirm}
+          onCancel={onTicketCancel}
+        />
+      )}
     </Box>
   );
 };

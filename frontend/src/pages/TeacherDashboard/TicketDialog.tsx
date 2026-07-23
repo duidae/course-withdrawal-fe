@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { useIntl } from "react-intl";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
@@ -7,8 +8,10 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
 import { BaseDialog } from "../../cool-ui/components/dialogs/BaseDialog";
 
+import { type Withdrawal } from "../../models";
+
 type TicketDialogProps = {
-  open: boolean;
+  withdrawal: Withdrawal;
   decision: "approve" | "decline";
   onDecisionChange: (decision: "approve" | "decline") => void;
   onConfirm: () => void;
@@ -16,17 +19,18 @@ type TicketDialogProps = {
 };
 
 export const TicketDialog = ({
-  open,
+  withdrawal,
   decision,
   onDecisionChange,
   onConfirm,
   onCancel,
 }: TicketDialogProps) => {
+  const [reply, setReply] = useState("");
   const { formatMessage: f } = useIntl();
 
   return (
     <BaseDialog
-      open={open}
+      open={withdrawal !== undefined}
       size="sm"
       title={f({ id: "teacherDashboard.ticket.title" })}
       onConfirm={onConfirm}
@@ -35,12 +39,27 @@ export const TicketDialog = ({
       cancelBtnText={f({ id: "teacherDashboard.ticket.cancel" })}
     >
       <Stack spacing={3}>
+        <Stack spacing={0.5}>
+          <Typography variant="body2">
+            {f({ id: "teacherDashboard.field.studentName" })}: {withdrawal.name}
+          </Typography>
+          <Typography variant="body2">
+            {f({ id: "teacherDashboard.field.section" })}: {withdrawal.school}
+          </Typography>
+          <Typography variant="body2">
+            {f({ id: "teacherDashboard.field.loginId" })}: {withdrawal.loginId}
+          </Typography>
+          <Typography variant="body2">
+            {f({ id: "teacherDashboard.field.studentId" })}:{" "}
+            {withdrawal.studentId}
+          </Typography>
+        </Stack>
         <Stack spacing={1}>
           <Typography variant="body2">
             {f({ id: "teacherDashboard.ticket.reason.label" })}
           </Typography>
           <TextField
-            value="aaa"
+            value={withdrawal.reason}
             multiline
             minRows={3}
             fullWidth
@@ -69,7 +88,13 @@ export const TicketDialog = ({
               label={f({ id: "teacherDashboard.withdrawal.decline" })}
             />
           </RadioGroup>
-          <TextField defaultValue="aaa" multiline minRows={3} fullWidth />
+          <TextField
+            value={reply}
+            multiline
+            minRows={3}
+            onChange={(e) => setReply(e.target.value)}
+            fullWidth
+          />
         </Stack>
       </Stack>
     </BaseDialog>
