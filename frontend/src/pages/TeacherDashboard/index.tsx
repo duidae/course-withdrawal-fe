@@ -150,7 +150,7 @@ export const TeacherDashboard: FC = () => {
   const exportToExcel = () => {
     const headers = [
       f({ id: "teacherDashboard.field.studentName" }),
-      f({ id: "teacherDashboard.field.class" }),
+      f({ id: "teacherDashboard.field.section" }),
       f({ id: "teacherDashboard.field.studentId" }),
       f({ id: "teacherDashboard.field.applyTime" }),
       f({ id: "teacherDashboard.field.reason" }),

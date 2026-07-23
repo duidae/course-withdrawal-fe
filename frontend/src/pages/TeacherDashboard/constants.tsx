@@ -21,7 +21,7 @@ export const columns = [
   },
   {
     key: "class",
-    label: "teacherDashboard.field.class",
+    label: "teacherDashboard.field.section",
     width: 110,
   },
   {

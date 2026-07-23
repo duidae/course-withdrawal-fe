@@ -89,7 +89,7 @@ export const FilterBar = ({
           />
           <SelectField
             disabled={disabled}
-            label={f({ id: "teacherDashboard.field.class" })}
+            label={f({ id: "teacherDashboard.field.section" })}
             value={classFilter}
             onChange={onClassFilterChange}
             options={classOptions}

@@ -41,6 +41,9 @@ export const TicketDialog = ({
       <Stack spacing={3}>
         <Stack spacing={0.5}>
           <Typography variant="body2">
+            {f({ id: "teacherDashboard.field.courseName" })}: {withdrawal.name}
+          </Typography>
+          <Typography variant="body2">
             {f({ id: "teacherDashboard.field.studentName" })}: {withdrawal.name}
           </Typography>
           <Typography variant="body2">
