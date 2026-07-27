@@ -202,7 +202,7 @@ export const TeacherDashboard: FC = () => {
     XLSX.writeFile(workbook, `${title}.xlsx`);
   };
 
-  const batchApprove = () => {
+  const onBatchApproveClick = () => {
     /*
     if (selected.length === 0) return;
     setWithdrawals((prev) =>
@@ -224,8 +224,16 @@ export const TeacherDashboard: FC = () => {
     setIsBatchReviewOpen(true);
   };
 
-  const batchDecline = () => {
+  const onBatchDeclineClick = () => {
     setIsBatchReviewOpen(true);
+  };
+
+  const onBatchApprove = () => {
+    setIsBatchReviewOpen(false);
+  };
+
+  const onBatchDecline = () => {
+    setIsBatchReviewOpen(false);
   };
 
   const onTicketConfirm = () => {
@@ -297,8 +305,8 @@ export const TeacherDashboard: FC = () => {
           onExport={exportToExcel}
           selectedCount={selected.length}
           hasSelections={hasSelections}
-          onApprove={batchApprove}
-          onDecline={batchDecline}
+          onApprove={onBatchApproveClick}
+          onDecline={onBatchDeclineClick}
         />
       </Box>
 
@@ -329,8 +337,8 @@ export const TeacherDashboard: FC = () => {
       {isBatchReviewOpen && (
         <BatchReviewDialog
           isOpen={isBatchReviewOpen}
-          onConfirm={onTicketConfirm}
-          onCancel={onTicketCancel}
+          onConfirm={onBatchApprove}
+          onCancel={onBatchDecline}
         />
       )}
     </Box>
