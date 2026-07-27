@@ -140,7 +140,12 @@ export const BatchReviewDialog = ({
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <Typography variant="body1">
-          {f({ id: "teacherDashboard.batch.approve.msg" })}
+          {f(
+            { id: "teacherDashboard.batch.approve.msg" },
+            {
+              br: () => <br />,
+            },
+          )}
         </Typography>
         <TextField
           value={reply}

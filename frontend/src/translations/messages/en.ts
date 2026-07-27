@@ -43,7 +43,7 @@ export const messages_En: Record<string, string> = {
   "teacherDashboard.ticket.cancel": "Cancel",
   "teacherDashboard.batch.approve.title": "Approve Selected Withdrawals",
   "teacherDashboard.batch.approve.msg":
-    "You're about to approve the withdrawal for all selected students.\nStudents who don't have a decision yet will be marked “Approved” and given the comment you enter below; students who already have a decision will have their existing status and comment overwritten. Are you sure you want to continue?",
+    "You're about to approve the withdrawal for all selected students.<br></br><br></br>Students who don't have a decision yet will be marked “Approved” and given the comment you enter below; students who already have a decision will have their existing status and comment overwritten. Are you sure you want to continue?",
   "teacherDashboard.batch.comment.label": "New Review Comment (Optional)",
   "teacherDashboard.batch.confirm": "Confirm",
 };
