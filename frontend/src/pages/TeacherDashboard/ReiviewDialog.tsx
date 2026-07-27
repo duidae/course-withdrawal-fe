@@ -134,7 +134,7 @@ export const BatchReviewDialog = ({
       size="sm"
       title={f({ id: "teacherDashboard.batch.approve.title" })}
       onConfirm={onConfirm}
-      confirmBtnText={f({ id: "teacherDashboard.ticket.confirm" })}
+      confirmBtnText={f({ id: "teacherDashboard.batch.confirm" })}
       onCancel={onCancel}
       cancelBtnText={f({ id: "teacherDashboard.ticket.cancel" })}
     >
