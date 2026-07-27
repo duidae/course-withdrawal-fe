@@ -14,7 +14,7 @@ import {
 import { statusOrder, pendingCountFormatter } from "./constants";
 import { FilterBar } from "./FilterBar";
 import { WithdrawalTable, type WithdrawalTableRow } from "./WithdrawalTable";
-import { TicketDialog } from "./TicketDialog";
+import { TicketDialog, BatchReviewDialog } from "./ReiviewDialog";
 import { type StudentRow, WithdrawalStatus } from "./types";
 import { type Withdrawal } from "../../models";
 import { useCourseInfo } from "../../contexts/course-info.context";
@@ -29,6 +29,7 @@ export const TeacherDashboard: FC = () => {
   const [reviewTicket, setReviewTicket] = useState<Withdrawal | undefined>(
     undefined,
   );
+  const [isBatchReviewOpen, setIsBatchReviewOpen] = useState(false);
   const [ticketDecision, setTicketDecision] = useState<"approve" | "decline">(
     "approve",
   );
@@ -202,6 +203,7 @@ export const TeacherDashboard: FC = () => {
   };
 
   const batchApprove = () => {
+    /*
     if (selected.length === 0) return;
     setWithdrawals((prev) =>
       prev.map((withdrawal) =>
@@ -218,10 +220,12 @@ export const TeacherDashboard: FC = () => {
       ),
     );
     setSelected([]);
+    */
+    setIsBatchReviewOpen(true);
   };
 
   const batchDecline = () => {
-    console.log("batch decline");
+    setIsBatchReviewOpen(true);
   };
 
   const onTicketConfirm = () => {
@@ -316,6 +320,16 @@ export const TeacherDashboard: FC = () => {
         <TicketDialog
           courseName={courseName}
           withdrawal={reviewTicket}
+          decision={ticketDecision}
+          onDecisionChange={setTicketDecision}
+          onConfirm={onTicketConfirm}
+          onCancel={onTicketCancel}
+        />
+      )}
+      {isBatchReviewOpen && (
+        <BatchReviewDialog
+          isOpen={isBatchReviewOpen}
+          courseName={courseName}
           decision={ticketDecision}
           onDecisionChange={setTicketDecision}
           onConfirm={onTicketConfirm}

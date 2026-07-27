@@ -39,4 +39,8 @@ export const messages_Zh: Record<string, string> = {
   "teacherDashboard.ticket.comment": "審核評語（選填）",
   "teacherDashboard.ticket.confirm": "送出回覆",
   "teacherDashboard.ticket.cancel": "取消",
+  "teacherDashboard.batch.approve.title": "批次同意停修",
+  "teacherDashboard.batch.approve.msg":
+    "您即將對所選取的學生批次審核「同意停修」。\n尚無審核結果的學生，將新增「同意」審核狀態及下方填寫的評語；已有審核結果的學生，現有狀態與評語將被覆蓋。確定要繼續嗎？",
+  "teacherDashboard.batch.comment.label": "新的審核評語 (選填)",
 };

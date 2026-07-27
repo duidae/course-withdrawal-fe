@@ -113,3 +113,50 @@ export const TicketDialog = ({
     </BaseDialog>
   );
 };
+
+type BatchReviewDialog = {
+  isOpen: boolean;
+  courseName: string;
+  decision: "approve" | "decline";
+  onDecisionChange: (decision: "approve" | "decline") => void;
+  onConfirm: () => void;
+  onCancel: () => void;
+};
+
+export const BatchReviewDialog = ({
+  isOpen,
+  decision,
+  onDecisionChange,
+  onConfirm,
+  onCancel,
+}: BatchReviewDialog) => {
+  const [reply, setReply] = useState("");
+  const { formatMessage: f } = useIntl();
+
+  return (
+    <BaseDialog
+      open={isOpen}
+      size="sm"
+      title={f({ id: "teacherDashboard.batch.approve.title" })}
+      onConfirm={onConfirm}
+      confirmBtnText={f({ id: "teacherDashboard.ticket.confirm" })}
+      onCancel={onCancel}
+      cancelBtnText={f({ id: "teacherDashboard.ticket.cancel" })}
+    >
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Typography variant="body1">
+          {f({ id: "teacherDashboard.batch.approve.msg" })}
+        </Typography>
+        <TextField
+          value={reply}
+          label={f({ id: "teacherDashboard.batch.comment.label" })}
+          multiline
+          minRows={3}
+          onChange={(e) => setReply(e.target.value)}
+          fullWidth
+          slotProps={{ inputLabel: { shrink: true } }}
+        />
+      </Box>
+    </BaseDialog>
+  );
+};
