@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useIntl } from "react-intl";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
