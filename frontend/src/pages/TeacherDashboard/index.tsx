@@ -329,9 +329,6 @@ export const TeacherDashboard: FC = () => {
       {isBatchReviewOpen && (
         <BatchReviewDialog
           isOpen={isBatchReviewOpen}
-          courseName={courseName}
-          decision={ticketDecision}
-          onDecisionChange={setTicketDecision}
           onConfirm={onTicketConfirm}
           onCancel={onTicketCancel}
         />

@@ -116,17 +116,12 @@ export const TicketDialog = ({
 
 type BatchReviewDialog = {
   isOpen: boolean;
-  courseName: string;
-  decision: "approve" | "decline";
-  onDecisionChange: (decision: "approve" | "decline") => void;
   onConfirm: () => void;
   onCancel: () => void;
 };
 
 export const BatchReviewDialog = ({
   isOpen,
-  decision,
-  onDecisionChange,
   onConfirm,
   onCancel,
 }: BatchReviewDialog) => {
