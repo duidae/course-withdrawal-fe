@@ -61,7 +61,7 @@ export const StudentDashboard = ({
           <Stack spacing={2}>
             <Box>
               <Typography variant="body1" sx={{ lineHeight: 1.75 }}>
-                {f({ id: "studentDashboard.field.courseName" })}：深度學習 Deep
+                {f({ id: "studentDashboard.field.courseTitle" })}：深度學習 Deep
                 Learning
               </Typography>
               <Typography variant="body1" sx={{ lineHeight: 1.75 }}>

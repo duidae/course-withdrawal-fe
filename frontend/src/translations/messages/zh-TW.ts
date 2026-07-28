@@ -45,7 +45,7 @@ export const messages_Zh: Record<string, string> = {
   "teacherDashboard.batch.comment.label": "新的審核評語 (選填)",
   "teacherDashboard.batch.confirm": "確定",
   "studentDashboard.title": "停修申請",
-  "studentDashboard.field.courseName": "課程名稱",
+  "studentDashboard.field.courseTitle": "課程名稱",
   "studentDashboard.field.section": "班別",
   "studentDashboard.field.teachers": "授課教師",
   "studentDashboard.field.studentName": "學生姓名",
@@ -88,6 +88,6 @@ export const messages_Zh: Record<string, string> = {
   "studentDashboard.notice.signature1": "NTU COOL 平臺團隊 敬上",
   "studentDashboard.notice.signature2": "ntucool@ntu.edu.tw",
   "studentDashboard.notice.signature3": "02-3366-3367 #594",
-  "studentDashboard.checkbox.confirm": "我已詳讀停修規範並確認停修該課程",
+  "studentDashboard.checkbox.confirm": "我已詳讀停修規範並確認停修該課程*",
   "studentDashboard.submit": "提交申請",
 };
