@@ -14,9 +14,3 @@ export type Application = {
   approver?: string;
   reviewTime?: string;
 };
-
-export type StudentDashboardProps = {
-  application: Application;
-  onSubmit?: (value: string) => void;
-  courseSettings?: CourseSettings;
-};

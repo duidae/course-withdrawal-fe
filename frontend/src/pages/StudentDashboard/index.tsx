@@ -12,7 +12,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import { NoticeContent } from "./NoticeContent";
 import { CourseTimeline } from "./CourseTimeline";
 import { ApplicationPanel } from "./ApplicationPanel";
-import { type CourseSettings, type StudentDashboardProps } from "./types";
+import { type CourseSettings } from "./types";
 
 const defaultCourseSettings: CourseSettings = {
   st: "2026/07/01 00:00",
@@ -21,9 +21,22 @@ const defaultCourseSettings: CourseSettings = {
   notes: "",
 };
 
+export type Application = {
+  status: string;
+  reason?: string;
+  applyTime?: string;
+  comment?: string;
+  approver?: string;
+  reviewTime?: string;
+};
+
+type StudentDashboardProps = {
+  application: Application;
+  courseSettings?: CourseSettings;
+};
+
 export const StudentDashboard = ({
   application,
-  onSubmit,
   courseSettings,
 }: StudentDashboardProps) => {
   const { formatMessage: f } = useIntl();
@@ -46,6 +59,10 @@ export const StudentDashboard = ({
     application.status === "逾期審核";
 
   const canSubmit = !hasSubmitted && !isAppExpired && sectionEnabled;
+
+  const onSubmit = () => {
+    console.log("submit");
+  };
 
   return (
     <Box sx={{ padding: "24px 24px 64px" }}>
@@ -153,7 +170,7 @@ export const StudentDashboard = ({
             <Button
               variant="contained"
               disabled={isDisabled}
-              onClick={() => onSubmit?.(reason)}
+              onClick={onSubmit}
             >
               {f({ id: "studentDashboard.submit" })}
             </Button>
