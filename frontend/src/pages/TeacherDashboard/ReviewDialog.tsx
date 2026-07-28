@@ -19,7 +19,7 @@ type TicketDialogProps = {
   onCancel: () => void;
 };
 
-export const TicketDialog = ({
+export const TicketReviewDialog = ({
   courseName,
   withdrawal,
   decision,

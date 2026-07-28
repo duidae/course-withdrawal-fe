@@ -14,7 +14,7 @@ import {
 import { statusOrder, pendingCountFormatter } from "./constants";
 import { FilterBar } from "./FilterBar";
 import { WithdrawalTable, type WithdrawalTableRow } from "./WithdrawalTable";
-import { TicketDialog, BatchReviewDialog } from "./ReiviewDialog";
+import { TicketReviewDialog, BatchReviewDialog } from "./ReviewDialog";
 import { type StudentRow, WithdrawalStatus } from "./types";
 import { type Withdrawal } from "../../models";
 import { useCourseInfo } from "../../contexts/course-info.context";
@@ -309,7 +309,6 @@ export const TeacherDashboard: FC = () => {
           onDecline={onBatchDeclineClick}
         />
       </Box>
-
       <WithdrawalTable
         rows={tableRows}
         isLoading={isLoading}
@@ -323,9 +322,8 @@ export const TeacherDashboard: FC = () => {
         onToggleSelect={toggleSelect}
         onReview={onTicketReview}
       />
-
       {reviewTicket !== undefined && (
-        <TicketDialog
+        <TicketReviewDialog
           courseName={courseName}
           withdrawal={reviewTicket}
           decision={ticketDecision}
