@@ -44,7 +44,7 @@ const AppRoutes: FC = () => {
               <StudentDashboard
                 application={{ status: "未申請", reason: "" }}
                 onSubmit={() => {}}
-                courseSettings={""}
+                courseSettings={undefined}
               />
             }
           />
