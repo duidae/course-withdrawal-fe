@@ -114,14 +114,22 @@ export const TicketReviewDialog = ({
   );
 };
 
+export const BatchReviewActionType = {
+  APPROVE: "approve",
+  DECLINE: "decline",
+} as const;
+
+export type BatchReviewActionType =
+  (typeof BatchReviewActionType)[keyof typeof BatchReviewActionType];
+
 type BatchReviewDialog = {
-  isOpen: boolean;
+  actionType: BatchReviewActionType;
   onConfirm: () => void;
   onCancel: () => void;
 };
 
 export const BatchReviewDialog = ({
-  isOpen,
+  actionType,
   onConfirm,
   onCancel,
 }: BatchReviewDialog) => {
@@ -130,9 +138,14 @@ export const BatchReviewDialog = ({
 
   return (
     <BaseDialog
-      open={isOpen}
+      open={true}
       size="sm"
-      title={f({ id: "teacherDashboard.batch.approve.title" })}
+      title={f({
+        id:
+          actionType === BatchReviewActionType.APPROVE
+            ? "teacherDashboard.batch.approve.title"
+            : "teacherDashboard.batch.decline.title",
+      })}
       onConfirm={onConfirm}
       confirmBtnText={f({ id: "teacherDashboard.batch.confirm" })}
       onCancel={onCancel}
@@ -141,7 +154,12 @@ export const BatchReviewDialog = ({
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <Typography variant="body1">
           {f(
-            { id: "teacherDashboard.batch.approve.msg" },
+            {
+              id:
+                actionType === BatchReviewActionType.APPROVE
+                  ? "teacherDashboard.batch.approve.msg"
+                  : "teacherDashboard.batch.decline.msg",
+            },
             {
               br: () => <br />,
             },

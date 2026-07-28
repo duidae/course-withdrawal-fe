@@ -14,7 +14,11 @@ import {
 import { statusOrder, pendingCountFormatter } from "./constants";
 import { FilterBar } from "./FilterBar";
 import { WithdrawalTable, type WithdrawalTableRow } from "./WithdrawalTable";
-import { TicketReviewDialog, BatchReviewDialog } from "./ReviewDialog";
+import {
+  TicketReviewDialog,
+  BatchReviewDialog,
+  BatchReviewActionType,
+} from "./ReviewDialog";
 import { type StudentRow, WithdrawalStatus } from "./types";
 import { type Withdrawal } from "../../models";
 import { useCourseInfo } from "../../contexts/course-info.context";
@@ -29,7 +33,9 @@ export const TeacherDashboard: FC = () => {
   const [reviewTicket, setReviewTicket] = useState<Withdrawal | undefined>(
     undefined,
   );
-  const [isBatchReviewOpen, setIsBatchReviewOpen] = useState(false);
+  const [batchReviewActionType, setBatchReviewActionType] = useState<
+    BatchReviewActionType | undefined
+  >(undefined);
   const [ticketDecision, setTicketDecision] = useState<"approve" | "decline">(
     "approve",
   );
@@ -221,26 +227,33 @@ export const TeacherDashboard: FC = () => {
     );
     setSelected([]);
     */
-    setIsBatchReviewOpen(true);
+    setBatchReviewActionType(BatchReviewActionType.APPROVE);
   };
 
   const onBatchDeclineClick = () => {
-    setIsBatchReviewOpen(true);
+    setBatchReviewActionType(BatchReviewActionType.DECLINE);
   };
 
   const onBatchApprove = () => {
-    setIsBatchReviewOpen(false);
+    // TODO: finish approve from api call
+    onBatchDialogClose();
   };
 
   const onBatchDecline = () => {
-    setIsBatchReviewOpen(false);
+    // TODO: finish decline from api call
+    onBatchDialogClose();
+  };
+
+  const onBatchDialogClose = () => {
+    setBatchReviewActionType(undefined);
   };
 
   const onTicketConfirm = () => {
     console.log("ticket confirm");
+    onTicketDialogClose();
   };
 
-  const onTicketCancel = () => {
+  const onTicketDialogClose = () => {
     setReviewTicket(undefined);
   };
 
@@ -329,14 +342,18 @@ export const TeacherDashboard: FC = () => {
           decision={ticketDecision}
           onDecisionChange={setTicketDecision}
           onConfirm={onTicketConfirm}
-          onCancel={onTicketCancel}
+          onCancel={onTicketDialogClose}
         />
       )}
-      {isBatchReviewOpen && (
+      {batchReviewActionType !== undefined && (
         <BatchReviewDialog
-          isOpen={isBatchReviewOpen}
-          onConfirm={onBatchApprove}
-          onCancel={onBatchDecline}
+          actionType={batchReviewActionType}
+          onConfirm={
+            batchReviewActionType === BatchReviewActionType.APPROVE
+              ? onBatchApprove
+              : onBatchDecline
+          }
+          onCancel={onBatchDialogClose}
         />
       )}
     </Box>

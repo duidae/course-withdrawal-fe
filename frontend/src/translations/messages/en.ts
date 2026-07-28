@@ -44,6 +44,9 @@ export const messages_En: Record<string, string> = {
   "teacherDashboard.batch.approve.title": "Approve Selected Withdrawals",
   "teacherDashboard.batch.approve.msg":
     "You're about to approve the withdrawal for all selected students.<br></br><br></br>Students who don't have a decision yet will be marked “Approved” and given the comment you enter below; students who already have a decision will have their existing status and comment overwritten. Are you sure you want to continue?",
+  "teacherDashboard.batch.decline.title": "Decline Selected Withdrawals",
+  "teacherDashboard.batch.decline.msg":
+    "You're about to decline the withdrawal for all selected students.<br></br><br></br>Students who don't have a decision yet will be marked “Declined” and given the comment you enter below; students who already have a decision will have their existing status and comment overwritten. Are you sure you want to continue?",
   "teacherDashboard.batch.comment.label": "New Review Comment (Optional)",
   "teacherDashboard.batch.confirm": "Confirm",
   "studentDashboard.title": "Withdrawal Application",
