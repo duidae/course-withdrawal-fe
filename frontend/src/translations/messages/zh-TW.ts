@@ -44,4 +44,50 @@ export const messages_Zh: Record<string, string> = {
     "您即將對所選取的學生批次審核「同意停修」。<br></br><br></br>尚無審核結果的學生，將新增「同意」審核狀態及下方填寫的評語；已有審核結果的學生，現有狀態與評語將被覆蓋。確定要繼續嗎？",
   "teacherDashboard.batch.comment.label": "新的審核評語 (選填)",
   "teacherDashboard.batch.confirm": "確定",
+  "studentDashboard.title": "停修申請",
+  "studentDashboard.field.courseName": "課程名稱",
+  "studentDashboard.field.section": "班別",
+  "studentDashboard.field.teachers": "授課教師",
+  "studentDashboard.field.studentName": "學生姓名",
+  "studentDashboard.field.loginId": "登入ID",
+  "studentDashboard.field.studentId": "學號",
+  "studentDashboard.field.reason": "停修原因",
+  "studentDashboard.timeline.start": "申請開始時間",
+  "studentDashboard.timeline.end": "申請截止時間",
+  "studentDashboard.timeline.teacherDeadline": "教師審核期限",
+  "studentDashboard.panel.applyTime": "- 申請時間：{time}",
+  "studentDashboard.panel.reviewComment": "審核評語",
+  "studentDashboard.panel.noComment": "- 無",
+  "studentDashboard.panel.approver": "- 審核人 {name}",
+  "studentDashboard.panel.reviewTime": "- 審核時間：{time}",
+  "studentDashboard.panel.disabledTitle": "停修功能未開放",
+  "studentDashboard.panel.disabledDesc":
+    "您無法透過 COOL 申請課程停修，請逕洽您的校務選課系統辦理。",
+  "studentDashboard.panel.expiredTitle": "已超過停修申請時間",
+  "studentDashboard.panel.expiredDesc":
+    "您已無法透過 COOL 申請此課程停修，請聯繫課程授課教師。",
+  "studentDashboard.panel.charCount": "{count} / 500",
+  "studentDashboard.notice.title": "申請停修注意事項",
+  "studentDashboard.notice.greeting": "各位 TAICA 盟校同學好：",
+  "studentDashboard.notice.rule":
+    "依據 TAICA 計畫辦公室的規範，TAICA 盟校學生如欲退選「生成式人工智慧與機器學習導論」之鏡像課程，需經過主授教師的同意。",
+  "studentDashboard.notice.schedule":
+    "本頁面上方已提供同學需完成「期中停修意願申請表單」的填寫時程、以及主授教師需完成核准的時程供您參考。",
+  "studentDashboard.notice.deletion":
+    "NTU COOL 團隊將在 11/19 (三) 下班前，依照主授老師於本表單的核定結果，將主授教師同意的退選同學從課程中刪除。",
+  "studentDashboard.notice.attentionTitle": "敬請同學留意：",
+  "studentDashboard.notice.attention1":
+    "「期中停修意願申請表單」<r>僅能填寫一次</r>，且送出後<r>無法撤回</r>。送出前，請務必核對所填寫之表單上的<r>課名</r>，是否為所欲申請停修的課程，以及確認填答內容是否正確。<r>敬請確認填寫內容皆正確再送出</r>。",
+  "studentDashboard.notice.attention2":
+    "依據 TAICA 計畫辦公室的規定，<r>同學一旦完成在 NTU COOL 上的「期中停修意願申請表單」的填寫並獲主授教師同意，即視為已經完成停修手續。</r>後續同學需自行依照所屬學校的退選流程完成校內停修手續。若有同學有填寫表單且獲主授教師同意，但並未確實依照所屬學校的停修流程，完成校內停修手續，若有任何後果同學需自行負責。",
+  "studentDashboard.notice.closing1": "以上說明，",
+  "studentDashboard.notice.closing2":
+    "若有任何與表單填寫相關之問題，歡迎來信或來電詢問 NTU COOL 團隊；",
+  "studentDashboard.notice.closing3":
+    "如有任何期中停修相關行政問題，請洽貴校 TAICA 窗口，謝謝您。",
+  "studentDashboard.notice.signature1": "NTU COOL 平臺團隊 敬上",
+  "studentDashboard.notice.signature2": "ntucool@ntu.edu.tw",
+  "studentDashboard.notice.signature3": "02-3366-3367 #594",
+  "studentDashboard.checkbox.confirm": "我已詳讀停修規範並確認停修該課程",
+  "studentDashboard.submit": "提交申請",
 };

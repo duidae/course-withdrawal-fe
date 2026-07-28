@@ -1,3 +1,4 @@
+import { useIntl } from "react-intl";
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -26,23 +27,30 @@ export const ApplicationPanel = ({
   reason,
   onReasonChange,
 }: ApplicationPanelProps) => {
+  const { formatMessage: f } = useIntl();
+
   if (!sectionEnabled) {
     return (
       <Alert severity="info">
-        <AlertTitle>停修功能未開放</AlertTitle>
-        您無法透過 COOL 申請課程停修，請逕洽您的校務選課系統辦理。
+        <AlertTitle>
+          {f({ id: "studentDashboard.panel.disabledTitle" })}
+        </AlertTitle>
+        {f({ id: "studentDashboard.panel.disabledDesc" })}
       </Alert>
     );
   }
 
   if (hasSubmitted) {
     const reasonAccordion = (
-      <AccordionItem title="停修原因">
+      <AccordionItem title={f({ id: "studentDashboard.field.reason" })}>
         <Stack spacing={1}>
           <Typography variant="caption">{application.reason}</Typography>
           {application.applyTime && (
             <Typography variant="caption">
-              - 申請時間：{application.applyTime}
+              {f(
+                { id: "studentDashboard.panel.applyTime" },
+                { time: application.applyTime },
+              )}
             </Typography>
           )}
         </Stack>
@@ -53,19 +61,28 @@ export const ApplicationPanel = ({
       <Paper variant="outlined" sx={{ boxShadow: 1 }}>
         {reasonAccordion}
         {isReviewed && (
-          <AccordionItem title="審核評語">
+          <AccordionItem
+            title={f({ id: "studentDashboard.panel.reviewComment" })}
+          >
             <Stack spacing={0.5}>
               <Typography variant="caption">
-                {application.comment || "- 無"}
+                {application.comment ||
+                  f({ id: "studentDashboard.panel.noComment" })}
               </Typography>
               {application.approver && (
                 <Typography variant="caption">
-                  - 審核人 {application.approver}
+                  {f(
+                    { id: "studentDashboard.panel.approver" },
+                    { name: application.approver },
+                  )}
                 </Typography>
               )}
               {application.reviewTime && (
                 <Typography variant="caption">
-                  - 審核時間：{application.reviewTime}
+                  {f(
+                    { id: "studentDashboard.panel.reviewTime" },
+                    { time: application.reviewTime },
+                  )}
                 </Typography>
               )}
             </Stack>
@@ -78,8 +95,10 @@ export const ApplicationPanel = ({
   if (isAppExpired) {
     return (
       <Alert severity="error">
-        <AlertTitle>已超過停修申請時間</AlertTitle>
-        您已無法透過 COOL 申請此課程停修，請聯繫課程授課教師。
+        <AlertTitle>
+          {f({ id: "studentDashboard.panel.expiredTitle" })}
+        </AlertTitle>
+        {f({ id: "studentDashboard.panel.expiredDesc" })}
       </Alert>
     );
   }
@@ -89,7 +108,7 @@ export const ApplicationPanel = ({
       <TextField
         multiline
         rows={4}
-        label="停修原因"
+        label={f({ id: "studentDashboard.field.reason" })}
         value={reason}
         onChange={(e) =>
           e.target.value.length <= 500 && onReasonChange(e.target.value)
@@ -100,7 +119,10 @@ export const ApplicationPanel = ({
         color="text.secondary"
         sx={{ textAlign: "right" }}
       >
-        {reason.length} / 500
+        {f(
+          { id: "studentDashboard.panel.charCount" },
+          { count: reason.length },
+        )}
       </Typography>
     </Stack>
   );

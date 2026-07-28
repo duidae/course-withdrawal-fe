@@ -46,4 +46,53 @@ export const messages_En: Record<string, string> = {
     "You're about to approve the withdrawal for all selected students.<br></br><br></br>Students who don't have a decision yet will be marked “Approved” and given the comment you enter below; students who already have a decision will have their existing status and comment overwritten. Are you sure you want to continue?",
   "teacherDashboard.batch.comment.label": "New Review Comment (Optional)",
   "teacherDashboard.batch.confirm": "Confirm",
+  "studentDashboard.title": "Withdrawal Application",
+  "studentDashboard.field.courseName": "Course Name",
+  "studentDashboard.field.section": "Section",
+  "studentDashboard.field.teachers": "Instructors",
+  "studentDashboard.field.studentName": "Student Name",
+  "studentDashboard.field.loginId": "Login ID",
+  "studentDashboard.field.studentId": "Student ID",
+  "studentDashboard.field.reason": "Withdrawal Reason",
+  "studentDashboard.timeline.start": "Application Start Time",
+  "studentDashboard.timeline.end": "Application Deadline",
+  "studentDashboard.timeline.teacherDeadline": "Instructor Review Deadline",
+  "studentDashboard.panel.applyTime": "- Submitted at: {time}",
+  "studentDashboard.panel.reviewComment": "Review Comment",
+  "studentDashboard.panel.noComment": "- None",
+  "studentDashboard.panel.approver": "- Reviewer {name}",
+  "studentDashboard.panel.reviewTime": "- Reviewed at: {time}",
+  "studentDashboard.panel.disabledTitle": "Withdrawal Not Available",
+  "studentDashboard.panel.disabledDesc":
+    "You cannot apply for course withdrawal through COOL. Please contact your school's course registration system.",
+  "studentDashboard.panel.expiredTitle":
+    "Withdrawal Application Period Has Ended",
+  "studentDashboard.panel.expiredDesc":
+    "You can no longer apply for withdrawal through COOL. Please contact the course instructor.",
+  "studentDashboard.panel.charCount": "{count} / 500",
+  "studentDashboard.notice.title": "Withdrawal Application Notice",
+  "studentDashboard.notice.greeting":
+    "Dear students from TAICA partner schools:",
+  "studentDashboard.notice.rule":
+    "Per TAICA Program Office rules, TAICA partner-school students who wish to withdraw from the mirrored course “Introduction to Generative AI and Machine Learning” must obtain the instructor's approval.",
+  "studentDashboard.notice.schedule":
+    "The schedule for completing the “Mid-term Withdrawal Application Form” and for the instructor's approval is provided above for your reference.",
+  "studentDashboard.notice.deletion":
+    "By the end of business on 11/19 (Wed), the NTU COOL team will remove students whose withdrawal has been approved by the instructor, based on the results of this form.",
+  "studentDashboard.notice.attentionTitle": "Please note the following:",
+  "studentDashboard.notice.attention1":
+    "The “Mid-term Withdrawal Application Form” <r>can only be submitted once</r>, and <r>cannot be withdrawn</r> after submission. Before submitting, please make sure to check the <r>course name</r> on the form to confirm it is the course you intend to withdraw from, and verify that all entries are correct. <r>Please make sure everything is correct before submitting</r>.",
+  "studentDashboard.notice.attention2":
+    "Per TAICA Program Office rules, <r>once a student completes the “Mid-term Withdrawal Application Form” on NTU COOL and receives the instructor's approval, the withdrawal is considered complete.</r> Students must then follow their own school's course-drop procedures to complete the withdrawal on their end. If a student receives instructor approval but does not follow through with their school's withdrawal procedures, the student is responsible for any resulting consequences.",
+  "studentDashboard.notice.closing1": "With the above in mind,",
+  "studentDashboard.notice.closing2":
+    "please feel free to email or call the NTU COOL team with any questions about filling out the form;",
+  "studentDashboard.notice.closing3":
+    "for administrative questions about mid-term withdrawal, please contact your school's TAICA liaison. Thank you.",
+  "studentDashboard.notice.signature1": "NTU COOL Platform Team",
+  "studentDashboard.notice.signature2": "ntucool@ntu.edu.tw",
+  "studentDashboard.notice.signature3": "02-3366-3367 #594",
+  "studentDashboard.checkbox.confirm":
+    "I have read the withdrawal policy and confirm I want to withdraw from this course",
+  "studentDashboard.submit": "Submit Application",
 };

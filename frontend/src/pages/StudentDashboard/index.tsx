@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useIntl } from "react-intl";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -25,6 +26,7 @@ export const StudentDashboard = ({
   onSubmit,
   courseSettings,
 }: StudentDashboardProps) => {
+  const { formatMessage: f } = useIntl();
   const [reason, setReason] = useState("");
   const [confirmed, setConfirmed] = useState(false);
 
@@ -48,7 +50,9 @@ export const StudentDashboard = ({
   return (
     <Box sx={{ padding: "24px 24px 64px" }}>
       <Stack direction="row" spacing={3} sx={{ alignItems: "center", mb: 3 }}>
-        <Typography variant="h1">停修申請</Typography>
+        <Typography variant="h1">
+          {f({ id: "studentDashboard.title" })}
+        </Typography>
         <Chip label={application.status} />
       </Stack>
 
@@ -57,13 +61,15 @@ export const StudentDashboard = ({
           <Stack spacing={2}>
             <Box>
               <Typography variant="body1" sx={{ lineHeight: 1.75 }}>
-                課程名稱：深度學習 Deep Learning
+                {f({ id: "studentDashboard.field.courseName" })}：深度學習 Deep
+                Learning
               </Typography>
               <Typography variant="body1" sx={{ lineHeight: 1.75 }}>
-                班別：國立成功大學
+                {f({ id: "studentDashboard.field.section" })}：國立成功大學
               </Typography>
               <Typography variant="body1" sx={{ lineHeight: 1.75 }}>
-                授課教師：彭文孝、陳永昇、謝秉均
+                {f({ id: "studentDashboard.field.teachers" })}
+                ：彭文孝、陳永昇、謝秉均
               </Typography>
             </Box>
 
@@ -76,13 +82,14 @@ export const StudentDashboard = ({
 
             <Stack spacing={0.25}>
               <Typography variant="caption" sx={{ lineHeight: 1.66 }}>
-                學生姓名：陳O佑
+                {f({ id: "studentDashboard.field.studentName" })}：陳O佑
               </Typography>
               <Typography variant="caption" sx={{ lineHeight: 1.66 }}>
-                登入ID：F34097391@mail.ncku.edu.tw
+                {f({ id: "studentDashboard.field.loginId" })}
+                ：F34097391@mail.ncku.edu.tw
               </Typography>
               <Typography variant="caption" sx={{ lineHeight: 1.66 }}>
-                學號：成大_F34097391
+                {f({ id: "studentDashboard.field.studentId" })}：成大_F34097391
               </Typography>
             </Stack>
 
@@ -101,7 +108,7 @@ export const StudentDashboard = ({
 
           <Stack spacing={1}>
             <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-              申請停修注意事項
+              {f({ id: "studentDashboard.notice.title" })}
             </Typography>
             <Paper variant="outlined" sx={{ padding: 2 }}>
               {cs.notes ? (
@@ -131,7 +138,7 @@ export const StudentDashboard = ({
               }
               label={
                 <Typography variant="caption">
-                  我已詳讀停修規範並確認停修該課程
+                  {f({ id: "studentDashboard.checkbox.confirm" })}
                   <Box component="span" sx={{ color: "error.light" }}>
                     *
                   </Box>
@@ -148,7 +155,7 @@ export const StudentDashboard = ({
               disabled={isDisabled}
               onClick={() => onSubmit?.(reason)}
             >
-              提交申請
+              {f({ id: "studentDashboard.submit" })}
             </Button>
           </Box>
         )}
