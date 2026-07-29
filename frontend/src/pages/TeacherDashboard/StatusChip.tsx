@@ -36,7 +36,7 @@ export const StatusChip = ({
   return (
     <Chip
       label={label}
-      size="small"
+      size="medium"
       variant="outlined"
       color={style.color}
       sx={style.sx}

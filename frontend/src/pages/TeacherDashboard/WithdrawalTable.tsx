@@ -114,7 +114,7 @@ export const WithdrawalTable = ({
                     backgroundColor: "#f5f5f5",
                     whiteSpace: "nowrap",
                     ...(col.key === "reason"
-                      ? { minWidth: col.width }
+                      ? { minWidth: col.width, width: col.width }
                       : { width: col.width }),
                   }}
                 >
@@ -210,7 +210,7 @@ export const WithdrawalTable = ({
                   <TableCell sx={{ ...cellSx, verticalAlign: "middle" }}>
                     <DateTimeCell value={s.applyTime} />
                   </TableCell>
-                  <TableCell sx={{ ...cellSx, overflow: "hidden" }}>
+                  <TableCell sx={{ ...cellSx }}>
                     <TruncatedReason
                       text={s.reason}
                       onReadMore={() => onReview(s)}

@@ -150,6 +150,7 @@ export const FilterBar = ({
           variant="outlined"
           color="success"
           disabled={!hasSelections}
+          sx={{ fontWeight: 500 }}
           onClick={onApprove}
         >
           {f({ id: "teacherDashboard.withdrawal.approve" })}
@@ -159,6 +160,7 @@ export const FilterBar = ({
           variant="outlined"
           color="error"
           disabled={!hasSelections}
+          sx={{ fontWeight: 500 }}
           onClick={onDecline}
         >
           {f({ id: "teacherDashboard.withdrawal.decline" })}

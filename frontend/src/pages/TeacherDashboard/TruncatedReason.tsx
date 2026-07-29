@@ -79,7 +79,7 @@ export const TruncatedReason = ({ text, onReadMore }: TruncatedReasonProps) => {
                 border: "none",
                 cursor: "pointer",
                 padding: 0,
-                fontSize: 12,
+                fontSize: 14,
                 color: "#757575",
                 fontFamily: "inherit",
                 whiteSpace: "nowrap",
