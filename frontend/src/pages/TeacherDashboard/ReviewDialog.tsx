@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useIntl } from "react-intl";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -9,6 +10,8 @@ import Radio from "@mui/material/Radio";
 import { BaseDialog } from "../../cool-ui/components/dialogs/BaseDialog";
 
 import { type Withdrawal } from "../../models";
+
+const maxReplyLength = 500;
 
 type TicketDialogProps = {
   courseName: string;
@@ -29,6 +32,8 @@ export const TicketReviewDialog = ({
 }: TicketDialogProps) => {
   const [reply, setReply] = useState("");
   const { formatMessage: f } = useIntl();
+
+  console.log(decision);
 
   return (
     <BaseDialog
@@ -67,13 +72,19 @@ export const TicketReviewDialog = ({
           <Typography variant="body2">
             {f({ id: "teacherDashboard.ticket.reason.label" })}
           </Typography>
-          <TextField
-            value={withdrawal.reason}
-            multiline
-            minRows={3}
-            fullWidth
-            slotProps={{ input: { readOnly: true } }}
-          />
+          <Paper
+            variant="outlined"
+            sx={{
+              padding: 1.5,
+              minHeight: "4.5em",
+              fontSize: 14,
+              color: "text.secondary",
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+            }}
+          >
+            {withdrawal.reason}
+          </Paper>
         </Box>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
@@ -82,7 +93,7 @@ export const TicketReviewDialog = ({
             </Typography>
             <RadioGroup
               row
-              value={decision}
+              value={undefined} // TODO: fix logic in radio button
               onChange={(e) =>
                 onDecisionChange(e.target.value as "approve" | "decline")
               }
@@ -108,6 +119,13 @@ export const TicketReviewDialog = ({
             fullWidth
             slotProps={{ inputLabel: { shrink: true } }}
           />
+          <Typography
+            variant="caption"
+            color="textSecondary"
+            sx={{ alignSelf: "flex-end" }}
+          >
+            {reply.length} / {maxReplyLength}
+          </Typography>
         </Box>
       </Box>
     </BaseDialog>
@@ -127,8 +145,6 @@ type BatchReviewDialog = {
   onConfirm: () => void;
   onCancel: () => void;
 };
-
-const maxReplyLength = 500;
 
 export const BatchReviewDialog = ({
   actionType,
