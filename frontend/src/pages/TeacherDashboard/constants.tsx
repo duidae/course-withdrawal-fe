@@ -1,10 +1,11 @@
 import { type ReactNode } from "react";
+import { BaseWithdrawalStatus } from "../../models";
 
 export const statusOrder: Record<string, number> = {
-  待審核: 1,
-  逾期審核: 2,
-  同意: 3,
-  不同意: 4,
+  [BaseWithdrawalStatus.PENDING]: 1,
+  [BaseWithdrawalStatus.OVERDUE]: 2,
+  [BaseWithdrawalStatus.APPROVED]: 3,
+  [BaseWithdrawalStatus.DECLINED]: 4,
 };
 
 export const pendingCountFormatter = {
