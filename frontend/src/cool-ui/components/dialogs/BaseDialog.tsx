@@ -93,7 +93,11 @@ export const BaseDialog: FC<BaseDialogProps> = (props: BaseDialogProps) => {
         {(showCancelButton || showConfirmButton) && (
           <DialogActions>
             {showCancelButton && (
-              <Button variant="text" onClick={props.onCancel}>
+              <Button
+                variant="text"
+                onClick={props.onCancel}
+                sx={{ fontWeight: 500 }}
+              >
                 {props.cancelBtnText}
               </Button>
             )}
@@ -103,6 +107,7 @@ export const BaseDialog: FC<BaseDialogProps> = (props: BaseDialogProps) => {
                 color={props.confirmBtnColor ?? "primary"}
                 disabled={props.disableConfirmBtn ?? false}
                 onClick={props.onConfirm}
+                sx={{ fontWeight: 500 }}
               >
                 {props.confirmBtnText}
               </Button>

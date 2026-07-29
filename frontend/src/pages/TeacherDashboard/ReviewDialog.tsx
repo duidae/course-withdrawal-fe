@@ -128,6 +128,8 @@ type BatchReviewDialog = {
   onCancel: () => void;
 };
 
+const maxReplyLength = 500;
+
 export const BatchReviewDialog = ({
   actionType,
   onConfirm,
@@ -151,7 +153,14 @@ export const BatchReviewDialog = ({
       onCancel={onCancel}
       cancelBtnText={f({ id: "teacherDashboard.ticket.cancel" })}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          height: "100%",
+        }}
+      >
         <Typography variant="body1">
           {f(
             {
@@ -165,15 +174,44 @@ export const BatchReviewDialog = ({
             },
           )}
         </Typography>
-        <TextField
-          value={reply}
-          label={f({ id: "teacherDashboard.batch.comment.label" })}
-          multiline
-          minRows={3}
-          onChange={(e) => setReply(e.target.value)}
-          fullWidth
-          slotProps={{ inputLabel: { shrink: true } }}
-        />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            height: "100%",
+          }}
+        >
+          <TextField
+            value={reply}
+            label={f({ id: "teacherDashboard.batch.comment.label" })}
+            multiline
+            onChange={(e) => setReply(e.target.value.slice(0, maxReplyLength))}
+            fullWidth
+            slotProps={{
+              inputLabel: { shrink: true },
+              htmlInput: { maxLength: maxReplyLength },
+            }}
+            sx={{
+              flex: 1,
+              "& .MuiInputBase-root": {
+                height: "100%",
+                alignItems: "flex-start",
+              },
+              "& .MuiInputBase-input": {
+                height: "100% !important",
+                overflow: "auto",
+              },
+            }}
+          />
+          <Typography
+            variant="caption"
+            color="textSecondary"
+            sx={{ alignSelf: "flex-end" }}
+          >
+            {reply.length} / {maxReplyLength}
+          </Typography>
+        </Box>
       </Box>
     </BaseDialog>
   );

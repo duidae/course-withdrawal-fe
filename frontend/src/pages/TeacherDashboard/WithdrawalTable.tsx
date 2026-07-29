@@ -267,6 +267,19 @@ export const WithdrawalTable = ({
             {f({ id: "teacherDashboard.table.rowsPerPage" })}
           </Typography>
         }
+        slotProps={{
+          select: {
+            MenuProps: {
+              sx: {
+                "& .MuiMenuItem-root": { fontSize: 12 },
+              },
+            },
+          },
+        }}
+        sx={{
+          "& .MuiTablePagination-select": { fontSize: 12 },
+          "& .MuiTablePagination-displayedRows": { fontSize: 12 },
+        }}
       />
     </Box>
   );
