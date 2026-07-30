@@ -131,7 +131,7 @@ export const StudentDashboard = ({
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
                 {f({ id: "studentDashboard.notice.title" })}
               </Typography>
-              <Paper variant="outlined" sx={{ padding: 2 }}>
+              <Paper variant="outlined">
                 {courseSettings.notes ? (
                   <Box
                     className="ql-editor"
