@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
@@ -9,35 +9,52 @@ import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import CircularProgress from "@mui/material/CircularProgress";
+import { getStudent } from "../../apis/course-withdrawal.api";
 import { NoticeContent } from "./NoticeContent";
 import { CourseTimeline } from "./CourseTimeline";
 import { ApplicationPanel } from "./ApplicationPanel";
 import { type CourseSettings } from "./types";
-
-export type Application = {
-  name: string;
-  loginID: string;
-  studentID: string;
-  status: string;
-  reason?: string;
-  applyTime?: string;
-  comment?: string;
-  approver?: string;
-  reviewTime?: string;
-};
+import { type Withdrawal } from "../../models";
 
 type StudentDashboardProps = {
-  application: Application;
+  studentId: number;
   courseSettings: CourseSettings;
 };
 
 export const StudentDashboard = ({
-  application,
+  studentId,
   courseSettings,
 }: StudentDashboardProps) => {
   const { formatMessage: f } = useIntl();
+  const [application, setApplication] = useState<Withdrawal | undefined>();
+  const [isLoading, setIsLoading] = useState(true);
   const [reason, setReason] = useState("");
   const [confirmed, setConfirmed] = useState(false);
+
+  useEffect(() => {
+    const fetchApplication = async () => {
+      setIsLoading(true);
+      const result = await getStudent({ id: studentId });
+      setApplication(result);
+      setIsLoading(false);
+    };
+    fetchApplication();
+  }, [studentId]);
+
+  if (isLoading || !application) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          padding: "64px 24px",
+        }}
+      >
+        <CircularProgress size={32} />
+      </Box>
+    );
+  }
 
   const hasSubmitted = application.status !== "未申請";
   const isDisabled = !reason.trim() || !confirmed;
@@ -105,11 +122,11 @@ export const StudentDashboard = ({
               </Typography>
               <Typography variant="caption" sx={{ lineHeight: 1.66 }}>
                 {f({ id: "studentDashboard.field.loginId" })}：
-                {application.loginID}
+                {application.loginId}
               </Typography>
               <Typography variant="caption" sx={{ lineHeight: 1.66 }}>
                 {f({ id: "studentDashboard.field.studentId" })}：
-                {application.studentID}
+                {application.studentId}
               </Typography>
             </Stack>
 

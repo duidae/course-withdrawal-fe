@@ -25,6 +25,26 @@ const CourseLayout: FC = () => {
   );
 };
 
+const StudentDashboardRoute: FC = () => {
+  const { studentId } = useParams();
+
+  return (
+    <StudentDashboard
+      studentId={Number(studentId)}
+      courseSettings={{
+        name: "深度學習 Deep Learning",
+        section: "國立成功大學",
+        teachers: ["彭文孝", "陳永昇", "謝秉均"],
+        st: "2026/07/01 00:00",
+        et: "2026/07/25 23:59",
+        ad: "2026/08/08 23:59",
+        notes: "",
+        isEnabled: true,
+      }}
+    />
+  );
+};
+
 const AppRoutes: FC = () => {
   const { formatMessage: f } = useIntl();
   const appName = f({ id: "app.name" });
@@ -39,28 +59,8 @@ const AppRoutes: FC = () => {
         <Route path="/courses/:id" element={<CourseLayout />}>
           <Route path="teacher" element={<TeacherDashboard />} />
           <Route
-            path="students/:id"
-            element={
-              <StudentDashboard
-                application={{
-                  name: "陳O佑",
-                  loginID: "F34097391@mail.ncku.edu.tw",
-                  studentID: "成大_F34097391",
-                  status: "未申請",
-                  reason: "",
-                }}
-                courseSettings={{
-                  name: "深度學習 Deep Learning",
-                  section: "國立成功大學",
-                  teachers: ["彭文孝", "陳永昇", "謝秉均"],
-                  st: "2026/07/01 00:00",
-                  et: "2026/07/25 23:59",
-                  ad: "2026/08/08 23:59",
-                  notes: "",
-                  isEnabled: true,
-                }}
-              />
-            }
+            path="students/:studentId"
+            element={<StudentDashboardRoute />}
           />
         </Route>
         {/*

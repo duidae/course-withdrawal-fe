@@ -8,6 +8,10 @@ type GetWithdrawalsParams = {
   pageSize?: number;
 };
 
+type GetStudentParams = {
+  id: number;
+};
+
 type GetCourseInfoParams = {
   courseId: string;
 };
@@ -39,6 +43,15 @@ const getWithdrawals = async (
   return { data, total: INIT_STUDENTS.length, page, pageSize };
 };
 
+const getStudent = async (
+  params: GetStudentParams,
+): Promise<Withdrawal | undefined> => {
+  const { id } = params;
+  //const response = await request.get<Withdrawal>(`/api/withdrawal/${id}`);
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  return INIT_STUDENTS.find((s) => s.id === id);
+};
+
 const getCourseInfo = async (
   params: GetCourseInfoParams,
 ): Promise<CourseInfo> => {
@@ -51,9 +64,10 @@ const getCourseInfo = async (
   return { courseName: course?.courseName ?? "" };
 };
 
-export { getWithdrawals, getCourseInfo };
+export { getWithdrawals, getStudent, getCourseInfo };
 export type {
   GetWithdrawalsParams,
+  GetStudentParams,
   PaginatedResult,
   GetCourseInfoParams,
   CourseInfo,
