@@ -13,7 +13,7 @@ type AccordionItemProps = {
 export const AccordionItem = ({ title, children }: AccordionItemProps) => (
   <Accordion disableGutters elevation={0} square>
     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-      <Typography variant="caption">{title}</Typography>
+      <Typography variant="body1">{title}</Typography>
     </AccordionSummary>
     <AccordionDetails>{children}</AccordionDetails>
   </Accordion>
