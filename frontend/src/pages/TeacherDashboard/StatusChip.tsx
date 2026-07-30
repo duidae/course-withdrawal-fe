@@ -1,3 +1,4 @@
+import { useIntl } from "react-intl";
 import Chip, { type ChipProps } from "@mui/material/Chip";
 import { type SxProps, type Theme } from "@mui/material/styles";
 import { BaseWithdrawalStatus } from "../../models";
@@ -22,20 +23,28 @@ const getChipStyle = (status: string): ChipStyle => {
   }
 };
 
-type StatusChipProps = {
-  status: string;
-  label?: string;
+export const getStatusI18nKey = (status: string) => {
+  const statusLabelIds: Record<string, string> = {
+    [BaseWithdrawalStatus.PENDING]: "teacherDashboard.status.pending",
+    [BaseWithdrawalStatus.OVERDUE]: "teacherDashboard.status.overdue",
+    [BaseWithdrawalStatus.APPROVED]: "teacherDashboard.status.approved",
+    [BaseWithdrawalStatus.DECLINED]: "teacherDashboard.status.declined",
+  };
+  return statusLabelIds[status] ?? status;
 };
 
-export const StatusChip = ({
-  status,
-  label: labelOverride,
-}: StatusChipProps) => {
-  const label = labelOverride ?? status;
+type StatusChipProps = {
+  status: string;
+};
+
+export const StatusChip = ({ status }: StatusChipProps) => {
+  const { formatMessage: f } = useIntl();
+  const i18nKey = getStatusI18nKey(status);
   const style = getChipStyle(status);
+
   return (
     <Chip
-      label={label}
+      label={f({ id: i18nKey })}
       size="medium"
       variant="outlined"
       color={style.color}

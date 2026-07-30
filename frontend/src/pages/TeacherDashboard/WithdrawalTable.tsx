@@ -22,7 +22,6 @@ import { type Withdrawal } from "../../models";
 
 export type WithdrawalTableRow = Withdrawal & {
   displayDeadline: string;
-  statusLabel: string;
 };
 
 type WithdrawalTableProps = {
@@ -217,7 +216,7 @@ export const WithdrawalTable = ({
                     />
                   </TableCell>
                   <TableCell sx={cellSx}>
-                    <StatusChip status={s.status} label={s.statusLabel} />
+                    <StatusChip status={s.status} />
                   </TableCell>
                   <TableCell sx={{ ...cellSx, verticalAlign: "middle" }}>
                     <DateTimeCell value={s.displayDeadline} />

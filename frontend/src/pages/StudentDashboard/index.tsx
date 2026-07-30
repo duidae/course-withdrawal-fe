@@ -5,17 +5,17 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Divider from "@mui/material/Divider";
-import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import CircularProgress from "@mui/material/CircularProgress";
 import { getStudent } from "../../apis/course-withdrawal.api";
+import { StatusChip } from "../TeacherDashboard/StatusChip";
 import { NoticeContent } from "./NoticeContent";
 import { CourseTimeline } from "./CourseTimeline";
 import { ApplicationPanel } from "./ApplicationPanel";
 import { type CourseSettings } from "./types";
-import { type Withdrawal } from "../../models";
+import { BaseWithdrawalStatus, type Withdrawal } from "../../models";
 
 type StudentDashboardProps = {
   studentId: number;
@@ -27,7 +27,7 @@ export const StudentDashboard = ({
   courseSettings,
 }: StudentDashboardProps) => {
   const { formatMessage: f } = useIntl();
-  const [application, setApplication] = useState<Withdrawal | undefined>();
+  const [student, setStudent] = useState<Withdrawal | undefined>();
   const [isLoading, setIsLoading] = useState(true);
   const [reason, setReason] = useState("");
   const [confirmed, setConfirmed] = useState(false);
@@ -36,13 +36,13 @@ export const StudentDashboard = ({
     const fetchApplication = async () => {
       setIsLoading(true);
       const result = await getStudent({ id: studentId });
-      setApplication(result);
+      setStudent(result);
       setIsLoading(false);
     };
     fetchApplication();
   }, [studentId]);
 
-  if (isLoading || !application) {
+  if (isLoading || !student) {
     return (
       <Box
         sx={{
@@ -56,7 +56,9 @@ export const StudentDashboard = ({
     );
   }
 
-  const hasSubmitted = application.status !== "未申請";
+  const hasSubmitted = (
+    Object.values(BaseWithdrawalStatus) as string[]
+  ).includes(student.status);
   const isDisabled = !reason.trim() || !confirmed;
   const isSectionEnabled = courseSettings.isEnabled !== false;
   const isAppExpired =
@@ -67,9 +69,9 @@ export const StudentDashboard = ({
         new Date(courseSettings.et.replaceAll("/", "-").replace(" ", "T")) <
           new Date();
   const isReviewed =
-    application.status === "同意" ||
-    application.status === "不同意" ||
-    application.status === "逾期審核";
+    student.status === BaseWithdrawalStatus.APPROVED ||
+    student.status === BaseWithdrawalStatus.DECLINED ||
+    student.status === BaseWithdrawalStatus.OVERDUE;
 
   const canSubmit = !hasSubmitted && !isAppExpired && isSectionEnabled;
 
@@ -83,11 +85,7 @@ export const StudentDashboard = ({
         <Typography variant="h1">
           {f({ id: "studentDashboard.title" })}
         </Typography>
-        <Chip
-          size="medium"
-          label={application.status}
-          sx={{ color: "text.secondary" }}
-        />
+        <StatusChip status={student.status} />
       </Stack>
 
       <Stack spacing={3}>
@@ -118,15 +116,14 @@ export const StudentDashboard = ({
             <Stack spacing={0.5}>
               <Typography variant="caption" sx={{ lineHeight: 1.66 }}>
                 {f({ id: "studentDashboard.field.studentName" })}：
-                {application.name}
+                {student.name}
               </Typography>
               <Typography variant="caption" sx={{ lineHeight: 1.66 }}>
-                {f({ id: "studentDashboard.field.loginId" })}：
-                {application.loginId}
+                {f({ id: "studentDashboard.field.loginId" })}：{student.loginId}
               </Typography>
               <Typography variant="caption" sx={{ lineHeight: 1.66 }}>
                 {f({ id: "studentDashboard.field.studentId" })}：
-                {application.studentId}
+                {student.studentId}
               </Typography>
             </Stack>
 
@@ -135,7 +132,7 @@ export const StudentDashboard = ({
               hasSubmitted={hasSubmitted}
               isAppExpired={isAppExpired}
               isReviewed={isReviewed}
-              application={application}
+              application={student}
               reason={reason}
               onReasonChange={setReason}
             />

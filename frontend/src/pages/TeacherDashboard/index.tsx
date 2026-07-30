@@ -49,16 +49,6 @@ export const TeacherDashboard: FC = () => {
   const [selected, setSelected] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const getStatusLabel = (status: string) => {
-    const statusLabelIds: Record<string, string> = {
-      [WithdrawalStatus.PENDING]: "teacherDashboard.status.pending",
-      [WithdrawalStatus.OVERDUE]: "teacherDashboard.status.overdue",
-      [WithdrawalStatus.APPROVED]: "teacherDashboard.status.approved",
-      [WithdrawalStatus.DECLINED]: "teacherDashboard.status.declined",
-    };
-    return statusLabelIds[status] ? f({ id: statusLabelIds[status] }) : status;
-  };
-
   const statusOptions = [
     {
       value: WithdrawalStatus.ALL,
@@ -195,7 +185,7 @@ export const TeacherDashboard: FC = () => {
         s.studentId,
         s.applyTime,
         s.reason,
-        getStatusLabel(s.status),
+        s.status,
         deadline,
         s.reviewTime || "",
         s.approver || "",
@@ -281,7 +271,6 @@ export const TeacherDashboard: FC = () => {
       s._orig === WithdrawalStatus.OVERDUE
         ? s.deadline
         : getSecForSchool(s.school).ad,
-    statusLabel: getStatusLabel(s.status),
   }));
 
   return (
