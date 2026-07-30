@@ -44,6 +44,9 @@ const AppRoutes: FC = () => {
               <StudentDashboard
                 application={{ status: "未申請", reason: "" }}
                 courseSettings={{
+                  name: "深度學習 Deep Learning",
+                  section: "國立成功大學",
+                  teachers: ["彭文孝", "陳永昇", "謝秉均"],
                   st: "2026/07/01 00:00",
                   et: "2026/07/25 23:59",
                   ad: "2026/08/08 23:59",

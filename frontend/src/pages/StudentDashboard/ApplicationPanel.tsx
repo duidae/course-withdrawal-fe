@@ -18,6 +18,8 @@ type ApplicationPanelProps = {
   onReasonChange: (value: string) => void;
 };
 
+const defaultCharCount = 500;
+
 export const ApplicationPanel = ({
   sectionEnabled,
   hasSubmitted,
@@ -113,14 +115,10 @@ export const ApplicationPanel = ({
         }
       />
       <Typography
-        variant="caption"
-        color="text.secondary"
-        sx={{ textAlign: "right" }}
+        variant="body1"
+        sx={{ textAlign: "right", color: "text.secondary" }}
       >
-        {f(
-          { id: "studentDashboard.panel.charCount" },
-          { count: reason.length },
-        )}
+        {`${reason.length} / ${defaultCharCount}`}
       </Typography>
     </Stack>
   );

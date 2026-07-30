@@ -1,4 +1,7 @@
 export type CourseSettings = {
+  name: string;
+  section: string;
+  teachers: string[];
   st: string;
   et: string;
   ad: string;

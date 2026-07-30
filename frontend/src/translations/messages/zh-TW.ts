@@ -69,7 +69,6 @@ export const messages_Zh: Record<string, string> = {
   "studentDashboard.panel.expiredTitle": "已超過停修申請時間",
   "studentDashboard.panel.expiredDesc":
     "您已無法透過 COOL 申請此課程停修，請聯繫課程授課教師。",
-  "studentDashboard.panel.charCount": "{count} / 500",
   "studentDashboard.notice.title": "申請停修注意事項",
   "studentDashboard.notice.greeting": "各位 TAICA 盟校同學好：",
   "studentDashboard.notice.rule":

@@ -72,7 +72,6 @@ export const messages_En: Record<string, string> = {
     "Withdrawal Application Period Has Ended",
   "studentDashboard.panel.expiredDesc":
     "You can no longer apply for withdrawal through COOL. Please contact the course instructor.",
-  "studentDashboard.panel.charCount": "{count} / 500",
   "studentDashboard.notice.title": "Withdrawal Application Notice",
   "studentDashboard.notice.greeting":
     "Dear students from TAICA partner schools:",

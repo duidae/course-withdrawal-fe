@@ -63,23 +63,28 @@ export const StudentDashboard = ({
         <Typography variant="h1">
           {f({ id: "studentDashboard.title" })}
         </Typography>
-        <Chip label={application.status} />
+        <Chip
+          size="medium"
+          label={application.status}
+          sx={{ color: "text.secondary" }}
+        />
       </Stack>
 
       <Stack spacing={2}>
         <Stack spacing={5}>
           <Stack spacing={2}>
             <Box>
-              <Typography variant="body1" sx={{ lineHeight: 1.75 }}>
-                {f({ id: "studentDashboard.field.courseTitle" })}：深度學習 Deep
-                Learning
+              <Typography variant="subtitle1" sx={{ lineHeight: 1.75 }}>
+                {f({ id: "studentDashboard.field.courseTitle" })}：
+                {courseSettings.name}
               </Typography>
-              <Typography variant="body1" sx={{ lineHeight: 1.75 }}>
-                {f({ id: "studentDashboard.field.section" })}：國立成功大學
+              <Typography variant="subtitle2" sx={{ lineHeight: 1.75 }}>
+                {f({ id: "studentDashboard.field.section" })}：
+                {courseSettings.section}
               </Typography>
-              <Typography variant="body1" sx={{ lineHeight: 1.75 }}>
-                {f({ id: "studentDashboard.field.teachers" })}
-                ：彭文孝、陳永昇、謝秉均
+              <Typography variant="subtitle2" sx={{ lineHeight: 1.75 }}>
+                {f({ id: "studentDashboard.field.teachers" })}：
+                {courseSettings.teachers.join("、")}
               </Typography>
             </Box>
 
