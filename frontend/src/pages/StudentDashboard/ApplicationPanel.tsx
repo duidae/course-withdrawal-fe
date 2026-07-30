@@ -46,9 +46,11 @@ export const ApplicationPanel = ({
     const reasonAccordion = (
       <AccordionItem title={f({ id: "studentDashboard.field.reason" })}>
         <Stack spacing={1}>
-          <Typography variant="caption">{application.reason}</Typography>
+          <Typography variant="caption" sx={{ color: "text.secondary" }}>
+            {application.reason}
+          </Typography>
           {application.applyTime && (
-            <Typography variant="caption">
+            <Typography variant="caption" sx={{ color: "text.secondary" }}>
               {f(
                 { id: "studentDashboard.panel.applyTime" },
                 { time: application.applyTime },
@@ -67,12 +69,12 @@ export const ApplicationPanel = ({
             title={f({ id: "studentDashboard.panel.reviewComment" })}
           >
             <Stack spacing={0.5}>
-              <Typography variant="caption">
+              <Typography variant="caption" sx={{ color: "text.secondary" }}>
                 {application.comment ||
                   f({ id: "studentDashboard.panel.noComment" })}
               </Typography>
               {application.approver && (
-                <Typography variant="caption">
+                <Typography variant="caption" sx={{ color: "text.secondary" }}>
                   {f(
                     { id: "studentDashboard.panel.approver" },
                     { name: application.approver },
@@ -80,7 +82,7 @@ export const ApplicationPanel = ({
                 </Typography>
               )}
               {application.reviewTime && (
-                <Typography variant="caption">
+                <Typography variant="caption" sx={{ color: "text.secondary" }}>
                   {f(
                     { id: "studentDashboard.panel.reviewTime" },
                     { time: application.reviewTime },
