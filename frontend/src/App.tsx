@@ -42,7 +42,13 @@ const AppRoutes: FC = () => {
             path="students/:id"
             element={
               <StudentDashboard
-                application={{ status: "未申請", reason: "" }}
+                application={{
+                  name: "陳O佑",
+                  loginID: "F34097391@mail.ncku.edu.tw",
+                  studentID: "成大_F34097391",
+                  status: "未申請",
+                  reason: "",
+                }}
                 courseSettings={{
                   name: "深度學習 Deep Learning",
                   section: "國立成功大學",

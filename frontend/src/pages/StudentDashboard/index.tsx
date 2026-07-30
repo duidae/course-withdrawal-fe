@@ -15,6 +15,9 @@ import { ApplicationPanel } from "./ApplicationPanel";
 import { type CourseSettings } from "./types";
 
 export type Application = {
+  name: string;
+  loginID: string;
+  studentID: string;
   status: string;
   reason?: string;
   applyTime?: string;
@@ -70,8 +73,8 @@ export const StudentDashboard = ({
         />
       </Stack>
 
-      <Stack spacing={2}>
-        <Stack spacing={5}>
+      <Stack spacing={3}>
+        <Stack spacing={3}>
           <Stack spacing={2}>
             <Box>
               <Typography variant="subtitle1" sx={{ lineHeight: 1.75 }}>
@@ -95,16 +98,18 @@ export const StudentDashboard = ({
               ad={courseSettings.ad}
             />
 
-            <Stack spacing={0.25}>
+            <Stack spacing={0.5}>
               <Typography variant="caption" sx={{ lineHeight: 1.66 }}>
-                {f({ id: "studentDashboard.field.studentName" })}：陳O佑
+                {f({ id: "studentDashboard.field.studentName" })}：
+                {application.name}
               </Typography>
               <Typography variant="caption" sx={{ lineHeight: 1.66 }}>
-                {f({ id: "studentDashboard.field.loginId" })}
-                ：F34097391@mail.ncku.edu.tw
+                {f({ id: "studentDashboard.field.loginId" })}：
+                {application.loginID}
               </Typography>
               <Typography variant="caption" sx={{ lineHeight: 1.66 }}>
-                {f({ id: "studentDashboard.field.studentId" })}：成大_F34097391
+                {f({ id: "studentDashboard.field.studentId" })}：
+                {application.studentID}
               </Typography>
             </Stack>
 
@@ -121,46 +126,48 @@ export const StudentDashboard = ({
 
           <Divider />
 
-          <Stack spacing={1}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-              {f({ id: "studentDashboard.notice.title" })}
-            </Typography>
-            <Paper variant="outlined" sx={{ padding: 2 }}>
-              {courseSettings.notes ? (
-                <Box
-                  className="ql-editor"
-                  sx={{
-                    padding: 0,
-                    fontSize: 16,
-                    lineHeight: 1.5,
-                    minHeight: "auto",
-                  }}
-                  dangerouslySetInnerHTML={{ __html: courseSettings.notes }}
-                />
-              ) : (
-                <NoticeContent />
-              )}
-            </Paper>
-          </Stack>
+          <Stack spacing={2}>
+            <Stack spacing={1}>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                {f({ id: "studentDashboard.notice.title" })}
+              </Typography>
+              <Paper variant="outlined" sx={{ padding: 2 }}>
+                {courseSettings.notes ? (
+                  <Box
+                    className="ql-editor"
+                    sx={{
+                      padding: 0,
+                      fontSize: 16,
+                      lineHeight: 1.5,
+                      minHeight: "auto",
+                    }}
+                    dangerouslySetInnerHTML={{ __html: courseSettings.notes }}
+                  />
+                ) : (
+                  <NoticeContent />
+                )}
+              </Paper>
+            </Stack>
 
-          {canSubmit && (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={confirmed}
-                  onChange={(e) => setConfirmed(e.target.checked)}
-                />
-              }
-              label={
-                <Typography variant="caption">
-                  {f({ id: "studentDashboard.checkbox.confirm" })}
-                  <Box component="span" sx={{ color: "error.light" }}>
-                    *
-                  </Box>
-                </Typography>
-              }
-            />
-          )}
+            {canSubmit && (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={confirmed}
+                    onChange={(e) => setConfirmed(e.target.checked)}
+                  />
+                }
+                label={
+                  <Typography variant="caption">
+                    {f({ id: "studentDashboard.checkbox.confirm" })}
+                    <Box component="span" sx={{ color: "error.light" }}>
+                      *
+                    </Box>
+                  </Typography>
+                }
+              />
+            )}
+          </Stack>
         </Stack>
 
         {canSubmit && (
@@ -169,6 +176,7 @@ export const StudentDashboard = ({
               variant="contained"
               disabled={isDisabled}
               onClick={onSubmit}
+              sx={{ fontWeight: 500 }}
             >
               {f({ id: "studentDashboard.submit" })}
             </Button>
