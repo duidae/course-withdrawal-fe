@@ -14,13 +14,6 @@ import { CourseTimeline } from "./CourseTimeline";
 import { ApplicationPanel } from "./ApplicationPanel";
 import { type CourseSettings } from "./types";
 
-const defaultCourseSettings: CourseSettings = {
-  st: "2026/07/01 00:00",
-  et: "2026/07/25 23:59",
-  ad: "2026/08/08 23:59",
-  notes: "",
-};
-
 export type Application = {
   status: string;
   reason?: string;
@@ -32,7 +25,7 @@ export type Application = {
 
 type StudentDashboardProps = {
   application: Application;
-  courseSettings?: CourseSettings;
+  courseSettings: CourseSettings;
 };
 
 export const StudentDashboard = ({
@@ -45,20 +38,20 @@ export const StudentDashboard = ({
 
   const hasSubmitted = application.status !== "未申請";
   const isDisabled = !reason.trim() || !confirmed;
-  const cs = courseSettings || defaultCourseSettings;
-  const sectionEnabled = cs.vis !== false;
+  const isSectionEnabled = courseSettings.isEnabled !== false;
   const isAppExpired =
-    !hasSubmitted && !sectionEnabled
+    !hasSubmitted && isSectionEnabled
       ? false
       : !hasSubmitted &&
-        !!cs.et &&
-        new Date(cs.et.replaceAll("/", "-").replace(" ", "T")) < new Date();
+        !!courseSettings.et &&
+        new Date(courseSettings.et.replaceAll("/", "-").replace(" ", "T")) <
+          new Date();
   const isReviewed =
     application.status === "同意" ||
     application.status === "不同意" ||
     application.status === "逾期審核";
 
-  const canSubmit = !hasSubmitted && !isAppExpired && sectionEnabled;
+  const canSubmit = !hasSubmitted && !isAppExpired && isSectionEnabled;
 
   const onSubmit = () => {
     console.log("submit");
@@ -91,10 +84,10 @@ export const StudentDashboard = ({
             </Box>
 
             <CourseTimeline
-              sectionEnabled={sectionEnabled}
-              st={cs.st}
-              et={cs.et}
-              ad={cs.ad}
+              sectionEnabled={isSectionEnabled}
+              st={courseSettings.st}
+              et={courseSettings.et}
+              ad={courseSettings.ad}
             />
 
             <Stack spacing={0.25}>
@@ -111,7 +104,7 @@ export const StudentDashboard = ({
             </Stack>
 
             <ApplicationPanel
-              sectionEnabled={sectionEnabled}
+              sectionEnabled={isSectionEnabled}
               hasSubmitted={hasSubmitted}
               isAppExpired={isAppExpired}
               isReviewed={isReviewed}
@@ -128,7 +121,7 @@ export const StudentDashboard = ({
               {f({ id: "studentDashboard.notice.title" })}
             </Typography>
             <Paper variant="outlined" sx={{ padding: 2 }}>
-              {cs.notes ? (
+              {courseSettings.notes ? (
                 <Box
                   className="ql-editor"
                   sx={{
@@ -137,7 +130,7 @@ export const StudentDashboard = ({
                     lineHeight: 1.5,
                     minHeight: "auto",
                   }}
-                  dangerouslySetInnerHTML={{ __html: cs.notes }}
+                  dangerouslySetInnerHTML={{ __html: courseSettings.notes }}
                 />
               ) : (
                 <NoticeContent />

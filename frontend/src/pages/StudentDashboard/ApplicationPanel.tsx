@@ -92,18 +92,16 @@ export const ApplicationPanel = ({
     );
   }
 
-  if (isAppExpired) {
-    return (
-      <Alert severity="error">
-        <AlertTitle>
-          {f({ id: "studentDashboard.panel.expiredTitle" })}
-        </AlertTitle>
-        {f({ id: "studentDashboard.panel.expiredDesc" })}
-      </Alert>
-    );
-  }
+  const expireAlertJSX = (
+    <Alert severity="error">
+      <AlertTitle>
+        {f({ id: "studentDashboard.panel.expiredTitle" })}
+      </AlertTitle>
+      {f({ id: "studentDashboard.panel.expiredDesc" })}
+    </Alert>
+  );
 
-  return (
+  const applicationEditorJSX = (
     <Stack spacing={1}>
       <TextField
         multiline
@@ -126,4 +124,6 @@ export const ApplicationPanel = ({
       </Typography>
     </Stack>
   );
+
+  return isAppExpired ? expireAlertJSX : applicationEditorJSX;
 };

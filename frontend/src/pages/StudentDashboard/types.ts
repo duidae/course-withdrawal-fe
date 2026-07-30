@@ -3,7 +3,7 @@ export type CourseSettings = {
   et: string;
   ad: string;
   notes: string;
-  vis?: boolean;
+  isEnabled?: boolean;
 };
 
 export type Application = {
