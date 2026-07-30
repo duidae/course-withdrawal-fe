@@ -13,6 +13,13 @@ type CourseTimelineProps = {
   ad: string;
 };
 
+const tableCellStyle = {
+  border: "1px solid",
+  borderColor: "divider",
+  padding: "6px 16px",
+  lineHeight: 1.66,
+};
+
 export const CourseTimeline = ({
   sectionEnabled,
   st,
@@ -47,7 +54,7 @@ export const CourseTimeline = ({
                   key={item.label}
                   component="th"
                   scope="col"
-                  sx={{ border: "1px solid", borderColor: "divider" }}
+                  sx={tableCellStyle}
                 >
                   <Typography variant="caption">{item.label}</Typography>
                 </TableCell>
@@ -57,10 +64,7 @@ export const CourseTimeline = ({
           <TableBody>
             <TableRow>
               {items.map((item) => (
-                <TableCell
-                  key={item.label}
-                  sx={{ border: "1px solid", borderColor: "divider" }}
-                >
+                <TableCell key={item.label} sx={tableCellStyle}>
                   <Typography variant="caption">{item.value}</Typography>
                 </TableCell>
               ))}
@@ -74,15 +78,11 @@ export const CourseTimeline = ({
           <TableBody>
             {items.map((item) => (
               <TableRow key={item.label}>
-                <TableCell
-                  component="th"
-                  scope="row"
-                  sx={{ border: "1px solid", borderColor: "divider" }}
-                >
-                  {item.label}
+                <TableCell component="th" scope="row" sx={tableCellStyle}>
+                  <Typography variant="caption">{item.label}</Typography>
                 </TableCell>
-                <TableCell sx={{ border: "1px solid", borderColor: "divider" }}>
-                  {item.value}
+                <TableCell sx={tableCellStyle}>
+                  <Typography variant="caption">{item.value}</Typography>
                 </TableCell>
               </TableRow>
             ))}
