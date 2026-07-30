@@ -10,7 +10,7 @@ import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import CircularProgress from "@mui/material/CircularProgress";
 import { getStudent } from "../../apis/course-withdrawal.api";
-import { StatusChip } from "../TeacherDashboard/StatusChip";
+import { StatusChip } from "../../components/StatusChip";
 import { NoticeContent } from "./NoticeContent";
 import { CourseTimeline } from "./CourseTimeline";
 import { ApplicationPanel } from "./ApplicationPanel";

@@ -16,7 +16,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { columns, cellSx } from "./constants";
 import { DateTimeCell } from "./DateTimeCell";
 import { TruncatedReason } from "./TruncatedReason";
-import { StatusChip } from "./StatusChip";
+import { StatusChip } from "../../components/StatusChip";
 import { WithdrawalStatus } from "./types";
 import { type Withdrawal } from "../../models";
 

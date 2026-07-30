@@ -49,6 +49,7 @@ export const messages_En: Record<string, string> = {
     "You're about to decline the withdrawal for all selected students.<br></br><br></br>Students who don't have a decision yet will be marked “Declined” and given the comment you enter below; students who already have a decision will have their existing status and comment overwritten. Are you sure you want to continue?",
   "teacherDashboard.batch.comment.label": "New Review Comment (Optional)",
   "teacherDashboard.batch.confirm": "Confirm",
+  "studentDashboard.status.notSubmitted": "Not Submitted",
   "studentDashboard.title": "Withdrawal Application",
   "studentDashboard.field.courseTitle": "Course Title",
   "studentDashboard.field.section": "Section",

@@ -47,6 +47,7 @@ export const messages_Zh: Record<string, string> = {
     "您即將對所選取的學生批次審核「不同意停修」。<br></br><br></br>尚無審核結果的學生，將新增「不同意」審核狀態及下方填寫的評語；已有審核結果的學生，現有狀態與評語將被覆蓋。確定要繼續嗎？",
   "teacherDashboard.batch.comment.label": "新的審核評語 (選填)",
   "teacherDashboard.batch.confirm": "確定",
+  "studentDashboard.status.notSubmitted": "未申請",
   "studentDashboard.title": "停修申請",
   "studentDashboard.field.courseTitle": "課程名稱",
   "studentDashboard.field.section": "班別",

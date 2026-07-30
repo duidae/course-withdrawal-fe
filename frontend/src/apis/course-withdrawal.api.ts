@@ -49,7 +49,21 @@ const getStudent = async (
   const { id } = params;
   //const response = await request.get<Withdrawal>(`/api/withdrawal/${id}`);
   await new Promise((resolve) => setTimeout(resolve, 1000));
-  return INIT_STUDENTS.find((s) => s.id === id);
+  // TODO: 未申請
+  const toApply = {
+    id: 1,
+    name: "丁O寧",
+    school: "國立臺灣科技大學",
+    studentId: "臺科大_B11000000",
+    loginId: "B11000000@mail.ntust.edu.tw",
+    applyTime: "2026/05/11 08:00",
+    deadline: "2026/05/11 08:00",
+    reason:
+      "本課程《大型語言模型與資訊安全系統》內容極具前瞻性，惟修讀後發現個人在 Transformer 架構與對抗性攻擊（Adversarial Attacks）的數學基礎尚不完備，導致在實作 LLM 弱點掃描與防禦機制時，進度明顯落後。為確保學習品質，本人決定先補強相關先修知識，待準備充分後再行挑戰，故申請停修。",
+    status: "notSubmitted",
+  };
+
+  return id ? INIT_STUDENTS.find((s) => s.id === id) : toApply;
 };
 
 const getCourseInfo = async (

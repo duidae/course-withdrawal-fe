@@ -1,7 +1,7 @@
 import { useIntl } from "react-intl";
 import Chip, { type ChipProps } from "@mui/material/Chip";
 import { type SxProps, type Theme } from "@mui/material/styles";
-import { BaseWithdrawalStatus } from "../../models";
+import { BaseWithdrawalStatus } from "../models";
 
 type ChipStyle = {
   color: ChipProps["color"];
@@ -17,9 +17,8 @@ const getChipStyle = (status: string): ChipStyle => {
     case BaseWithdrawalStatus.DECLINED:
       return { color: "error" };
     case BaseWithdrawalStatus.OVERDUE:
-      return { color: "default", sx: { color: "text.secondary" } };
     default:
-      return { color: "default" };
+      return { color: "default", sx: { color: "text.secondary" } };
   }
 };
 
@@ -29,6 +28,7 @@ export const getStatusI18nKey = (status: string) => {
     [BaseWithdrawalStatus.OVERDUE]: "teacherDashboard.status.overdue",
     [BaseWithdrawalStatus.APPROVED]: "teacherDashboard.status.approved",
     [BaseWithdrawalStatus.DECLINED]: "teacherDashboard.status.declined",
+    ["notSubmitted"]: "studentDashboard.status.notSubmitted",
   };
   return statusLabelIds[status] ?? status;
 };
