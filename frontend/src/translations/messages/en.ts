@@ -95,6 +95,6 @@ export const messages_En: Record<string, string> = {
   "studentDashboard.notice.signature2": "ntucool@ntu.edu.tw",
   "studentDashboard.notice.signature3": "02-3366-3367 #594",
   "studentDashboard.checkbox.confirm":
-    "I have read the withdrawal notes thoroughly and I confirm that I want to withdraw from this course.*",
+    "I have read the withdrawal notes thoroughly and I confirm that I want to withdraw from this course.",
   "studentDashboard.submit": "Submit",
 };
