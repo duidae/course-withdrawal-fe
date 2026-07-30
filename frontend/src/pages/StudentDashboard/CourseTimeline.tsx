@@ -1,7 +1,10 @@
 import { useIntl } from "react-intl";
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import { Box, Typography } from "@mui/material";
 
 type CourseTimelineProps = {
   sectionEnabled: boolean;
@@ -18,54 +21,74 @@ export const CourseTimeline = ({
 }: CourseTimelineProps) => {
   const { formatMessage: f } = useIntl();
 
+  const items = [
+    {
+      label: f({ id: "studentDashboard.timeline.start" }),
+      value: sectionEnabled ? st : "-",
+    },
+    {
+      label: f({ id: "studentDashboard.timeline.end" }),
+      value: sectionEnabled ? et : "-",
+    },
+    {
+      label: f({ id: "studentDashboard.timeline.teacherDeadline" }),
+      value: sectionEnabled ? ad : "-",
+    },
+  ];
+
   return (
-    <Paper variant="outlined" sx={{ display: "flex", width: "100%" }}>
-      {[
-        {
-          label: f({ id: "studentDashboard.timeline.start" }),
-          value: sectionEnabled ? st : "-",
-        },
-        {
-          label: f({ id: "studentDashboard.timeline.end" }),
-          value: sectionEnabled ? et : "-",
-        },
-        {
-          label: f({ id: "studentDashboard.timeline.teacherDeadline" }),
-          value: sectionEnabled ? ad : "-",
-        },
-      ].map((item, i, arr) => (
-        <Box
-          key={item.label}
-          sx={{
-            flex: 1,
-            borderRight: i < arr.length - 1 ? "1px solid" : "none",
-            borderColor: "divider",
-          }}
-        >
-          <Typography
-            variant="caption"
-            sx={{
-              display: "block",
-              padding: "6px 16px",
-              borderBottom: "1px solid",
-              borderColor: "divider",
-              letterSpacing: "0.4px",
-            }}
-          >
-            {item.label}
-          </Typography>
-          <Typography
-            variant="caption"
-            sx={{
-              display: "block",
-              padding: "6px 16px",
-              letterSpacing: "0.4px",
-            }}
-          >
-            {item.value}
-          </Typography>
-        </Box>
-      ))}
-    </Paper>
+    <>
+      <Box sx={{ display: { xs: "none", sm: "block" } }}>
+        <Table sx={{ borderCollapse: "collapse" }}>
+          <TableHead>
+            <TableRow>
+              {items.map((item) => (
+                <TableCell
+                  key={item.label}
+                  component="th"
+                  scope="col"
+                  sx={{ border: "1px solid", borderColor: "divider" }}
+                >
+                  <Typography variant="caption">{item.label}</Typography>
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              {items.map((item) => (
+                <TableCell
+                  key={item.label}
+                  sx={{ border: "1px solid", borderColor: "divider" }}
+                >
+                  <Typography variant="caption">{item.value}</Typography>
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableBody>
+        </Table>
+      </Box>
+
+      <Box sx={{ display: { xs: "block", sm: "none" } }}>
+        <Table sx={{ borderCollapse: "collapse" }}>
+          <TableBody>
+            {items.map((item) => (
+              <TableRow key={item.label}>
+                <TableCell
+                  component="th"
+                  scope="row"
+                  sx={{ border: "1px solid", borderColor: "divider" }}
+                >
+                  {item.label}
+                </TableCell>
+                <TableCell sx={{ border: "1px solid", borderColor: "divider" }}>
+                  {item.value}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Box>
+    </>
   );
 };
