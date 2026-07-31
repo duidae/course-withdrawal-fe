@@ -112,7 +112,7 @@ export const TeacherDashboard: FC = () => {
     const sec = getSecForSchool(withdrawal.school);
     if (!sec.ad) return withdrawal.status;
     const deadline = new Date(sec.ad.replace(/\//g, "-").replace(" ", "T"));
-    return deadline < new Date() ? "逾期審核" : withdrawal.status;
+    return deadline < new Date() ? WithdrawalStatus.OVERDUE : withdrawal.status;
   };
 
   const effectiveWithdrawals: Withdrawal[] = withdrawals.map((w) => {

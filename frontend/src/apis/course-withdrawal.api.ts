@@ -50,7 +50,7 @@ const getStudent = async (
   //const response = await request.get<Withdrawal>(`/api/withdrawal/${id}`);
   await new Promise((resolve) => setTimeout(resolve, 1000));
   // TODO: 未申請
-  const toApply = {
+  const toApply: Withdrawal = {
     id: 1,
     name: "丁O寧",
     school: "國立臺灣科技大學",

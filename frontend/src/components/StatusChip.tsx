@@ -22,19 +22,21 @@ const getChipStyle = (status: string): ChipStyle => {
   }
 };
 
-export const getStatusI18nKey = (status: string) => {
-  const statusLabelIds: Record<string, string> = {
-    [BaseWithdrawalStatus.PENDING]: "teacherDashboard.status.pending",
-    [BaseWithdrawalStatus.OVERDUE]: "teacherDashboard.status.overdue",
-    [BaseWithdrawalStatus.APPROVED]: "teacherDashboard.status.approved",
-    [BaseWithdrawalStatus.DECLINED]: "teacherDashboard.status.declined",
-    ["notSubmitted"]: "studentDashboard.status.notSubmitted",
-  };
+const getStatusI18nKey = (status: BaseWithdrawalStatus) => {
+  const statusLabelIds: Record<BaseWithdrawalStatus | "notSubmitted", string> =
+    {
+      [BaseWithdrawalStatus.PENDING]: "teacherDashboard.status.pending",
+      [BaseWithdrawalStatus.OVERDUE]: "teacherDashboard.status.overdue",
+      [BaseWithdrawalStatus.APPROVED]: "teacherDashboard.status.approved",
+      [BaseWithdrawalStatus.DECLINED]: "teacherDashboard.status.declined",
+      [BaseWithdrawalStatus.NOTSUBMITTED]:
+        "studentDashboard.status.notSubmitted",
+    };
   return statusLabelIds[status] ?? status;
 };
 
 type StatusChipProps = {
-  status: string;
+  status: BaseWithdrawalStatus | "notSubmitted";
 };
 
 export const StatusChip = ({ status }: StatusChipProps) => {

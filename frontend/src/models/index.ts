@@ -3,7 +3,11 @@ export const BaseWithdrawalStatus = {
   OVERDUE: "overdue",
   APPROVED: "approved",
   DECLINED: "declined",
+  NOTSUBMITTED: "notSubmitted",
 } as const;
+
+export type BaseWithdrawalStatus =
+  (typeof BaseWithdrawalStatus)[keyof typeof BaseWithdrawalStatus];
 
 export type Withdrawal = {
   id: number;
@@ -14,7 +18,7 @@ export type Withdrawal = {
   applyTime: string;
   deadline: string;
   reason: string;
-  status: string;
+  status: BaseWithdrawalStatus;
   reviewTime?: string;
   approver?: string;
   lastModified?: number;

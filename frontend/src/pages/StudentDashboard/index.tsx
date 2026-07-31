@@ -17,6 +17,12 @@ import { ApplicationPanel } from "./ApplicationPanel";
 import { type CourseSettings } from "./types";
 import { BaseWithdrawalStatus, type Withdrawal } from "../../models";
 
+const reviewedStatus: ReadonlySet<BaseWithdrawalStatus> = new Set([
+  BaseWithdrawalStatus.APPROVED,
+  BaseWithdrawalStatus.DECLINED,
+  BaseWithdrawalStatus.OVERDUE,
+]);
+
 type StudentDashboardProps = {
   studentId: number;
   courseSettings: CourseSettings;
@@ -56,9 +62,7 @@ export const StudentDashboard = ({
     );
   }
 
-  const hasSubmitted = (
-    Object.values(BaseWithdrawalStatus) as string[]
-  ).includes(student.status);
+  const hasSubmitted = student.status !== BaseWithdrawalStatus.NOTSUBMITTED;
   const isDisabled = !reason.trim() || !confirmed;
   const isSectionEnabled = courseSettings.isEnabled !== false;
   const isAppExpired =
@@ -68,10 +72,7 @@ export const StudentDashboard = ({
         !!courseSettings.et &&
         new Date(courseSettings.et.replaceAll("/", "-").replace(" ", "T")) <
           new Date();
-  const isReviewed =
-    student.status === BaseWithdrawalStatus.APPROVED ||
-    student.status === BaseWithdrawalStatus.DECLINED ||
-    student.status === BaseWithdrawalStatus.OVERDUE;
+  const isReviewed = reviewedStatus.has(student.status);
 
   const canSubmit = !hasSubmitted && !isAppExpired && isSectionEnabled;
 

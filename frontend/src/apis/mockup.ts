@@ -1,3 +1,5 @@
+import { type Withdrawal } from "../models";
+
 export const statusOptions = [
   { value: "待審核", label: "待審核" },
   { value: "逾期審核", label: "逾期審核" },
@@ -102,7 +104,7 @@ export const initCS = (): Record<string, CourseSection[]> => {
   return o;
 };
 
-export const INIT_STUDENTS = [
+export const INIT_STUDENTS: Withdrawal[] = [
   {
     id: 1,
     name: "丁O寧",
