@@ -14,6 +14,7 @@ import { SessionModule } from './session/session.module';
 import { SisDbModule } from './database/sis-db/sis-db.module';
 import { ExternalSisDbModule } from './database/external-sis-db/external-sis-db.module';
 import { CourseWithdrawalDbModule } from './database/course-withdrawal-db/course-withdrawal-db.module';
+import { CourseWithdrawalModule } from './course-withdrawal/course-withdrawal.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { CourseWithdrawalDbModule } from './database/course-withdrawal-db/course
     SisDbModule,
     ExternalSisDbModule,
     CourseWithdrawalDbModule,
+    CourseWithdrawalModule,
   ],
   controllers: [],
   providers: [
