@@ -1,10 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { CanvasApiService } from '@ntucool/nestjs-canvas-api';
 import request from 'supertest';
 
 import { CourseWithdrawalDbName } from '../database/course-withdrawal-db/config/db.config';
 import { CourseWithdrawal } from '../database/course-withdrawal-db/entities/course-withdrawal.entity';
+import { CourseWithdrawalStatus } from '../database/course-withdrawal-db/entities/course-withdrawal-status.enum';
 import { ResponseErrorFilter } from '../shared/errors';
 import {
   repositoryMockFactory,
@@ -20,19 +22,17 @@ import {
 describe('CourseWithdrawalController', () => {
   let app: INestApplication;
   let repository: MockRepository<CourseWithdrawal>;
+  let service: CourseWithdrawalService;
+  const canvasApiService = { courses: { get: jest.fn() } };
 
   const withdrawal: CourseWithdrawal = {
     id: '11111111-1111-1111-1111-111111111111',
     studentId: 'B11000000',
     courseId: 'CS101',
-    courseName: '大型語言模型與資訊安全系統',
-    studentName: '丁O寧',
+    status: CourseWithdrawalStatus.Pending,
     reason: '故申請停修。',
-    status: 'pending',
-    applyTime: new Date('2026-05-11T08:00:00Z'),
-    deadline: new Date('2026-05-11T08:00:00Z'),
-    createdDate: new Date('2026-05-11T08:00:00Z'),
-    updatedDate: new Date('2026-05-11T08:00:00Z'),
+    createdAt: new Date('2026-05-11T08:00:00Z'),
+    updatedAt: new Date('2026-05-11T08:00:00Z'),
   };
 
   beforeAll(async () => {
@@ -44,12 +44,17 @@ describe('CourseWithdrawalController', () => {
           provide: getRepositoryToken(CourseWithdrawal, CourseWithdrawalDbName),
           useFactory: repositoryMockFactory,
         },
+        {
+          provide: CanvasApiService,
+          useValue: canvasApiService,
+        },
       ],
     }).compile();
 
     repository = moduleFixture.get<MockRepository<CourseWithdrawal>>(
       getRepositoryToken(CourseWithdrawal, CourseWithdrawalDbName),
     );
+    service = moduleFixture.get(CourseWithdrawalService);
 
     app = moduleFixture.createNestApplication();
     app.useGlobalFilters(new ResponseErrorFilter());
@@ -129,14 +134,14 @@ describe('CourseWithdrawalController', () => {
         courseId: withdrawal.courseId,
         studentId: withdrawal.studentId,
         reason: withdrawal.reason,
-        status: 'pending',
+        status: CourseWithdrawalStatus.Pending,
       }),
     );
     expect(body).toMatchObject({
       courseId: withdrawal.courseId,
       studentId: withdrawal.studentId,
       reason: withdrawal.reason,
-      status: 'pending',
+      status: CourseWithdrawalStatus.Pending,
     });
   });
 
@@ -148,5 +153,22 @@ describe('CourseWithdrawalController', () => {
       .send({ reason: '   ' });
 
     expect(response.status).toBe(400);
+  });
+
+  it('getCourseInfo returns the course name from the Canvas API', async () => {
+    canvasApiService.courses.get.mockResolvedValue({ name: '深度學習 Deep Learning' });
+
+    const courseInfo = await service.getCourseInfo('CS101');
+
+    expect(canvasApiService.courses.get).toHaveBeenCalledWith('CS101');
+    expect(courseInfo).toEqual({ courseName: '深度學習 Deep Learning' });
+  });
+
+  it('getCourseInfo wraps Canvas API failures as a CanvasApiError', async () => {
+    canvasApiService.courses.get.mockRejectedValue(new Error('unauthorized'));
+
+    await expect(service.getCourseInfo('CS101')).rejects.toMatchObject({
+      name: 'CanvasApiError',
+    });
   });
 });
