@@ -23,13 +23,16 @@ export const WithdrawalStatus = {
 export type WithdrawalStatus = (typeof WithdrawalStatus)[keyof typeof WithdrawalStatus];
 
 export type Withdrawal = {
-  id?: string;
-  studentId: string;
-  courseId: string;
-  reason?: string;
   status: WithdrawalStatus;
-  reviewerId?: string;
+  courseName?: string;
+  section?: string;
+  teachers?: string[];
+  notice?: object;
+  reason?: string;
+  submittedAt?: Date;
   reviewComment?: string;
+  reviewerName?: string;
+  reviewedAt?: Date;
 };
 
 export type CreateWithdrawalInput = {
@@ -91,6 +94,15 @@ export class CourseWithdrawalService {
     }
   }
 
+  async getReviewerName(reviewerId: string): Promise<string> {
+    try {
+      const reviewer = await this.canvasApiService.users.get(reviewerId);
+      return reviewer.name;
+    } catch (error) {
+      throw new CanvasApiError((error as Error).message);
+    }
+  }
+
   // TODO: get user info in external db
 
   async getWithdrawals(
@@ -118,6 +130,7 @@ export class CourseWithdrawalService {
   }
 
   async getWithdrawal(courseId: string, studentId: string): Promise<Withdrawal> {
+    const courseInfo = await this.getCourseInfo(courseId);
     const settings = await this.getSettingsOrThrow(courseId);
 
     let entity: CourseWithdrawal | null;
@@ -129,12 +142,30 @@ export class CourseWithdrawalService {
     }
 
     if (!entity) {
-      return { studentId, courseId, status: WithdrawalStatus.NotSubmitted };
+      return {
+        status: WithdrawalStatus.NotSubmitted,
+        courseName: courseInfo.courseName,
+        section: courseInfo.section,
+        teachers: courseInfo.teachers,
+        notice: settings.noticeDelta,
+      };
     }
 
+    const reviewerName = entity.reviewerId
+      ? await this.getReviewerName(entity.reviewerId)
+      : undefined;
+
     return {
-      ...this.toWithdrawal(entity),
       status: this.getEffectiveStatus(entity.status, settings),
+      courseName: courseInfo.courseName,
+      section: courseInfo.section,
+      teachers: courseInfo.teachers,
+      reason: entity.reason,
+      submittedAt: entity.createdAt,
+      reviewComment: entity.reviewComment,
+      reviewerName,
+      reviewedAt: entity.reviewedAt,
+      notice: settings.noticeDelta,
     };
   }
 
@@ -192,13 +223,11 @@ export class CourseWithdrawalService {
 
   private toWithdrawal(entity: CourseWithdrawal): Withdrawal {
     return {
-      id: entity.id,
-      studentId: entity.studentId,
-      courseId: entity.courseId,
-      reason: entity.reason,
       status: entity.status,
-      reviewerId: entity.reviewerId,
+      reason: entity.reason,
       reviewComment: entity.reviewComment,
+      reviewedAt: entity.reviewedAt,
+      submittedAt: entity.createdAt,
     };
   }
 }

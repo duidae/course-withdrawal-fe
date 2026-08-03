@@ -108,8 +108,8 @@ describe('CourseWithdrawalController', () => {
     expect(body).toMatchObject({ total: 1, page: 1, pageSize: 2 });
     expect(body.data).toHaveLength(1);
     expect(body.data[0]).toMatchObject({
-      id: withdrawal.id,
       status: withdrawal.status,
+      reason: withdrawal.reason,
     });
   });
 
@@ -125,9 +125,32 @@ describe('CourseWithdrawalController', () => {
 
     expect(response.status).toBe(200);
     expect(body).toMatchObject({
-      id: withdrawal.id,
       status: CourseWithdrawalStatus.Pending,
+      reason: withdrawal.reason,
+      courseName: 'Mock Course CS101',
+      section: 'Mock Section CS101',
+      teachers: ['Mock Teacher 1', 'Mock Teacher 2'],
     });
+  });
+
+  it('/api/courses/:courseId/students/:studentId/withdrawal resolves the reviewer name via the Canvas API', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue(settings);
+    repository.findOneBy!.mockResolvedValue({
+      ...withdrawal,
+      status: CourseWithdrawalStatus.Approved,
+      reviewerId: 'T00000001',
+    });
+    canvasApiService.users.get.mockResolvedValue({ name: '林教授' });
+
+    const response = await request(httpServer()).get(
+      `/api/courses/${withdrawal.courseId}/students/${withdrawal.studentId}/withdrawal`,
+    );
+
+    const body = response.body as Withdrawal;
+
+    expect(response.status).toBe(200);
+    expect(canvasApiService.users.get).toHaveBeenCalledWith('T00000001');
+    expect(body.reviewerName).toBe('林教授');
   });
 
   it('/api/courses/:courseId/students/:studentId/withdrawal returns a notSubmitted status when no withdrawal exists', async () => {
@@ -142,9 +165,8 @@ describe('CourseWithdrawalController', () => {
 
     expect(response.status).toBe(200);
     expect(body).toMatchObject({
-      studentId: 'unknown-student',
-      courseId: withdrawal.courseId,
       status: WithdrawalStatus.NotSubmitted,
+      courseName: 'Mock Course CS101',
     });
   });
 
@@ -199,8 +221,6 @@ describe('CourseWithdrawalController', () => {
       }),
     );
     expect(body).toMatchObject({
-      courseId: withdrawal.courseId,
-      studentId: withdrawal.studentId,
       reason: withdrawal.reason,
       status: CourseWithdrawalStatus.Pending,
     });
@@ -219,7 +239,11 @@ describe('CourseWithdrawalController', () => {
   it('getCourseInfo returns mock course info', async () => {
     const courseInfo = await service.getCourseInfo('CS101');
 
-    expect(courseInfo).toEqual({ courseName: 'Mock Course CS101' });
+    expect(courseInfo).toEqual({
+      courseName: 'Mock Course CS101',
+      section: 'Mock Section CS101',
+      teachers: ['Mock Teacher 1', 'Mock Teacher 2'],
+    });
   });
 
   it('getUserInfo returns the user name and login id from the Canvas API', async () => {
@@ -241,6 +265,23 @@ describe('CourseWithdrawalController', () => {
     canvasApiService.users.get.mockRejectedValue(new Error('not found'));
 
     await expect(service.getUserInfo('unknown')).rejects.toMatchObject({
+      name: 'CanvasApiError',
+    });
+  });
+
+  it('getReviewerName returns the reviewer name from the Canvas API', async () => {
+    canvasApiService.users.get.mockResolvedValue({ name: '林教授' });
+
+    const reviewerName = await service.getReviewerName('T00000001');
+
+    expect(canvasApiService.users.get).toHaveBeenCalledWith('T00000001');
+    expect(reviewerName).toBe('林教授');
+  });
+
+  it('getReviewerName wraps Canvas API failures as a CanvasApiError', async () => {
+    canvasApiService.users.get.mockRejectedValue(new Error('not found'));
+
+    await expect(service.getReviewerName('unknown')).rejects.toMatchObject({
       name: 'CanvasApiError',
     });
   });
