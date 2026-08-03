@@ -43,8 +43,8 @@ export class CourseWithdrawalController {
 
   /* TODO: admin part
   @Get('courses/:courseId')
-  getCourseInfo(@Param('courseId') courseId: string): CourseInfo {
-    return this.courseWithdrawalService.getCourseInfo(courseId);
+  getCourse(@Param('courseId') courseId: string): CourseInfo {
+    return this.courseWithdrawalService.getCourse(courseId);
   }
   */
 }
