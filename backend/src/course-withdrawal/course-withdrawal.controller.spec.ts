@@ -23,7 +23,10 @@ describe('CourseWithdrawalController', () => {
   let app: INestApplication;
   let repository: MockRepository<CourseWithdrawal>;
   let service: CourseWithdrawalService;
-  const canvasApiService = { courses: { get: jest.fn() } };
+  const canvasApiService = {
+    courses: { get: jest.fn() },
+    users: { get: jest.fn() },
+  };
 
   const withdrawal: CourseWithdrawal = {
     id: '11111111-1111-1111-1111-111111111111',
@@ -168,6 +171,29 @@ describe('CourseWithdrawalController', () => {
     canvasApiService.courses.get.mockRejectedValue(new Error('unauthorized'));
 
     await expect(service.getCourseInfo('CS101')).rejects.toMatchObject({
+      name: 'CanvasApiError',
+    });
+  });
+
+  it('getUserInfo returns the user name and login id from the Canvas API', async () => {
+    canvasApiService.users.get.mockResolvedValue({
+      name: '丁O寧',
+      loginId: 'B11000000@mail.ntust.edu.tw',
+    });
+
+    const userInfo = await service.getUserInfo('B11000000');
+
+    expect(canvasApiService.users.get).toHaveBeenCalledWith('B11000000');
+    expect(userInfo).toEqual({
+      name: '丁O寧',
+      loginId: 'B11000000@mail.ntust.edu.tw',
+    });
+  });
+
+  it('getUserInfo wraps Canvas API failures as a CanvasApiError', async () => {
+    canvasApiService.users.get.mockRejectedValue(new Error('not found'));
+
+    await expect(service.getUserInfo('unknown')).rejects.toMatchObject({
       name: 'CanvasApiError',
     });
   });
