@@ -83,6 +83,10 @@ export class CourseWithdrawalService {
     // } catch (error) {
     //   throw new CanvasApiError((error as Error).message);
     // }
+
+    //  /api/v1/courses/:course_id/enrollments?user_id=:user_id => course_section_id
+    // /api/v1/sections/:section_id => section name
+    // teachers: /api/v1/courses/:course_id/users?enrollment_type[]=teacher
   }
 
   async getUserInfo(userId: string): Promise<UserInfo> {
