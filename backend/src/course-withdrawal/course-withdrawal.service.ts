@@ -18,6 +18,7 @@ export type Withdrawal = {
   deadline?: string;
   reviewTime?: string;
   reviewer?: string;
+  comment?: string;
 };
 
 export type CreateWithdrawalInput = {
@@ -130,6 +131,7 @@ export class CourseWithdrawalService {
       deadline: entity.deadline?.toISOString(),
       reviewTime: entity.reviewTime?.toISOString(),
       reviewer: entity.reviewer,
+      comment: entity.comment,
     };
   }
 }
