@@ -37,6 +37,12 @@ export class CourseWithdrawal {
   @Column({ type: 'timestamp with time zone', nullable: true })
   deadline?: Date;
 
+  @Column({ type: 'timestamp with time zone', nullable: true })
+  reviewTime?: Date;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  reviewer?: string;
+
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdDate!: Date;
 
