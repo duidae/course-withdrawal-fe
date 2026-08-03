@@ -21,6 +21,9 @@ async function bootstrap() {
     httpsOptions,
   });
 
+  // Enable graceful shutdown hooks to handle request drain
+  app.enableShutdownHooks();
+
   const config = app.get<ConfigService>(ConfigService);
   const logger = app.get<LoggerService>(LoggerService);
   const session = app.get<RequestHandler | RequestHandler[]>(SessionMiddlewareToken);
