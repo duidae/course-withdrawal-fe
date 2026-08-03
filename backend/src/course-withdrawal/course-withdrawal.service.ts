@@ -48,9 +48,14 @@ export class CourseWithdrawalService {
     { courseId: 'CS102', courseName: '資料結構與演算法' },
   ];
 
-  async getWithdrawals(page = 1, pageSize = 10): Promise<PaginatedResult<Withdrawal>> {
+  async getWithdrawals(
+    courseId: string,
+    page = 1,
+    pageSize = 10,
+  ): Promise<PaginatedResult<Withdrawal>> {
     try {
       const [entities, total] = await this.courseWithdrawalRepository.findAndCount({
+        where: { courseId },
         skip: (page - 1) * pageSize,
         take: pageSize,
         order: { createdDate: 'DESC' },
