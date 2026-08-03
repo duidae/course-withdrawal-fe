@@ -14,9 +14,6 @@ export type Withdrawal = {
   studentName?: string;
   reason?: string;
   status?: string;
-  applyTime?: string;
-  deadline?: string;
-  reviewTime?: string;
   reviewer?: string;
   comment?: string;
 };
@@ -104,11 +101,9 @@ export class CourseWithdrawalService {
       const entity = this.courseWithdrawalRepository.create({
         courseId,
         studentId,
-        courseName: input.courseName,
         studentName: input.studentName,
         reason: input.reason,
         status: 'pending',
-        applyTime: new Date(),
       });
 
       const saved = await this.courseWithdrawalRepository.save(entity);
@@ -123,13 +118,9 @@ export class CourseWithdrawalService {
       id: entity.id,
       studentId: entity.studentId,
       courseId: entity.courseId,
-      courseName: entity.courseName,
       studentName: entity.studentName,
       reason: entity.reason,
       status: entity.status,
-      applyTime: entity.applyTime?.toISOString(),
-      deadline: entity.deadline?.toISOString(),
-      reviewTime: entity.reviewTime?.toISOString(),
       reviewer: entity.reviewer,
       comment: entity.comment,
     };
