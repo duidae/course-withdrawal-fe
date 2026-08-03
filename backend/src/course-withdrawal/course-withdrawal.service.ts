@@ -67,11 +67,11 @@ export class CourseWithdrawalService {
     }
   }
 
-  async getStudent(id: string): Promise<Withdrawal> {
+  async getWithdrawal(courseId: string, studentId: string): Promise<Withdrawal> {
     let entity: CourseWithdrawal | null;
 
     try {
-      entity = await this.courseWithdrawalRepository.findOneBy({ id });
+      entity = await this.courseWithdrawalRepository.findOneBy({ courseId, studentId });
     } catch (error) {
       throw new DbError((error as Error).message);
     }
