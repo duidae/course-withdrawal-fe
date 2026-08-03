@@ -6,6 +6,7 @@ import request from 'supertest';
 
 import { CourseWithdrawalDbName } from '../database/course-withdrawal-db/config/db.config';
 import { CourseWithdrawal } from '../database/course-withdrawal-db/entities/course-withdrawal.entity';
+import { CourseWithdrawalSetting } from '../database/course-withdrawal-db/entities/course-withdrawal-settings.entity';
 import { CourseWithdrawalStatus } from '../database/course-withdrawal-db/entities/course-withdrawal-status.enum';
 import { ResponseErrorFilter } from '../shared/errors';
 import {
@@ -15,6 +16,7 @@ import {
 import { CourseWithdrawalController } from './course-withdrawal.controller';
 import {
   CourseWithdrawalService,
+  WithdrawalStatus,
   type PaginatedResult,
   type Withdrawal,
 } from './course-withdrawal.service';
@@ -22,6 +24,7 @@ import {
 describe('CourseWithdrawalController', () => {
   let app: INestApplication;
   let repository: MockRepository<CourseWithdrawal>;
+  let settingsRepository: MockRepository<CourseWithdrawalSetting>;
   let service: CourseWithdrawalService;
   const canvasApiService = {
     courses: { get: jest.fn() },
@@ -38,6 +41,18 @@ describe('CourseWithdrawalController', () => {
     updatedAt: new Date('2026-05-11T08:00:00Z'),
   };
 
+  const settings: CourseWithdrawalSetting = {
+    id: '22222222-2222-2222-2222-222222222222',
+    courseId: 'CS101',
+    startAt: new Date('2026-01-01T00:00:00Z'),
+    endAt: new Date('2099-01-01T00:00:00Z'),
+    enabled: true,
+    createdBy: 'admin',
+    updatedBy: 'admin',
+    createdAt: new Date('2026-01-01T00:00:00Z'),
+    updatedAt: new Date('2026-01-01T00:00:00Z'),
+  };
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [CourseWithdrawalController],
@@ -45,6 +60,10 @@ describe('CourseWithdrawalController', () => {
         CourseWithdrawalService,
         {
           provide: getRepositoryToken(CourseWithdrawal, CourseWithdrawalDbName),
+          useFactory: repositoryMockFactory,
+        },
+        {
+          provide: getRepositoryToken(CourseWithdrawalSetting, CourseWithdrawalDbName),
           useFactory: repositoryMockFactory,
         },
         {
@@ -56,6 +75,9 @@ describe('CourseWithdrawalController', () => {
 
     repository = moduleFixture.get<MockRepository<CourseWithdrawal>>(
       getRepositoryToken(CourseWithdrawal, CourseWithdrawalDbName),
+    );
+    settingsRepository = moduleFixture.get<MockRepository<CourseWithdrawalSetting>>(
+      getRepositoryToken(CourseWithdrawalSetting, CourseWithdrawalDbName),
     );
     service = moduleFixture.get(CourseWithdrawalService);
 
@@ -92,6 +114,7 @@ describe('CourseWithdrawalController', () => {
   });
 
   it('/api/courses/:courseId/students/:studentId/withdrawal returns the requested withdrawal', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue(settings);
     repository.findOneBy!.mockResolvedValue(withdrawal);
 
     const response = await request(httpServer()).get(
@@ -103,15 +126,50 @@ describe('CourseWithdrawalController', () => {
     expect(response.status).toBe(200);
     expect(body).toMatchObject({
       id: withdrawal.id,
-      status: withdrawal.status,
+      status: CourseWithdrawalStatus.Pending,
     });
   });
 
-  it('/api/courses/:courseId/students/:studentId/withdrawal returns 404 when not found', async () => {
+  it('/api/courses/:courseId/students/:studentId/withdrawal returns a notSubmitted status when no withdrawal exists', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue(settings);
     repository.findOneBy!.mockResolvedValue(null);
 
     const response = await request(httpServer()).get(
-      '/api/courses/CS999/students/unknown/withdrawal',
+      `/api/courses/${withdrawal.courseId}/students/unknown-student/withdrawal`,
+    );
+
+    const body = response.body as Withdrawal;
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      studentId: 'unknown-student',
+      courseId: withdrawal.courseId,
+      status: WithdrawalStatus.NotSubmitted,
+    });
+  });
+
+  it('/api/courses/:courseId/students/:studentId/withdrawal returns overdue for a pending withdrawal past the deadline', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue({
+      ...settings,
+      endAt: new Date('2000-01-01T00:00:00Z'),
+    });
+    repository.findOneBy!.mockResolvedValue(withdrawal);
+
+    const response = await request(httpServer()).get(
+      `/api/courses/${withdrawal.courseId}/students/${withdrawal.studentId}/withdrawal`,
+    );
+
+    const body = response.body as Withdrawal;
+
+    expect(response.status).toBe(200);
+    expect(body.status).toBe(WithdrawalStatus.Overdue);
+  });
+
+  it('/api/courses/:courseId/students/:studentId/withdrawal returns 404 when course withdrawal settings do not exist', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue(null);
+
+    const response = await request(httpServer()).get(
+      `/api/courses/CS999/students/${withdrawal.studentId}/withdrawal`,
     );
 
     expect(response.status).toBe(404);

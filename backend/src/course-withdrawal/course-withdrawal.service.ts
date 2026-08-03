@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 
 import { CourseWithdrawalDbName } from '../database/course-withdrawal-db/config/db.config';
 import { CourseWithdrawal } from '../database/course-withdrawal-db/entities/course-withdrawal.entity';
+import { CourseWithdrawalSetting } from '../database/course-withdrawal-db/entities/course-withdrawal-settings.entity';
 import { CourseWithdrawalStatus } from '../database/course-withdrawal-db/entities/course-withdrawal-status.enum';
 import {
   CanvasApiError,
@@ -13,12 +14,20 @@ import {
   NotFoundError,
 } from '../shared/errors';
 
+export const WithdrawalStatus = {
+  NotSubmitted: 'notSubmitted',
+  ...CourseWithdrawalStatus,
+  Overdue: 'overdue',
+} as const;
+
+export type WithdrawalStatus = (typeof WithdrawalStatus)[keyof typeof WithdrawalStatus];
+
 export type Withdrawal = {
-  id: string;
+  id?: string;
   studentId: string;
   courseId: string;
   reason?: string;
-  status?: string;
+  status: WithdrawalStatus;
   reviewerId?: string;
   reviewComment?: string;
 };
@@ -50,6 +59,8 @@ export class CourseWithdrawalService {
   constructor(
     @InjectRepository(CourseWithdrawal, CourseWithdrawalDbName)
     private readonly courseWithdrawalRepository: Repository<CourseWithdrawal>,
+    @InjectRepository(CourseWithdrawalSetting, CourseWithdrawalDbName)
+    private readonly courseWithdrawalSettingRepository: Repository<CourseWithdrawalSetting>,
     private readonly canvasApiService: CanvasApiService,
   ) {}
 
@@ -98,6 +109,8 @@ export class CourseWithdrawalService {
   }
 
   async getWithdrawal(courseId: string, studentId: string): Promise<Withdrawal> {
+    const settings = await this.getSettingsOrThrow(courseId);
+
     let entity: CourseWithdrawal | null;
 
     try {
@@ -107,10 +120,13 @@ export class CourseWithdrawalService {
     }
 
     if (!entity) {
-      throw new NotFoundError('withdrawal');
+      return { studentId, courseId, status: WithdrawalStatus.NotSubmitted };
     }
 
-    return this.toWithdrawal(entity);
+    return {
+      ...this.toWithdrawal(entity),
+      status: this.getEffectiveStatus(entity.status, settings),
+    };
   }
 
   async createWithdrawal(
@@ -135,6 +151,34 @@ export class CourseWithdrawalService {
     } catch (error) {
       throw new DbError((error as Error).message);
     }
+  }
+
+  private async getSettingsOrThrow(courseId: string): Promise<CourseWithdrawalSetting> {
+    let settings: CourseWithdrawalSetting | null;
+
+    try {
+      settings = await this.courseWithdrawalSettingRepository.findOneBy({ courseId });
+    } catch (error) {
+      throw new DbError((error as Error).message);
+    }
+
+    if (!settings) {
+      throw new NotFoundError('course withdrawal settings');
+    }
+
+    return settings;
+  }
+
+  private getEffectiveStatus(
+    status: CourseWithdrawalStatus,
+    settings: CourseWithdrawalSetting,
+  ): WithdrawalStatus {
+    if (status !== CourseWithdrawalStatus.Pending) {
+      return status;
+    }
+
+    const isExpired = !settings.enabled || settings.endAt < new Date();
+    return isExpired ? WithdrawalStatus.Overdue : WithdrawalStatus.Pending;
   }
 
   private toWithdrawal(entity: CourseWithdrawal): Withdrawal {
