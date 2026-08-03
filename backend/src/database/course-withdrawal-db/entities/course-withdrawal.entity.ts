@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { CourseWithdrawalStatus } from './course-withdrawal-status.enum';
 
 @Entity({ name: 'course_withdrawals' })
 @Index(['studentId', 'courseId'], { unique: true })
@@ -13,30 +14,37 @@ export class CourseWithdrawal {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ length: 255 })
   studentId!: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ length: 255 })
   courseId!: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  studentName?: string;
+  @Column({
+    type: 'enum',
+    enum: CourseWithdrawalStatus,
+    default: CourseWithdrawalStatus.Pending,
+  })
+  status!: CourseWithdrawalStatus;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  status?: string;
+  @Column({ type: 'text' })
+  reason!: string;
+
+  @Column({ length: 255, nullable: true })
+  reviewerId?: string;
 
   @Column({ type: 'text', nullable: true })
-  reason?: string;
+  reviewComment?: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  reviewer?: string;
-
-  @Column({ type: 'text', nullable: true })
-  comment?: string;
+  @Column({
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
+  reviewedAt?: Date;
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
-  createdDate!: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({ type: 'timestamp with time zone' })
-  updatedDate!: Date;
+  updatedAt!: Date;
 }
