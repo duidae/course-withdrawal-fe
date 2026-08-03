@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import type {
-  CourseInfo,
   CreateWithdrawalInput,
   PaginatedResult,
   Withdrawal,
@@ -12,22 +11,21 @@ import { CourseWithdrawalService } from './course-withdrawal.service';
 export class CourseWithdrawalController {
   constructor(private readonly courseWithdrawalService: CourseWithdrawalService) {}
 
-  @Get('withdrawal-list')
+  @Get('courses/:courseId/withdrawal-list')
   getWithdrawals(
+    @Param('courseId') courseId: string,
     @Query('page') page = 1,
     @Query('pageSize') pageSize = 10,
   ): Promise<PaginatedResult<Withdrawal>> {
     return this.courseWithdrawalService.getWithdrawals(Number(page), Number(pageSize));
   }
 
-  @Get('withdrawal/:id')
-  getStudent(@Param('id') id: string): Promise<Withdrawal> {
-    return this.courseWithdrawalService.getStudent(id);
-  }
-
-  @Get('courses/:courseId')
-  getCourseInfo(@Param('courseId') courseId: string): CourseInfo {
-    return this.courseWithdrawalService.getCourseInfo(courseId);
+  @Get('courses/:courseId/students/:studentId/withdrawal')
+  getWithdrawal(
+    @Param('courseId') courseId: string,
+    @Param('studentId') studentId: string,
+  ): Promise<Withdrawal> {
+    return this.courseWithdrawalService.getWithdrawal(courseId, studentId);
   }
 
   @Post('courses/:courseId/students/:studentId/withdrawal')
@@ -38,4 +36,11 @@ export class CourseWithdrawalController {
   ): Promise<Withdrawal> {
     return this.courseWithdrawalService.createWithdrawal(courseId, studentId, body);
   }
+
+  /* TODO: admin part
+  @Get('courses/:courseId')
+  getCourseInfo(@Param('courseId') courseId: string): CourseInfo {
+    return this.courseWithdrawalService.getCourseInfo(courseId);
+  }
+  */
 }
