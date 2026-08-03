@@ -9,6 +9,7 @@ export const repositoryMockFactory: () => MockRepository<any> = jest.fn(() => ({
   update: jest.fn(),
   save: jest.fn(),
   find: jest.fn(),
+  findAndCount: jest.fn(),
   findBy: jest.fn(),
   findOne: jest.fn(),
   findOneBy: jest.fn(),
