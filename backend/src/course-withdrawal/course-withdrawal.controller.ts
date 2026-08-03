@@ -1,6 +1,7 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import type {
   CourseInfo,
+  CreateWithdrawalInput,
   PaginatedResult,
   Withdrawal,
 } from './course-withdrawal.service';
@@ -27,5 +28,14 @@ export class CourseWithdrawalController {
   @Get('courses/:courseId')
   getCourseInfo(@Param('courseId') courseId: string): CourseInfo {
     return this.courseWithdrawalService.getCourseInfo(courseId);
+  }
+
+  @Post('courses/:courseId/students/:studentId/withdrawal')
+  createWithdrawal(
+    @Param('courseId') courseId: string,
+    @Param('studentId') studentId: string,
+    @Body() body: CreateWithdrawalInput,
+  ): Promise<Withdrawal> {
+    return this.courseWithdrawalService.createWithdrawal(courseId, studentId, body);
   }
 }
