@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 
 @Entity({ name: 'course_withdrawals' })
-@Index(['studentId', 'courseId'], { unique: false })
+@Index(['studentId', 'courseId'], { unique: true })
 export class CourseWithdrawal {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
