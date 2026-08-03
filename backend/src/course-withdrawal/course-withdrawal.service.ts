@@ -16,6 +16,8 @@ export type Withdrawal = {
   status?: string;
   applyTime?: string;
   deadline?: string;
+  reviewTime?: string;
+  reviewer?: string;
 };
 
 export type CreateWithdrawalInput = {
@@ -88,11 +90,6 @@ export class CourseWithdrawalService {
     return this.toWithdrawal(entity);
   }
 
-  getCourseInfo(courseId: string): CourseInfo {
-    const course = this.courses.find((entry) => entry.courseId === courseId);
-    return { courseName: course?.courseName ?? '' };
-  }
-
   async createWithdrawal(
     courseId: string,
     studentId: string,
@@ -131,6 +128,8 @@ export class CourseWithdrawalService {
       status: entity.status,
       applyTime: entity.applyTime?.toISOString(),
       deadline: entity.deadline?.toISOString(),
+      reviewTime: entity.reviewTime?.toISOString(),
+      reviewer: entity.reviewer,
     };
   }
 }

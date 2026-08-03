@@ -13,7 +13,6 @@ import {
 import { CourseWithdrawalController } from './course-withdrawal.controller';
 import {
   CourseWithdrawalService,
-  type CourseInfo,
   type PaginatedResult,
   type Withdrawal,
 } from './course-withdrawal.service';
@@ -63,16 +62,19 @@ describe('CourseWithdrawalController', () => {
 
   const httpServer = () => app.getHttpServer() as Parameters<typeof request>[0];
 
-  it('/api/withdrawal-list returns paginated withdrawals', async () => {
+  it('/api/courses/:courseId/withdrawal-list returns paginated withdrawals', async () => {
     repository.findAndCount!.mockResolvedValue([[withdrawal], 1]);
 
     const response = await request(httpServer())
-      .get('/api/withdrawal-list')
+      .get(`/api/courses/${withdrawal.courseId}/withdrawal-list`)
       .query({ page: 1, pageSize: 2 });
 
     const body = response.body as PaginatedResult<Withdrawal>;
 
     expect(response.status).toBe(200);
+    expect(repository.findAndCount).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { courseId: withdrawal.courseId } }),
+    );
     expect(body).toMatchObject({ total: 1, page: 1, pageSize: 2 });
     expect(body.data).toHaveLength(1);
     expect(body.data[0]).toMatchObject({
@@ -81,10 +83,12 @@ describe('CourseWithdrawalController', () => {
     });
   });
 
-  it('/api/withdrawal/:id returns the requested student', async () => {
+  it('/api/courses/:courseId/students/:studentId/withdrawal returns the requested withdrawal', async () => {
     repository.findOneBy!.mockResolvedValue(withdrawal);
 
-    const response = await request(httpServer()).get(`/api/withdrawal/${withdrawal.id}`);
+    const response = await request(httpServer()).get(
+      `/api/courses/${withdrawal.courseId}/students/${withdrawal.studentId}/withdrawal`,
+    );
 
     const body = response.body as Withdrawal;
 
@@ -95,11 +99,11 @@ describe('CourseWithdrawalController', () => {
     });
   });
 
-  it('/api/withdrawal/:id returns 404 when the withdrawal does not exist', async () => {
+  it('/api/courses/:courseId/students/:studentId/withdrawal returns 404 when not found', async () => {
     repository.findOneBy!.mockResolvedValue(null);
 
     const response = await request(httpServer()).get(
-      '/api/withdrawal/00000000-0000-0000-0000-000000000000',
+      '/api/courses/CS999/students/unknown/withdrawal',
     );
 
     expect(response.status).toBe(404);
@@ -144,16 +148,5 @@ describe('CourseWithdrawalController', () => {
       .send({ reason: '   ' });
 
     expect(response.status).toBe(400);
-  });
-
-  it('/api/courses/:courseId returns course info', async () => {
-    const response = await request(httpServer()).get('/api/courses/CS101');
-
-    const body = response.body as CourseInfo;
-
-    expect(response.status).toBe(200);
-    expect(body).toMatchObject({
-      courseName: '大型語言模型與資訊安全系統',
-    });
   });
 });
