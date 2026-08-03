@@ -33,6 +33,11 @@ export type CourseInfo = {
   courseName: string;
 };
 
+export type UserInfo = {
+  name: string;
+  loginId: string;
+};
+
 export type PaginatedResult<T> = {
   data: T[];
   total: number;
@@ -52,6 +57,15 @@ export class CourseWithdrawalService {
     try {
       const course = await this.canvasApiService.courses.get(courseId);
       return { courseName: course.name };
+    } catch (error) {
+      throw new CanvasApiError((error as Error).message);
+    }
+  }
+
+  async getUserInfo(userId: string): Promise<UserInfo> {
+    try {
+      const user = await this.canvasApiService.users.get(userId);
+      return { name: user.name, loginId: user.loginId };
     } catch (error) {
       throw new CanvasApiError((error as Error).message);
     }
