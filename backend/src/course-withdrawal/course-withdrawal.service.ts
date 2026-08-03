@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 
 import { CourseWithdrawalDbName } from '../database/course-withdrawal-db/config/db.config';
 import { CourseWithdrawal } from '../database/course-withdrawal-db/entities/course-withdrawal.entity';
-import { DbError, NotFoundError } from '../shared/errors';
+import { DbError, InvalidInputError, NotFoundError } from '../shared/errors';
 
 export type Withdrawal = {
   id: string;
@@ -16,6 +16,12 @@ export type Withdrawal = {
   status?: string;
   applyTime?: string;
   deadline?: string;
+};
+
+export type CreateWithdrawalInput = {
+  reason: string;
+  studentName?: string;
+  courseName?: string;
 };
 
 export type CourseInfo = {
@@ -80,6 +86,33 @@ export class CourseWithdrawalService {
   getCourseInfo(courseId: string): CourseInfo {
     const course = this.courses.find((entry) => entry.courseId === courseId);
     return { courseName: course?.courseName ?? '' };
+  }
+
+  async createWithdrawal(
+    courseId: string,
+    studentId: string,
+    input: CreateWithdrawalInput,
+  ): Promise<Withdrawal> {
+    if (!input.reason?.trim()) {
+      throw new InvalidInputError('reason is required');
+    }
+
+    try {
+      const entity = this.courseWithdrawalRepository.create({
+        courseId,
+        studentId,
+        courseName: input.courseName,
+        studentName: input.studentName,
+        reason: input.reason,
+        status: 'pending',
+        applyTime: new Date(),
+      });
+
+      const saved = await this.courseWithdrawalRepository.save(entity);
+      return this.toWithdrawal(saved);
+    } catch (error) {
+      throw new DbError((error as Error).message);
+    }
   }
 
   private toWithdrawal(entity: CourseWithdrawal): Withdrawal {

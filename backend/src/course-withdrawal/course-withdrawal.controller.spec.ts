@@ -105,6 +105,47 @@ describe('CourseWithdrawalController', () => {
     expect(response.status).toBe(404);
   });
 
+  it('POST /api/courses/:courseId/students/:studentId/withdrawal creates a withdrawal', async () => {
+    repository.create!.mockImplementation((input: object) => input);
+    repository.save!.mockImplementation((input: object) =>
+      Promise.resolve({ ...withdrawal, ...input }),
+    );
+
+    const response = await request(httpServer())
+      .post(
+        `/api/courses/${withdrawal.courseId}/students/${withdrawal.studentId}/withdrawal`,
+      )
+      .send({ reason: withdrawal.reason });
+
+    const body = response.body as Withdrawal;
+
+    expect(response.status).toBe(201);
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        courseId: withdrawal.courseId,
+        studentId: withdrawal.studentId,
+        reason: withdrawal.reason,
+        status: 'pending',
+      }),
+    );
+    expect(body).toMatchObject({
+      courseId: withdrawal.courseId,
+      studentId: withdrawal.studentId,
+      reason: withdrawal.reason,
+      status: 'pending',
+    });
+  });
+
+  it('POST /api/courses/:courseId/students/:studentId/withdrawal rejects a blank reason', async () => {
+    const response = await request(httpServer())
+      .post(
+        `/api/courses/${withdrawal.courseId}/students/${withdrawal.studentId}/withdrawal`,
+      )
+      .send({ reason: '   ' });
+
+    expect(response.status).toBe(400);
+  });
+
   it('/api/courses/:courseId returns course info', async () => {
     const response = await request(httpServer()).get('/api/courses/CS101');
 
