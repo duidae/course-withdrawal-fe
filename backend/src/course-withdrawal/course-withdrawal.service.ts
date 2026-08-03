@@ -1,15 +1,21 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+import { CourseWithdrawalDbName } from '../database/course-withdrawal-db/config/db.config';
+import { CourseWithdrawal } from '../database/course-withdrawal-db/entities/course-withdrawal.entity';
+import { DbError, NotFoundError } from '../shared/errors';
 
 export type Withdrawal = {
-  id: number;
-  name: string;
-  school: string;
+  id: string;
   studentId: string;
-  loginId: string;
-  applyTime: string;
-  deadline: string;
-  reason: string;
-  status: string;
+  courseId: string;
+  courseName?: string;
+  studentName?: string;
+  reason?: string;
+  status?: string;
+  applyTime?: string;
+  deadline?: string;
 };
 
 export type CourseInfo = {
@@ -25,61 +31,68 @@ export type PaginatedResult<T> = {
 
 @Injectable()
 export class CourseWithdrawalService {
-  private readonly withdrawals: Withdrawal[] = [
-    {
-      id: 1,
-      name: '丁O寧',
-      school: '國立臺灣科技大學',
-      studentId: '臺科大_B11000000',
-      loginId: 'B11000000@mail.ntust.edu.tw',
-      applyTime: '2026/05/11 08:00',
-      deadline: '2026/05/11 08:00',
-      reason:
-        '本課程《大型語言模型與資訊安全系統》內容極具前瞻性，惟修讀後發現個人在 Transformer 架構與對抗性攻擊（Adversarial Attacks）的數學基礎尚不完備，導致在實作 LLM 弱點掃描與防禦機制時，進度明顯落後。為確保學習品質，本人決定先補強相關先修知識，待準備充分後再行挑戰，故申請停修。',
-      status: 'notSubmitted',
-    },
-    {
-      id: 2,
-      name: '王小明',
-      school: '國立臺灣大學',
-      studentId: '台大_B11000001',
-      loginId: 'B11000001@mail.ntu.edu.tw',
-      applyTime: '2026/05/12 09:00',
-      deadline: '2026/05/12 09:00',
-      reason: '因家庭因素暫時無法持續修習本課程，申請停修。',
-      status: 'submitted',
-    },
-    {
-      id: 3,
-      name: '李小華',
-      school: '國立清華大學',
-      studentId: '清大_B11000002',
-      loginId: 'B11000002@mail.nthu.edu.tw',
-      applyTime: '2026/05/13 10:00',
-      deadline: '2026/05/13 10:00',
-      reason: '因學業規劃調整，決定暫停修讀。',
-      status: 'approved',
-    },
-  ];
+  constructor(
+    @InjectRepository(CourseWithdrawal, CourseWithdrawalDbName)
+    private readonly courseWithdrawalRepository: Repository<CourseWithdrawal>,
+  ) {}
 
+  // TODO: back this with a real courses table/service once one exists.
   private readonly courses: Array<{ courseId: string; courseName: string }> = [
     { courseId: 'CS101', courseName: '大型語言模型與資訊安全系統' },
     { courseId: 'CS102', courseName: '資料結構與演算法' },
   ];
 
-  getWithdrawals(page = 1, pageSize = 10): PaginatedResult<Withdrawal> {
-    const start = (page - 1) * pageSize;
-    const data = this.withdrawals.slice(start, start + pageSize);
+  async getWithdrawals(page = 1, pageSize = 10): Promise<PaginatedResult<Withdrawal>> {
+    try {
+      const [entities, total] = await this.courseWithdrawalRepository.findAndCount({
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        order: { createdDate: 'DESC' },
+      });
 
-    return { data, total: this.withdrawals.length, page, pageSize };
+      return {
+        data: entities.map((entity) => this.toWithdrawal(entity)),
+        total,
+        page,
+        pageSize,
+      };
+    } catch (error) {
+      throw new DbError((error as Error).message);
+    }
   }
 
-  getStudent(id: number): Withdrawal | undefined {
-    return this.withdrawals.find((student) => student.id === id);
+  async getStudent(id: string): Promise<Withdrawal> {
+    let entity: CourseWithdrawal | null;
+
+    try {
+      entity = await this.courseWithdrawalRepository.findOneBy({ id });
+    } catch (error) {
+      throw new DbError((error as Error).message);
+    }
+
+    if (!entity) {
+      throw new NotFoundError('withdrawal');
+    }
+
+    return this.toWithdrawal(entity);
   }
 
   getCourseInfo(courseId: string): CourseInfo {
     const course = this.courses.find((entry) => entry.courseId === courseId);
     return { courseName: course?.courseName ?? '' };
+  }
+
+  private toWithdrawal(entity: CourseWithdrawal): Withdrawal {
+    return {
+      id: entity.id,
+      studentId: entity.studentId,
+      courseId: entity.courseId,
+      courseName: entity.courseName,
+      studentName: entity.studentName,
+      reason: entity.reason,
+      status: entity.status,
+      applyTime: entity.applyTime?.toISOString(),
+      deadline: entity.deadline?.toISOString(),
+    };
   }
 }

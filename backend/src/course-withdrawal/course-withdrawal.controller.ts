@@ -1,5 +1,9 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
-import type { CourseInfo, PaginatedResult, Withdrawal } from './course-withdrawal.service';
+import type {
+  CourseInfo,
+  PaginatedResult,
+  Withdrawal,
+} from './course-withdrawal.service';
 
 import { CourseWithdrawalService } from './course-withdrawal.service';
 
@@ -11,13 +15,13 @@ export class CourseWithdrawalController {
   getWithdrawals(
     @Query('page') page = 1,
     @Query('pageSize') pageSize = 10,
-  ): PaginatedResult<Withdrawal> {
+  ): Promise<PaginatedResult<Withdrawal>> {
     return this.courseWithdrawalService.getWithdrawals(Number(page), Number(pageSize));
   }
 
   @Get('withdrawal/:id')
-  getStudent(@Param('id') id: string): Withdrawal | undefined {
-    return this.courseWithdrawalService.getStudent(Number(id));
+  getStudent(@Param('id') id: string): Promise<Withdrawal> {
+    return this.courseWithdrawalService.getStudent(id);
   }
 
   @Get('courses/:courseId')
