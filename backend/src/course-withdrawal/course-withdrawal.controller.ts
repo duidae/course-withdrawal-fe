@@ -17,7 +17,11 @@ export class CourseWithdrawalController {
     @Query('page') page = 1,
     @Query('pageSize') pageSize = 10,
   ): Promise<PaginatedResult<Withdrawal>> {
-    return this.courseWithdrawalService.getWithdrawals(Number(page), Number(pageSize));
+    return this.courseWithdrawalService.getWithdrawals(
+      courseId,
+      Number(page),
+      Number(pageSize),
+    );
   }
 
   @Get('courses/:courseId/students/:studentId/withdrawal')
