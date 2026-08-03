@@ -10,12 +10,10 @@ export type Withdrawal = {
   id: string;
   studentId: string;
   courseId: string;
-  courseName?: string;
-  studentName?: string;
   reason?: string;
   status?: string;
-  reviewer?: string;
-  comment?: string;
+  reviewerId?: string;
+  reviewComment?: string;
 };
 
 export type CreateWithdrawalInput = {
@@ -58,7 +56,7 @@ export class CourseWithdrawalService {
         where: { courseId },
         skip: (page - 1) * pageSize,
         take: pageSize,
-        order: { createdDate: 'DESC' },
+        order: { createdAt: 'DESC' },
       });
 
       return {
@@ -101,7 +99,6 @@ export class CourseWithdrawalService {
       const entity = this.courseWithdrawalRepository.create({
         courseId,
         studentId,
-        studentName: input.studentName,
         reason: input.reason,
         status: 'pending',
       });
@@ -118,11 +115,10 @@ export class CourseWithdrawalService {
       id: entity.id,
       studentId: entity.studentId,
       courseId: entity.courseId,
-      studentName: entity.studentName,
       reason: entity.reason,
       status: entity.status,
-      reviewer: entity.reviewer,
-      comment: entity.comment,
+      reviewerId: entity.reviewerId,
+      reviewComment: entity.reviewComment,
     };
   }
 }
