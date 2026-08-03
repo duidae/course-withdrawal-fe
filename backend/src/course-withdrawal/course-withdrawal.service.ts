@@ -71,6 +71,8 @@ export class CourseWithdrawalService {
     }
   }
 
+  // TODO: get user info in external db
+
   async getWithdrawals(
     courseId: string,
     page = 1,
