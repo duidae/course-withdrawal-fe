@@ -20,25 +20,13 @@ export class CourseWithdrawal {
   courseId!: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  courseName?: string;
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
   studentName?: string;
-
-  @Column({ type: 'text', nullable: true })
-  reason?: string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
   status?: string;
 
-  @Column({ type: 'timestamp with time zone', nullable: true })
-  applyTime?: Date;
-
-  @Column({ type: 'timestamp with time zone', nullable: true })
-  deadline?: Date;
-
-  @Column({ type: 'timestamp with time zone', nullable: true })
-  reviewTime?: Date;
+  @Column({ type: 'text', nullable: true })
+  reason?: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   reviewer?: string;
