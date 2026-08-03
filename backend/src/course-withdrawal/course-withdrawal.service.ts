@@ -1,10 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CanvasApiService } from '@ntucool/nestjs-canvas-api';
 import { Repository } from 'typeorm';
 
 import { CourseWithdrawalDbName } from '../database/course-withdrawal-db/config/db.config';
 import { CourseWithdrawal } from '../database/course-withdrawal-db/entities/course-withdrawal.entity';
-import { DbError, InvalidInputError, NotFoundError } from '../shared/errors';
+import { CourseWithdrawalStatus } from '../database/course-withdrawal-db/entities/course-withdrawal-status.enum';
+import {
+  CanvasApiError,
+  DbError,
+  InvalidInputError,
+  NotFoundError,
+} from '../shared/errors';
 
 export type Withdrawal = {
   id: string;
@@ -38,13 +45,17 @@ export class CourseWithdrawalService {
   constructor(
     @InjectRepository(CourseWithdrawal, CourseWithdrawalDbName)
     private readonly courseWithdrawalRepository: Repository<CourseWithdrawal>,
+    private readonly canvasApiService: CanvasApiService,
   ) {}
 
-  // TODO: back this with a real courses table/service once one exists.
-  private readonly courses: Array<{ courseId: string; courseName: string }> = [
-    { courseId: 'CS101', courseName: '大型語言模型與資訊安全系統' },
-    { courseId: 'CS102', courseName: '資料結構與演算法' },
-  ];
+  async getCourseInfo(courseId: string): Promise<CourseInfo> {
+    try {
+      const course = await this.canvasApiService.courses.get(courseId);
+      return { courseName: course.name };
+    } catch (error) {
+      throw new CanvasApiError((error as Error).message);
+    }
+  }
 
   async getWithdrawals(
     courseId: string,
@@ -100,7 +111,7 @@ export class CourseWithdrawalService {
         courseId,
         studentId,
         reason: input.reason,
-        status: 'pending',
+        status: CourseWithdrawalStatus.Pending,
       });
 
       const saved = await this.courseWithdrawalRepository.save(entity);
