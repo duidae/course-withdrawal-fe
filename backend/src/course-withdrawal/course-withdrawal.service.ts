@@ -15,8 +15,8 @@ import {
 } from '../shared/errors';
 
 export const WithdrawalStatus = {
-  NotSubmitted: 'notSubmitted',
   ...CourseWithdrawalStatus,
+  NotSubmitted: 'notSubmitted',
   Overdue: 'overdue',
 } as const;
 
@@ -40,6 +40,8 @@ export type CreateWithdrawalInput = {
 
 export type CourseInfo = {
   courseName: string;
+  section: string;
+  teachers: string[];
 };
 
 export type UserInfo = {
@@ -64,13 +66,20 @@ export class CourseWithdrawalService {
     private readonly canvasApiService: CanvasApiService,
   ) {}
 
-  async getCourseInfo(courseId: string): Promise<CourseInfo> {
-    try {
-      const course = await this.canvasApiService.courses.get(courseId);
-      return { courseName: course.name };
-    } catch (error) {
-      throw new CanvasApiError((error as Error).message);
-    }
+  getCourseInfo(courseId: string): Promise<CourseInfo> {
+    return Promise.resolve({
+      courseName: `Mock Course ${courseId}`,
+      section: `Mock Section ${courseId}`,
+      teachers: [`Mock Teacher 1`, `Mock Teacher 2`],
+    });
+
+    // TODO: get course info from canvas api
+    // try {
+    //   const course = await this.canvasApiService.courses.get(courseId);
+    //   return { courseName: course.name };
+    // } catch (error) {
+    //   throw new CanvasApiError((error as Error).message);
+    // }
   }
 
   async getUserInfo(userId: string): Promise<UserInfo> {
