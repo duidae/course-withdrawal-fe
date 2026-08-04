@@ -267,6 +267,10 @@ describe('CourseWithdrawalController', () => {
   it('/api/admin-list returns withdrawal settings and counts for every configured course', async () => {
     settingsRepository.find!.mockResolvedValue([settings]);
     repository.count!.mockResolvedValue(3);
+    canvasApiService.courses.get.mockResolvedValue({
+      name: '深度學習 Deep Learning',
+      term: { name: '114-2' },
+    });
 
     const response = await request(httpServer()).get('/api/admin-list');
 
@@ -276,17 +280,29 @@ describe('CourseWithdrawalController', () => {
     expect(repository.count).toHaveBeenCalledWith({
       where: { courseId: settings.courseId },
     });
+    expect(canvasApiService.courses.get).toHaveBeenCalledWith(
+      settings.courseId,
+      expect.objectContaining({ parameters: { include: ['term'] } }),
+    );
     expect(body).toEqual([
       {
-        term: `Mock Term ${settings.courseId}`,
-        courseName: `Mock Course name ${settings.courseId}`,
+        term: '114-2',
+        courseName: '深度學習 Deep Learning',
         courseId: settings.courseId,
         withdrawalCount: 3,
-        startAt: settings.startAt.toISOString(),
-        endAt: settings.endAt.toISOString(),
         enabled: settings.enabled,
       },
     ]);
+  });
+
+  it('/api/admin-list wraps Canvas API failures as a CanvasApiError', async () => {
+    settingsRepository.find!.mockResolvedValue([settings]);
+    repository.count!.mockResolvedValue(3);
+    canvasApiService.courses.get.mockRejectedValue(new Error('unauthorized'));
+
+    const response = await request(httpServer()).get('/api/admin-list');
+
+    expect(response.status).toBe(400);
   });
 
   it('/api/admin-list returns an empty array when no courses are configured', async () => {

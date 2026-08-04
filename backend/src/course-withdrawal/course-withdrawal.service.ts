@@ -14,7 +14,7 @@ import { CourseWithdrawal } from '../database/course-withdrawal-db/entities/cour
 import { CourseWithdrawalSetting } from '../database/course-withdrawal-db/entities/course-withdrawal-settings.entity';
 import { CourseWithdrawalStatus } from '../database/course-withdrawal-db/entities/course-withdrawal-status.enum';
 import {
-  //CanvasApiError,
+  CanvasApiError,
   DbError,
   InvalidInputError,
   NotFoundError,
@@ -234,18 +234,33 @@ export class CourseWithdrawalService {
 
     return Promise.all(
       settingsList.map(async (settings) => {
-        const withdrawalCount = await this.getWithdrawalCount(settings.courseId);
+        const [withdrawalCount, course] = await Promise.all([
+          this.getWithdrawalCount(settings.courseId),
+          this.getCourseTermAndName(settings.courseId),
+        ]);
 
         return {
-          // TODO: get term/course name from canvas api
-          term: `Mock Term ${settings.courseId}`,
-          courseName: `Mock Course name ${settings.courseId}`,
+          term: course.term,
+          courseName: course.courseName,
           courseId: settings.courseId,
           withdrawalCount,
           enabled: settings.enabled,
         };
       }),
     );
+  }
+
+  private async getCourseTermAndName(
+    courseId: string,
+  ): Promise<{ term: string; courseName: string }> {
+    try {
+      const course = await this.canvasApiService.courses.get(courseId, {
+        parameters: { include: ['term'] },
+      });
+      return { term: course.term?.name ?? '', courseName: course.name };
+    } catch (error) {
+      throw new CanvasApiError((error as Error).message);
+    }
   }
 
   async createWithdrawal(
