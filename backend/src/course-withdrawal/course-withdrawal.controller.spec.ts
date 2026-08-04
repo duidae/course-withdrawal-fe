@@ -269,6 +269,72 @@ describe('CourseWithdrawalController', () => {
     expect(response.status).toBe(400);
   });
 
+  it('PATCH /api/courses/:courseId/students/:studentId/withdrawal approves a withdrawal', async () => {
+    repository.findOneBy!.mockResolvedValue({ ...withdrawal });
+    repository.save!.mockImplementation((input: object) => Promise.resolve(input));
+
+    const response = await request(httpServer())
+      .patch(
+        `/api/courses/${withdrawal.courseId}/students/${withdrawal.studentId}/withdrawal`,
+      )
+      .send({ status: CourseWithdrawalStatus.Approved, reviewComment: 'looks good' });
+
+    const body = response.body as Withdrawal;
+
+    expect(response.status).toBe(200);
+    expect(repository.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: CourseWithdrawalStatus.Approved,
+        reviewerId: String(ltiUser.canvasUserId),
+        reviewComment: 'looks good',
+      }),
+    );
+    const calls = repository.save!.mock.calls as [CourseWithdrawal][];
+    const [savedEntity] = calls[calls.length - 1];
+    expect(savedEntity.reviewedAt).toBeInstanceOf(Date);
+    expect(body).toMatchObject({
+      status: CourseWithdrawalStatus.Approved,
+      reviewComment: 'looks good',
+      courseName: ltiUser.courseName,
+    });
+  });
+
+  it('PATCH /api/courses/:courseId/students/:studentId/withdrawal declines a withdrawal', async () => {
+    repository.findOneBy!.mockResolvedValue({ ...withdrawal });
+    repository.save!.mockImplementation((input: object) => Promise.resolve(input));
+
+    const response = await request(httpServer())
+      .patch(
+        `/api/courses/${withdrawal.courseId}/students/${withdrawal.studentId}/withdrawal`,
+      )
+      .send({ status: CourseWithdrawalStatus.Declined });
+
+    const body = response.body as Withdrawal;
+
+    expect(response.status).toBe(200);
+    expect(body.status).toBe(CourseWithdrawalStatus.Declined);
+  });
+
+  it('PATCH /api/courses/:courseId/students/:studentId/withdrawal rejects an invalid status', async () => {
+    const response = await request(httpServer())
+      .patch(
+        `/api/courses/${withdrawal.courseId}/students/${withdrawal.studentId}/withdrawal`,
+      )
+      .send({ status: CourseWithdrawalStatus.Pending });
+
+    expect(response.status).toBe(400);
+  });
+
+  it('PATCH /api/courses/:courseId/students/:studentId/withdrawal returns 404 when the withdrawal does not exist', async () => {
+    repository.findOneBy!.mockResolvedValue(null);
+
+    const response = await request(httpServer())
+      .patch(`/api/courses/${withdrawal.courseId}/students/unknown-student/withdrawal`)
+      .send({ status: CourseWithdrawalStatus.Approved });
+
+    expect(response.status).toBe(404);
+  });
+
   it('/api/admin-list returns withdrawal settings and counts for every configured course', async () => {
     settingsRepository.find!.mockResolvedValue([settings]);
     repository.count!.mockResolvedValue(3);
