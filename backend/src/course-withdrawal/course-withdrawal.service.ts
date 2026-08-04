@@ -53,6 +53,11 @@ export type CreateWithdrawalInput = {
   courseName?: string;
 };
 
+export type ReviewWithdrawalInput = {
+  status: CourseWithdrawalStatus.Approved | CourseWithdrawalStatus.Declined;
+  reviewComment?: string;
+};
+
 export type CourseInfo = {
   sectionName: string;
   teachers: string[];
@@ -309,6 +314,43 @@ export class CourseWithdrawalService {
         reason: input.reason,
         status: CourseWithdrawalStatus.Pending,
       });
+
+      const saved = await this.courseWithdrawalRepository.save(entity);
+      return { ...this.toWithdrawal(saved), courseName: user.courseName };
+    } catch (error) {
+      throw new DbError((error as Error).message);
+    }
+  }
+
+  async reviewWithdrawal(
+    courseId: string,
+    studentId: string,
+    input: ReviewWithdrawalInput,
+    user: LtiAuthUser,
+  ): Promise<Withdrawal> {
+    if (
+      input.status !== CourseWithdrawalStatus.Approved &&
+      input.status !== CourseWithdrawalStatus.Declined
+    ) {
+      throw new InvalidInputError('status must be "approved" or "declined"');
+    }
+
+    let entity: CourseWithdrawal | null;
+    try {
+      entity = await this.courseWithdrawalRepository.findOneBy({ courseId, studentId });
+    } catch (error) {
+      throw new DbError((error as Error).message);
+    }
+
+    if (!entity) {
+      throw new NotFoundError('withdrawal');
+    }
+
+    try {
+      entity.status = input.status;
+      entity.reviewerId = String(user.canvasUserId);
+      entity.reviewComment = input.reviewComment;
+      entity.reviewedAt = new Date();
 
       const saved = await this.courseWithdrawalRepository.save(entity);
       return { ...this.toWithdrawal(saved), courseName: user.courseName };

@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CanvasLmsAuthGuard } from '@ntucool/nestjs-canvas-lms-auth/dist/canvas-lms-auth.guard';
 import { User } from '@ntucool/nestjs-canvas-lms-auth';
 import { Permissions } from '../auth/decorators/permission.decorator';
@@ -8,6 +17,7 @@ import type {
   CourseWithdrawalSettingsInfo,
   CreateWithdrawalInput,
   PaginatedResult,
+  ReviewWithdrawalInput,
   Withdrawal,
 } from './course-withdrawal.service';
 
@@ -49,6 +59,16 @@ export class CourseWithdrawalController {
     @User() user: LtiAuthUser,
   ): Promise<Withdrawal> {
     return this.courseWithdrawalService.createWithdrawal(courseId, studentId, body, user);
+  }
+
+  @Patch('courses/:courseId/students/:studentId/withdrawal')
+  reviewWithdrawal(
+    @Param('courseId') courseId: string,
+    @Param('studentId') studentId: string,
+    @Body() body: ReviewWithdrawalInput,
+    @User() user: LtiAuthUser,
+  ): Promise<Withdrawal> {
+    return this.courseWithdrawalService.reviewWithdrawal(courseId, studentId, body, user);
   }
 
   @Get('/admin-list')
