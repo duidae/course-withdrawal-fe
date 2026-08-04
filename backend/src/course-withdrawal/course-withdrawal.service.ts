@@ -58,11 +58,11 @@ export type CourseInfo = {
 };
 
 export type CourseWithdrawalSettingsInfo = {
+  term: string;
   courseName: string;
-  startAt: Date;
-  endAt: Date;
+  courseId: string;
+  withdrawalCount: number;
   enabled: boolean;
-  notice?: object;
 };
 
 export type UserInfo = {
@@ -151,8 +151,6 @@ export class CourseWithdrawalService {
     }
   }
 
-  // TODO: get user info in external db
-
   async getWithdrawals(
     courseId: string,
     page = 1,
@@ -225,19 +223,29 @@ export class CourseWithdrawalService {
     };
   }
 
-  async getCourseWithdrawalSettings(
-    courseId: string,
-    courseName: string,
-  ): Promise<CourseWithdrawalSettingsInfo> {
-    const settings = await this.getWithdrawalSettings(courseId);
+  async getCourseWithdrawalSettings(): Promise<CourseWithdrawalSettingsInfo[]> {
+    let settingsList: CourseWithdrawalSetting[];
 
-    return {
-      courseName,
-      startAt: settings.startAt,
-      endAt: settings.endAt,
-      enabled: settings.enabled,
-      notice: settings.noticeDelta,
-    };
+    try {
+      settingsList = await this.courseWithdrawalSettingRepository.find();
+    } catch (error) {
+      throw new DbError((error as Error).message);
+    }
+
+    return Promise.all(
+      settingsList.map(async (settings) => {
+        const withdrawalCount = await this.getWithdrawalCount(settings.courseId);
+
+        return {
+          // TODO: get term/course name from canvas api
+          term: `Mock Term ${settings.courseId}`,
+          courseName: `Mock Course name ${settings.courseId}`,
+          courseId: settings.courseId,
+          withdrawalCount,
+          enabled: settings.enabled,
+        };
+      }),
+    );
   }
 
   async createWithdrawal(
@@ -260,6 +268,14 @@ export class CourseWithdrawalService {
 
       const saved = await this.courseWithdrawalRepository.save(entity);
       return { ...this.toWithdrawal(saved), courseName: user.courseName };
+    } catch (error) {
+      throw new DbError((error as Error).message);
+    }
+  }
+
+  private async getWithdrawalCount(courseId: string): Promise<number> {
+    try {
+      return await this.courseWithdrawalRepository.count({ where: { courseId } });
     } catch (error) {
       throw new DbError((error as Error).message);
     }
