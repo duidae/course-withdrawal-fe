@@ -40,6 +40,7 @@ export type Withdrawal = {
   studentId?: string;
   reason?: string;
   submittedAt?: Date;
+  endAt?: Date;
   reviewComment?: string;
   reviewerName?: string;
   reviewedAt?: Date;
@@ -122,16 +123,17 @@ export class CourseWithdrawalService {
 
   async getStudentInfo(
     userId: string,
-  ): Promise<{ name: string; loginId: string; studentId: string }> {
+  ): Promise<{ name: string; loginId: string; studentId: string; sectionName: string }> {
     return Promise.resolve({
       name: `Mock Student name ${userId}`,
       loginId: `Mock Student loginId ${userId}`,
       studentId: `Mock Student studentId ${userId}`,
+      sectionName: `Mock Section name ${userId}`,
     });
     /*
     try {
       const user = await this.canvasApiService.users.get(userId);
-      // TODO: get student info in external db
+      // TODO: get student info (incl. section) in external db
       return { name: user.name, loginId: user.loginId };
     } catch (error) {
       throw new CanvasApiError((error as Error).message);
@@ -156,23 +158,50 @@ export class CourseWithdrawalService {
     page = 1,
     pageSize = 10,
   ): Promise<PaginatedResult<Withdrawal>> {
+    const settings = await this.getWithdrawalSettings(courseId);
+
+    let entities: CourseWithdrawal[];
+    let total: number;
+
     try {
-      const [entities, total] = await this.courseWithdrawalRepository.findAndCount({
+      [entities, total] = await this.courseWithdrawalRepository.findAndCount({
         where: { courseId },
         skip: (page - 1) * pageSize,
         take: pageSize,
         order: { createdAt: 'DESC' },
       });
-
-      return {
-        data: entities.map((entity) => this.toWithdrawal(entity)),
-        total,
-        page,
-        pageSize,
-      };
     } catch (error) {
       throw new DbError((error as Error).message);
     }
+
+    const data = await Promise.all(
+      entities.map((entity) => this.toWithdrawalListItem(entity, settings)),
+    );
+
+    return { data, total, page, pageSize };
+  }
+
+  private async toWithdrawalListItem(
+    entity: CourseWithdrawal,
+    settings: CourseWithdrawalSetting,
+  ): Promise<Withdrawal> {
+    const [studentInfo, reviewerName] = await Promise.all([
+      this.getStudentInfo(entity.studentId),
+      entity.reviewerId ? this.getReviewerName(entity.reviewerId) : undefined,
+    ]);
+
+    return {
+      status: this.getEffectiveStatus(settings, entity.status),
+      studnetName: studentInfo.name,
+      sectionName: studentInfo.sectionName,
+      studentId: entity.studentId,
+      reason: entity.reason,
+      submittedAt: entity.createdAt,
+      endAt: settings.endAt,
+      reviewComment: entity.reviewComment,
+      reviewerName,
+      reviewedAt: entity.reviewedAt,
+    };
   }
 
   async getWithdrawal(
