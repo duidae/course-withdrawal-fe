@@ -38,11 +38,7 @@ export class CourseWithdrawalController {
     @Param('studentId') studentId: string,
     @User() user: LtiAuthUser,
   ): Promise<Withdrawal> {
-    return this.courseWithdrawalService.getWithdrawal(
-      courseId,
-      studentId,
-      user.courseName,
-    );
+    return this.courseWithdrawalService.getWithdrawal(courseId, studentId, user);
   }
 
   @Post('students/:studentId/withdrawal')
@@ -50,8 +46,9 @@ export class CourseWithdrawalController {
     @Param('courseId') courseId: string,
     @Param('studentId') studentId: string,
     @Body() body: CreateWithdrawalInput,
+    @User() user: LtiAuthUser,
   ): Promise<Withdrawal> {
-    return this.courseWithdrawalService.createWithdrawal(courseId, studentId, body);
+    return this.courseWithdrawalService.createWithdrawal(courseId, studentId, body, user);
   }
 
   @Get('/admin')

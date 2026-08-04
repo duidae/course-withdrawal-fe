@@ -31,7 +31,16 @@ describe('CourseWithdrawalController', () => {
   let service: CourseWithdrawalService;
   const canvasApiService = {
     courses: { get: jest.fn() },
-    users: { get: jest.fn() },
+    users: {
+      get: jest.fn(),
+      list: jest.fn().mockResolvedValue([{ name: 'Teacher A' }, { name: 'Teacher B' }]),
+    },
+    enrollments: {
+      list: jest.fn().mockResolvedValue([{ courseSectionId: 1 }]),
+    },
+    sections: {
+      get: jest.fn().mockResolvedValue({ name: 'Mock Section' }),
+    },
   };
 
   const withdrawal: CourseWithdrawal = {
@@ -146,8 +155,8 @@ describe('CourseWithdrawalController', () => {
       status: CourseWithdrawalStatus.Pending,
       reason: withdrawal.reason,
       courseName: ltiUser.courseName,
-      sectionName: 'Mock Section name CS101',
-      teachers: ['Mock Teacher 1', 'Mock Teacher 2'],
+      sectionName: 'Mock Section',
+      teachers: ['Teacher A', 'Teacher B'],
     });
   });
 
@@ -241,6 +250,7 @@ describe('CourseWithdrawalController', () => {
     expect(body).toMatchObject({
       reason: withdrawal.reason,
       status: CourseWithdrawalStatus.Pending,
+      courseName: ltiUser.courseName,
     });
   });
 
@@ -278,12 +288,30 @@ describe('CourseWithdrawalController', () => {
     expect(response.status).toBe(404);
   });
 
-  it('getCourseInfo returns mock course info', async () => {
-    const courseInfo = await service.getCourseInfo('CS101', withdrawal.studentId);
+  it('getCourseInfo resolves the section and teacher names via the Canvas API', async () => {
+    const courseInfo = await service.getCourseInfo('CS101', ltiUser);
 
+    expect(canvasApiService.enrollments.list).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contextId: 'CS101',
+        parameters: { userId: ltiUser.canvasUserId },
+      }),
+    );
+    expect(canvasApiService.sections.get).toHaveBeenCalledWith(1);
+    expect(canvasApiService.users.list).toHaveBeenCalledWith(
+      expect.objectContaining({ contextId: 'CS101' }),
+    );
     expect(courseInfo).toEqual({
-      sectionName: 'Mock Section name CS101',
-      teachers: ['Mock Teacher 1', 'Mock Teacher 2'],
+      sectionName: 'Mock Section',
+      teachers: ['Teacher A', 'Teacher B'],
+    });
+  });
+
+  it('getCourseInfo wraps Canvas API failures as a CanvasApiError', async () => {
+    canvasApiService.enrollments.list.mockRejectedValueOnce(new Error('unauthorized'));
+
+    await expect(service.getCourseInfo('CS101', ltiUser)).rejects.toMatchObject({
+      name: 'CanvasApiError',
     });
   });
 
