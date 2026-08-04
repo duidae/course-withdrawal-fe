@@ -14,7 +14,7 @@ import { CourseWithdrawal } from '../database/course-withdrawal-db/entities/cour
 import { CourseWithdrawalSetting } from '../database/course-withdrawal-db/entities/course-withdrawal-settings.entity';
 import { CourseWithdrawalStatus } from '../database/course-withdrawal-db/entities/course-withdrawal-status.enum';
 import {
-  CanvasApiError,
+  //CanvasApiError,
   DbError,
   InvalidInputError,
   NotFoundError,
@@ -23,6 +23,8 @@ import {
 export const WithdrawalStatus = {
   ...CourseWithdrawalStatus,
   NotSubmitted: 'notSubmitted',
+  NotStarted: 'notStarted',
+  NotEnabled: 'notEnabled',
   Overdue: 'overdue',
 } as const;
 
@@ -115,21 +117,34 @@ export class CourseWithdrawalService {
     */
   }
 
-  async getUserInfo(userId: string): Promise<UserInfo> {
+  async getStudentInfo(
+    userId: string,
+  ): Promise<{ name: string; loginId: string; studentId: string }> {
+    return Promise.resolve({
+      name: `Mock Student name ${userId}`,
+      loginId: `Mock Student loginId ${userId}`,
+      studentId: `Mock Student studentId ${userId}`,
+    });
+    /*
     try {
       const user = await this.canvasApiService.users.get(userId);
+      // TODO: get student info in external db
       return { name: user.name, loginId: user.loginId };
     } catch (error) {
       throw new CanvasApiError((error as Error).message);
     }
+    */
   }
 
-  async getReviewerName(reviewerId: string): Promise<string> {
+  async getReviewerName(reviewerId: string): Promise<string | undefined> {
     try {
       const reviewer = await this.canvasApiService.users.get(reviewerId);
       return reviewer.name;
     } catch (error) {
-      throw new CanvasApiError((error as Error).message);
+      console.error('Failed to get reviewer name:', (error as Error).message);
+      return undefined;
+      //TODO: check throw error or just return undefined
+      //throw new CanvasApiError((error as Error).message);
     }
   }
 
@@ -164,42 +179,80 @@ export class CourseWithdrawalService {
     studentId: string,
     user: LtiAuthUser,
   ): Promise<Withdrawal> {
-    const courseInfo = await this.getCourseInfo(courseId, user);
-    const settings = await this.getWithdrawalSettings(courseId);
-
-    let entity: CourseWithdrawal | null;
+    let courseInfo;
+    let studentInfo;
+    let settings: CourseWithdrawalSetting | null;
+    let withdrawalEntity: CourseWithdrawal | null;
 
     try {
-      entity = await this.courseWithdrawalRepository.findOneBy({ courseId, studentId });
+      courseInfo = await this.getCourseInfo(courseId, user);
+      studentInfo = await this.getStudentInfo(studentId);
+      settings = await this.courseWithdrawalSettingRepository.findOneBy({ courseId });
+      withdrawalEntity = await this.courseWithdrawalRepository.findOneBy({
+        courseId,
+        studentId,
+      });
     } catch (error) {
       throw new DbError((error as Error).message);
     }
 
-    if (!entity) {
+    if (!courseInfo || !studentInfo || !settings) {
+      throw new NotFoundError(
+        'course info, student info, or withdrawal settings not found!',
+      );
+    }
+
+    const withdrawal = {
+      courseName: user.courseName,
+      sectionName: courseInfo.sectionName,
+      studnetName: studentInfo.name,
+      loginId: studentInfo.loginId,
+      studentId: studentId,
+      teachers: courseInfo.teachers,
+      notice: settings.noticeDelta,
+    };
+
+    if (!settings.enabled) {
       return {
-        status: WithdrawalStatus.NotSubmitted,
-        courseName: user.courseName,
-        sectionName: courseInfo.sectionName,
-        teachers: courseInfo.teachers,
-        notice: settings.noticeDelta,
+        ...withdrawal,
+        status: WithdrawalStatus.NotEnabled,
       };
     }
 
-    const reviewerName = entity.reviewerId
-      ? await this.getReviewerName(entity.reviewerId)
+    const now = new Date();
+
+    if (settings.startAt > now) {
+      return {
+        ...withdrawal,
+        status: WithdrawalStatus.NotStarted,
+      };
+    }
+    if (settings.endAt < now) {
+      return {
+        ...withdrawal,
+        status: WithdrawalStatus.Overdue,
+      };
+    }
+
+    if (!withdrawalEntity) {
+      return {
+        ...withdrawal,
+        status: WithdrawalStatus.NotSubmitted,
+      };
+    }
+
+    const reviewerName = withdrawalEntity.reviewerId
+      ? await this.getReviewerName(withdrawalEntity.reviewerId)
       : undefined;
 
     return {
-      status: this.getEffectiveStatus(entity.status, settings),
-      courseName: user.courseName,
-      sectionName: courseInfo.sectionName,
-      teachers: courseInfo.teachers,
-      reason: entity.reason,
-      submittedAt: entity.createdAt,
-      reviewComment: entity.reviewComment,
+      status: withdrawalEntity.status,
+      ...withdrawal,
+      reason: withdrawalEntity.reason,
+      submittedAt: withdrawalEntity.createdAt,
+      reviewComment: withdrawalEntity.reviewComment,
       reviewerName,
-      reviewedAt: entity.reviewedAt,
-      notice: settings.noticeDelta,
+      reviewedAt: withdrawalEntity.reviewedAt,
     };
   }
 
