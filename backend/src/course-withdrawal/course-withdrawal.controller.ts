@@ -14,6 +14,8 @@ import { Permissions } from '../auth/decorators/permission.decorator';
 import { Permission } from '../auth/models/enums/permission.enum';
 import { type LtiAuthUser } from '../auth/models/lti-auth-user.model';
 import type {
+  BatchReviewResult,
+  BatchReviewWithdrawalInput,
   CourseWithdrawalSettingsInfo,
   CreateWithdrawalInput,
   PaginatedResult,
@@ -69,6 +71,15 @@ export class CourseWithdrawalController {
     @User() user: LtiAuthUser,
   ): Promise<Withdrawal> {
     return this.courseWithdrawalService.reviewWithdrawal(courseId, studentId, body, user);
+  }
+
+  @Patch('courses/:courseId/withdrawals/batch-review')
+  batchReviewWithdrawals(
+    @Param('courseId') courseId: string,
+    @Body() body: BatchReviewWithdrawalInput,
+    @User() user: LtiAuthUser,
+  ): Promise<BatchReviewResult[]> {
+    return this.courseWithdrawalService.batchReviewWithdrawals(courseId, body, user);
   }
 
   @Get('/admin-list')
