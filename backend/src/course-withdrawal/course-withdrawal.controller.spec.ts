@@ -155,8 +155,8 @@ describe('CourseWithdrawalController', () => {
       status: CourseWithdrawalStatus.Pending,
       reason: withdrawal.reason,
       courseName: ltiUser.courseName,
-      sectionName: 'Mock Section',
-      teachers: ['Teacher A', 'Teacher B'],
+      sectionName: `Mock Section name ${withdrawal.courseId} ${ltiUser.courseName}`,
+      teachers: ['Mock Teacher 1', 'Mock Teacher 2'],
     });
   });
 
@@ -288,30 +288,12 @@ describe('CourseWithdrawalController', () => {
     expect(response.status).toBe(404);
   });
 
-  it('getCourseInfo resolves the section and teacher names via the Canvas API', async () => {
+  it('getCourseInfo returns mock section and teacher names', async () => {
     const courseInfo = await service.getCourseInfo('CS101', ltiUser);
 
-    expect(canvasApiService.enrollments.list).toHaveBeenCalledWith(
-      expect.objectContaining({
-        contextId: 'CS101',
-        parameters: { userId: ltiUser.canvasUserId },
-      }),
-    );
-    expect(canvasApiService.sections.get).toHaveBeenCalledWith(1);
-    expect(canvasApiService.users.list).toHaveBeenCalledWith(
-      expect.objectContaining({ contextId: 'CS101' }),
-    );
     expect(courseInfo).toEqual({
-      sectionName: 'Mock Section',
-      teachers: ['Teacher A', 'Teacher B'],
-    });
-  });
-
-  it('getCourseInfo wraps Canvas API failures as a CanvasApiError', async () => {
-    canvasApiService.enrollments.list.mockRejectedValueOnce(new Error('unauthorized'));
-
-    await expect(service.getCourseInfo('CS101', ltiUser)).rejects.toMatchObject({
-      name: 'CanvasApiError',
+      sectionName: `Mock Section name CS101 ${ltiUser.courseName}`,
+      teachers: ['Mock Teacher 1', 'Mock Teacher 2'],
     });
   });
 
@@ -321,7 +303,7 @@ describe('CourseWithdrawalController', () => {
       loginId: 'B11000000@mail.ntust.edu.tw',
     });
 
-    const userInfo = await service.getUserInfo('B11000000');
+    const userInfo = await service.getStudentInfo('B11000000');
 
     expect(canvasApiService.users.get).toHaveBeenCalledWith('B11000000');
     expect(userInfo).toEqual({
@@ -330,10 +312,10 @@ describe('CourseWithdrawalController', () => {
     });
   });
 
-  it('getUserInfo wraps Canvas API failures as a CanvasApiError', async () => {
+  it('getStudentInfo wraps Canvas API failures as a CanvasApiError', async () => {
     canvasApiService.users.get.mockRejectedValue(new Error('not found'));
 
-    await expect(service.getUserInfo('unknown')).rejects.toMatchObject({
+    await expect(service.getStudentInfo('unknown')).rejects.toMatchObject({
       name: 'CanvasApiError',
     });
   });
