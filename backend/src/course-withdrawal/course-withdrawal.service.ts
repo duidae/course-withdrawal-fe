@@ -1,8 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CanvasApiService } from '@ntucool/nestjs-canvas-api';
+import {
+  CanvasApiService,
+  /*
+  EnrollmentType,
+  ResourceName,
+  */
+} from '@ntucool/nestjs-canvas-api';
 import { Repository } from 'typeorm';
-
+import { type LtiAuthUser } from '../auth/models/lti-auth-user.model';
 import { CourseWithdrawalDbName } from '../database/course-withdrawal-db/config/db.config';
 import { CourseWithdrawal } from '../database/course-withdrawal-db/entities/course-withdrawal.entity';
 import { CourseWithdrawalSetting } from '../database/course-withdrawal-db/entities/course-withdrawal-settings.entity';
@@ -76,17 +82,37 @@ export class CourseWithdrawalService {
     private readonly canvasApiService: CanvasApiService,
   ) {}
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- studentId will be used once section/teacher lookup calls the Canvas API
-  getCourseInfo(courseId: string, studentId: string): Promise<CourseInfo> {
+  async getCourseInfo(courseId: string, user: LtiAuthUser): Promise<CourseInfo> {
     return Promise.resolve({
-      sectionName: `Mock Section name ${courseId}`,
+      sectionName: `Mock Section name ${courseId} ${user.courseName}`,
       teachers: [`Mock Teacher 1`, `Mock Teacher 2`],
     });
+    /*
+    try {
+      const enrollments = await this.canvasApiService.enrollments.list({
+        contextName: ResourceName.Course,
+        contextId: courseId,
+        parameters: { userId: user.canvasUserId },
+      });
+      const sectionId = enrollments[0]?.courseSectionId;
+      const section = sectionId
+        ? await this.canvasApiService.sections.get(sectionId)
+        : undefined;
 
-    // TODO: get section/teachers info from canvas api
-    //  /api/v1/courses/:course_id/enrollments?user_id=:user_id => course_section_id
-    // /api/v1/sections/:section_id => section name
-    // teachers: /api/v1/courses/:course_id/users?enrollment_type[]=teacher
+      const teachers = await this.canvasApiService.users.list({
+        contextName: ResourceName.Course,
+        contextId: courseId,
+        parameters: { enrollmentType: [EnrollmentType.TeacherEnrollment] },
+      });
+
+      return {
+        sectionName: section?.name ?? '',
+        teachers: teachers.map((teacher) => teacher.name),
+      };
+    } catch (error) {
+      throw new CanvasApiError((error as Error).message);
+    }
+    */
   }
 
   async getUserInfo(userId: string): Promise<UserInfo> {
@@ -136,9 +162,9 @@ export class CourseWithdrawalService {
   async getWithdrawal(
     courseId: string,
     studentId: string,
-    courseName: string,
+    user: LtiAuthUser,
   ): Promise<Withdrawal> {
-    const courseInfo = await this.getCourseInfo(courseId, studentId);
+    const courseInfo = await this.getCourseInfo(courseId, user);
     const settings = await this.getWithdrawalSettings(courseId);
 
     let entity: CourseWithdrawal | null;
@@ -152,7 +178,7 @@ export class CourseWithdrawalService {
     if (!entity) {
       return {
         status: WithdrawalStatus.NotSubmitted,
-        courseName,
+        courseName: user.courseName,
         sectionName: courseInfo.sectionName,
         teachers: courseInfo.teachers,
         notice: settings.noticeDelta,
@@ -165,7 +191,7 @@ export class CourseWithdrawalService {
 
     return {
       status: this.getEffectiveStatus(entity.status, settings),
-      courseName,
+      courseName: user.courseName,
       sectionName: courseInfo.sectionName,
       teachers: courseInfo.teachers,
       reason: entity.reason,
@@ -196,6 +222,7 @@ export class CourseWithdrawalService {
     courseId: string,
     studentId: string,
     input: CreateWithdrawalInput,
+    user: LtiAuthUser,
   ): Promise<Withdrawal> {
     if (!input.reason?.trim()) {
       throw new InvalidInputError('reason is required');
@@ -210,7 +237,7 @@ export class CourseWithdrawalService {
       });
 
       const saved = await this.courseWithdrawalRepository.save(entity);
-      return this.toWithdrawal(saved);
+      return { ...this.toWithdrawal(saved), courseName: user.courseName };
     } catch (error) {
       throw new DbError((error as Error).message);
     }
