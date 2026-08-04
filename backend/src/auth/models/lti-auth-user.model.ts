@@ -6,4 +6,5 @@ import { AuthUser } from '@ntucool/nestjs-canvas-lms-auth';
 export type LtiAuthUser = AuthUser & {
   canvasUserId: number;
   roles: RoleType[];
+  courseName: string;
 };

@@ -25,14 +25,14 @@ export type WithdrawalStatus = (typeof WithdrawalStatus)[keyof typeof Withdrawal
 export type Withdrawal = {
   status: WithdrawalStatus;
   courseName?: string;
-  section?: string;
+  sectionName?: string;
   teachers?: string[];
-  notice?: object;
   reason?: string;
   submittedAt?: Date;
   reviewComment?: string;
   reviewerName?: string;
   reviewedAt?: Date;
+  notice?: object;
 };
 
 export type CreateWithdrawalInput = {
@@ -42,9 +42,16 @@ export type CreateWithdrawalInput = {
 };
 
 export type CourseInfo = {
-  courseName: string;
-  section: string;
+  sectionName: string;
   teachers: string[];
+};
+
+export type CourseWithdrawalSettingsInfo = {
+  courseName: string;
+  startAt: Date;
+  endAt: Date;
+  enabled: boolean;
+  notice?: object;
 };
 
 export type UserInfo = {
@@ -69,21 +76,14 @@ export class CourseWithdrawalService {
     private readonly canvasApiService: CanvasApiService,
   ) {}
 
-  getCourseInfo(courseId: string): Promise<CourseInfo> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- studentId will be used once section/teacher lookup calls the Canvas API
+  getCourseInfo(courseId: string, studentId: string): Promise<CourseInfo> {
     return Promise.resolve({
-      courseName: `Mock Course ${courseId}`,
-      section: `Mock Section ${courseId}`,
+      sectionName: `Mock Section name ${courseId}`,
       teachers: [`Mock Teacher 1`, `Mock Teacher 2`],
     });
 
-    // TODO: get course info from canvas api
-    // try {
-    //   const course = await this.canvasApiService.courses.get(courseId);
-    //   return { courseName: course.name };
-    // } catch (error) {
-    //   throw new CanvasApiError((error as Error).message);
-    // }
-
+    // TODO: get section/teachers info from canvas api
     //  /api/v1/courses/:course_id/enrollments?user_id=:user_id => course_section_id
     // /api/v1/sections/:section_id => section name
     // teachers: /api/v1/courses/:course_id/users?enrollment_type[]=teacher
@@ -133,9 +133,13 @@ export class CourseWithdrawalService {
     }
   }
 
-  async getWithdrawal(courseId: string, studentId: string): Promise<Withdrawal> {
-    const courseInfo = await this.getCourseInfo(courseId);
-    const settings = await this.getSettingsOrThrow(courseId);
+  async getWithdrawal(
+    courseId: string,
+    studentId: string,
+    courseName: string,
+  ): Promise<Withdrawal> {
+    const courseInfo = await this.getCourseInfo(courseId, studentId);
+    const settings = await this.getWithdrawalSettings(courseId);
 
     let entity: CourseWithdrawal | null;
 
@@ -148,8 +152,8 @@ export class CourseWithdrawalService {
     if (!entity) {
       return {
         status: WithdrawalStatus.NotSubmitted,
-        courseName: courseInfo.courseName,
-        section: courseInfo.section,
+        courseName,
+        sectionName: courseInfo.sectionName,
         teachers: courseInfo.teachers,
         notice: settings.noticeDelta,
       };
@@ -161,14 +165,29 @@ export class CourseWithdrawalService {
 
     return {
       status: this.getEffectiveStatus(entity.status, settings),
-      courseName: courseInfo.courseName,
-      section: courseInfo.section,
+      courseName,
+      sectionName: courseInfo.sectionName,
       teachers: courseInfo.teachers,
       reason: entity.reason,
       submittedAt: entity.createdAt,
       reviewComment: entity.reviewComment,
       reviewerName,
       reviewedAt: entity.reviewedAt,
+      notice: settings.noticeDelta,
+    };
+  }
+
+  async getCourseWithdrawalSettings(
+    courseId: string,
+    courseName: string,
+  ): Promise<CourseWithdrawalSettingsInfo> {
+    const settings = await this.getWithdrawalSettings(courseId);
+
+    return {
+      courseName,
+      startAt: settings.startAt,
+      endAt: settings.endAt,
+      enabled: settings.enabled,
       notice: settings.noticeDelta,
     };
   }
@@ -197,7 +216,9 @@ export class CourseWithdrawalService {
     }
   }
 
-  private async getSettingsOrThrow(courseId: string): Promise<CourseWithdrawalSetting> {
+  private async getWithdrawalSettings(
+    courseId: string,
+  ): Promise<CourseWithdrawalSetting> {
     let settings: CourseWithdrawalSetting | null;
 
     try {
