@@ -58,6 +58,19 @@ export type ReviewWithdrawalInput = {
   reviewComment?: string;
 };
 
+export type BatchReviewWithdrawalInput = {
+  studentIds: string[];
+  status: CourseWithdrawalStatus.Approved | CourseWithdrawalStatus.Declined;
+  reviewComment?: string;
+};
+
+export type BatchReviewResult = {
+  studentId: string;
+  success: boolean;
+  withdrawal?: Withdrawal;
+  error?: string;
+};
+
 export type CourseInfo = {
   sectionName: string;
   teachers: string[];
@@ -357,6 +370,32 @@ export class CourseWithdrawalService {
     } catch (error) {
       throw new DbError((error as Error).message);
     }
+  }
+
+  async batchReviewWithdrawals(
+    courseId: string,
+    input: BatchReviewWithdrawalInput,
+    user: LtiAuthUser,
+  ): Promise<BatchReviewResult[]> {
+    if (!input.studentIds?.length) {
+      throw new InvalidInputError('studentIds must be a non-empty array');
+    }
+
+    return Promise.all(
+      input.studentIds.map(async (studentId): Promise<BatchReviewResult> => {
+        try {
+          const withdrawal = await this.reviewWithdrawal(
+            courseId,
+            studentId,
+            { status: input.status, reviewComment: input.reviewComment },
+            user,
+          );
+          return { studentId, success: true, withdrawal };
+        } catch (error) {
+          return { studentId, success: false, error: (error as Error).message };
+        }
+      }),
+    );
   }
 
   private async getWithdrawalCount(courseId: string): Promise<number> {
