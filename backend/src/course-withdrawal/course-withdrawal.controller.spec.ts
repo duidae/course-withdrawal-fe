@@ -120,6 +120,7 @@ describe('CourseWithdrawalController', () => {
   const httpServer = () => app.getHttpServer() as Parameters<typeof request>[0];
 
   it('/api/courses/:courseId/withdrawal-list returns paginated withdrawals', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue(settings);
     repository.findAndCount!.mockResolvedValue([[withdrawal], 1]);
 
     const response = await request(httpServer())
@@ -137,6 +138,10 @@ describe('CourseWithdrawalController', () => {
     expect(body.data[0]).toMatchObject({
       status: withdrawal.status,
       reason: withdrawal.reason,
+      studnetName: 'Mock Student name B11000000',
+      sectionName: 'Mock Section name B11000000',
+      studentId: withdrawal.studentId,
+      endAt: settings.endAt.toISOString(),
     });
   });
 
@@ -330,6 +335,7 @@ describe('CourseWithdrawalController', () => {
       name: 'Mock Student name B11000000',
       loginId: 'Mock Student loginId B11000000',
       studentId: 'Mock Student studentId B11000000',
+      sectionName: 'Mock Section name B11000000',
     });
   });
 
