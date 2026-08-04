@@ -182,80 +182,46 @@ export class CourseWithdrawalService {
     studentId: string,
     user: LtiAuthUser,
   ): Promise<Withdrawal> {
-    let courseInfo;
-    let studentInfo;
-    let settings: CourseWithdrawalSetting | null;
-    let withdrawalEntity: CourseWithdrawal | null;
+    const courseInfo = await this.getCourseInfo(courseId, user);
+    const studentInfo = await this.getStudentInfo(studentId);
+    const settings = await this.getWithdrawalSettings(courseId);
 
+    let entity: CourseWithdrawal | null;
     try {
-      courseInfo = await this.getCourseInfo(courseId, user);
-      studentInfo = await this.getStudentInfo(studentId);
-      settings = await this.courseWithdrawalSettingRepository.findOneBy({ courseId });
-      withdrawalEntity = await this.courseWithdrawalRepository.findOneBy({
-        courseId,
-        studentId,
-      });
+      entity = await this.courseWithdrawalRepository.findOneBy({ courseId, studentId });
     } catch (error) {
       throw new DbError((error as Error).message);
     }
 
-    if (!courseInfo || !studentInfo || !settings) {
-      throw new NotFoundError(
-        'course info, student info, or withdrawal settings not found!',
-      );
-    }
-
-    const withdrawal = {
+    const base = {
       courseName: user.courseName,
       sectionName: courseInfo.sectionName,
+      teachers: courseInfo.teachers,
       studnetName: studentInfo.name,
       loginId: studentInfo.loginId,
-      studentId: studentId,
-      teachers: courseInfo.teachers,
+      studentId,
       notice: settings.noticeDelta,
     };
 
-    if (!settings.enabled) {
+    if (!entity) {
       return {
-        ...withdrawal,
-        status: WithdrawalStatus.NotEnabled,
+        ...base,
+        status: this.getEffectiveStatus(settings, WithdrawalStatus.NotSubmitted),
       };
     }
 
-    const now = new Date();
-    if (settings.startAt > now) {
-      return {
-        ...withdrawal,
-        status: WithdrawalStatus.NotStarted,
-      };
-    }
-
-    if (settings.endAt < now) {
-      return {
-        ...withdrawal,
-        status: WithdrawalStatus.Overdue,
-      };
-    }
-
-    if (!withdrawalEntity) {
-      return {
-        ...withdrawal,
-        status: WithdrawalStatus.NotSubmitted,
-      };
-    }
-
-    const reviewerName = withdrawalEntity.reviewerId
-      ? await this.getReviewerName(withdrawalEntity.reviewerId)
+    const reviewerName = entity.reviewerId
+      ? await this.getReviewerName(entity.reviewerId)
       : undefined;
 
     return {
-      status: withdrawalEntity.status,
-      ...withdrawal,
-      reason: withdrawalEntity.reason,
-      submittedAt: withdrawalEntity.createdAt,
-      reviewComment: withdrawalEntity.reviewComment,
+      ...base,
+      status: this.getEffectiveStatus(settings, entity.status),
+      reason: entity.reason,
+      submittedAt: entity.createdAt,
+      reviewComment: entity.reviewComment,
       reviewerName,
-      reviewedAt: withdrawalEntity.reviewedAt,
+      reviewedAt: entity.reviewedAt,
     };
   }
 
@@ -318,15 +284,30 @@ export class CourseWithdrawalService {
   }
 
   private getEffectiveStatus(
-    status: CourseWithdrawalStatus,
     settings: CourseWithdrawalSetting,
+    status: CourseWithdrawalStatus | typeof WithdrawalStatus.NotSubmitted,
   ): WithdrawalStatus {
-    if (status !== CourseWithdrawalStatus.Pending) {
+    const isPending =
+      status === CourseWithdrawalStatus.Pending ||
+      status === WithdrawalStatus.NotSubmitted;
+
+    if (!isPending) {
       return status;
     }
 
-    const isExpired = !settings.enabled || settings.endAt < new Date();
-    return isExpired ? WithdrawalStatus.Overdue : WithdrawalStatus.Pending;
+    if (!settings.enabled) {
+      return WithdrawalStatus.NotEnabled;
+    }
+
+    const now = new Date();
+    if (settings.startAt > now) {
+      return WithdrawalStatus.NotStarted;
+    }
+    if (settings.endAt < now) {
+      return WithdrawalStatus.Overdue;
+    }
+
+    return status;
   }
 
   private toWithdrawal(entity: CourseWithdrawal): Withdrawal {

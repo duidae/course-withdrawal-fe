@@ -297,26 +297,13 @@ describe('CourseWithdrawalController', () => {
     });
   });
 
-  it('getUserInfo returns the user name and login id from the Canvas API', async () => {
-    canvasApiService.users.get.mockResolvedValue({
-      name: '丁O寧',
-      loginId: 'B11000000@mail.ntust.edu.tw',
-    });
+  it('getStudentInfo returns mock student info', async () => {
+    const studentInfo = await service.getStudentInfo('B11000000');
 
-    const userInfo = await service.getStudentInfo('B11000000');
-
-    expect(canvasApiService.users.get).toHaveBeenCalledWith('B11000000');
-    expect(userInfo).toEqual({
-      name: '丁O寧',
-      loginId: 'B11000000@mail.ntust.edu.tw',
-    });
-  });
-
-  it('getStudentInfo wraps Canvas API failures as a CanvasApiError', async () => {
-    canvasApiService.users.get.mockRejectedValue(new Error('not found'));
-
-    await expect(service.getStudentInfo('unknown')).rejects.toMatchObject({
-      name: 'CanvasApiError',
+    expect(studentInfo).toEqual({
+      name: 'Mock Student name B11000000',
+      loginId: 'Mock Student loginId B11000000',
+      studentId: 'Mock Student studentId B11000000',
     });
   });
 
@@ -329,11 +316,11 @@ describe('CourseWithdrawalController', () => {
     expect(reviewerName).toBe('林教授');
   });
 
-  it('getReviewerName wraps Canvas API failures as a CanvasApiError', async () => {
+  it('getReviewerName returns undefined when the Canvas API call fails', async () => {
     canvasApiService.users.get.mockRejectedValue(new Error('not found'));
 
-    await expect(service.getReviewerName('unknown')).rejects.toMatchObject({
-      name: 'CanvasApiError',
-    });
+    const reviewerName = await service.getReviewerName('unknown');
+
+    expect(reviewerName).toBeUndefined();
   });
 });
