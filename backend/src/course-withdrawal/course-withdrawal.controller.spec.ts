@@ -264,28 +264,38 @@ describe('CourseWithdrawalController', () => {
     expect(response.status).toBe(400);
   });
 
-  it('/api/courses/:courseId/admin returns the withdrawal settings using the LTI-provided course name', async () => {
-    settingsRepository.findOneBy!.mockResolvedValue(settings);
+  it('/api/admin-list returns withdrawal settings and counts for every configured course', async () => {
+    settingsRepository.find!.mockResolvedValue([settings]);
+    repository.count!.mockResolvedValue(3);
 
-    const response = await request(httpServer()).get(
-      `/api/courses/${withdrawal.courseId}/admin`,
-    );
+    const response = await request(httpServer()).get('/api/admin-list');
 
-    const body = response.body as CourseWithdrawalSettingsInfo;
+    const body = response.body as CourseWithdrawalSettingsInfo[];
 
     expect(response.status).toBe(200);
-    expect(body).toMatchObject({
-      courseName: ltiUser.courseName,
-      enabled: settings.enabled,
+    expect(repository.count).toHaveBeenCalledWith({
+      where: { courseId: settings.courseId },
     });
+    expect(body).toEqual([
+      {
+        term: `Mock Term ${settings.courseId}`,
+        courseName: `Mock Course name ${settings.courseId}`,
+        courseId: settings.courseId,
+        withdrawalCount: 3,
+        startAt: settings.startAt.toISOString(),
+        endAt: settings.endAt.toISOString(),
+        enabled: settings.enabled,
+      },
+    ]);
   });
 
-  it('/api/courses/:courseId/admin returns 404 when course withdrawal settings do not exist', async () => {
-    settingsRepository.findOneBy!.mockResolvedValue(null);
+  it('/api/admin-list returns an empty array when no courses are configured', async () => {
+    settingsRepository.find!.mockResolvedValue([]);
 
-    const response = await request(httpServer()).get('/api/courses/CS999/admin');
+    const response = await request(httpServer()).get('/api/admin-list');
 
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([]);
   });
 
   it('getCourseInfo returns mock section and teacher names', async () => {
