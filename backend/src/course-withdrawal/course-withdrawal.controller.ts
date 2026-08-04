@@ -13,12 +13,12 @@ import type {
 
 import { CourseWithdrawalService } from './course-withdrawal.service';
 
-@Controller('api/courses/:courseId')
+@Controller('api')
 @UseGuards(CanvasLmsAuthGuard)
 export class CourseWithdrawalController {
   constructor(private readonly courseWithdrawalService: CourseWithdrawalService) {}
 
-  @Get('withdrawal-list')
+  @Get('courses/:courseId/withdrawal-list')
   @Permissions(['courseId', Permission.GeneralView])
   getWithdrawals(
     @Param('courseId') courseId: string,
@@ -32,7 +32,7 @@ export class CourseWithdrawalController {
     );
   }
 
-  @Get('students/:studentId/withdrawal')
+  @Get('courses/:courseId/students/:studentId/withdrawal')
   getWithdrawal(
     @Param('courseId') courseId: string,
     @Param('studentId') studentId: string,
@@ -41,7 +41,7 @@ export class CourseWithdrawalController {
     return this.courseWithdrawalService.getWithdrawal(courseId, studentId, user);
   }
 
-  @Post('students/:studentId/withdrawal')
+  @Post('courses/:courseId/students/:studentId/withdrawal')
   createWithdrawal(
     @Param('courseId') courseId: string,
     @Param('studentId') studentId: string,
@@ -51,14 +51,8 @@ export class CourseWithdrawalController {
     return this.courseWithdrawalService.createWithdrawal(courseId, studentId, body, user);
   }
 
-  @Get('/admin')
-  getCourse(
-    @Param('courseId') courseId: string,
-    @User() user: LtiAuthUser,
-  ): Promise<CourseWithdrawalSettingsInfo> {
-    return this.courseWithdrawalService.getCourseWithdrawalSettings(
-      courseId,
-      user.courseName,
-    );
+  @Get('/admin-list')
+  getCourses(): Promise<CourseWithdrawalSettingsInfo[]> {
+    return this.courseWithdrawalService.getCourseWithdrawalSettings();
   }
 }
