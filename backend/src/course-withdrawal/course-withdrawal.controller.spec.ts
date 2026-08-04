@@ -1,9 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { type ExecutionContext, type INestApplication } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CanvasApiService } from '@ntucool/nestjs-canvas-api';
+import { CanvasLmsAuthGuard } from '@ntucool/nestjs-canvas-lms-auth/dist/canvas-lms-auth.guard';
 import request from 'supertest';
 
+import { type LtiAuthUser } from '../auth/models/lti-auth-user.model';
 import { CourseWithdrawalDbName } from '../database/course-withdrawal-db/config/db.config';
 import { CourseWithdrawal } from '../database/course-withdrawal-db/entities/course-withdrawal.entity';
 import { CourseWithdrawalSetting } from '../database/course-withdrawal-db/entities/course-withdrawal-settings.entity';
@@ -17,6 +19,7 @@ import { CourseWithdrawalController } from './course-withdrawal.controller';
 import {
   CourseWithdrawalService,
   WithdrawalStatus,
+  type CourseWithdrawalSettingsInfo,
   type PaginatedResult,
   type Withdrawal,
 } from './course-withdrawal.service';
@@ -39,6 +42,12 @@ describe('CourseWithdrawalController', () => {
     reason: '故申請停修。',
     createdAt: new Date('2026-05-11T08:00:00Z'),
     updatedAt: new Date('2026-05-11T08:00:00Z'),
+  };
+
+  const ltiUser: LtiAuthUser = {
+    canvasUserId: 1,
+    roles: [],
+    courseName: 'LTI Course Name',
   };
 
   const settings: CourseWithdrawalSetting = {
@@ -71,7 +80,16 @@ describe('CourseWithdrawalController', () => {
           useValue: canvasApiService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(CanvasLmsAuthGuard)
+      .useValue({
+        canActivate: (context: ExecutionContext) => {
+          const request = context.switchToHttp().getRequest<{ user?: LtiAuthUser }>();
+          request.user = ltiUser;
+          return true;
+        },
+      })
+      .compile();
 
     repository = moduleFixture.get<MockRepository<CourseWithdrawal>>(
       getRepositoryToken(CourseWithdrawal, CourseWithdrawalDbName),
@@ -127,8 +145,8 @@ describe('CourseWithdrawalController', () => {
     expect(body).toMatchObject({
       status: CourseWithdrawalStatus.Pending,
       reason: withdrawal.reason,
-      courseName: 'Mock Course CS101',
-      section: 'Mock Section CS101',
+      courseName: ltiUser.courseName,
+      sectionName: 'Mock Section name CS101',
       teachers: ['Mock Teacher 1', 'Mock Teacher 2'],
     });
   });
@@ -166,7 +184,7 @@ describe('CourseWithdrawalController', () => {
     expect(response.status).toBe(200);
     expect(body).toMatchObject({
       status: WithdrawalStatus.NotSubmitted,
-      courseName: 'Mock Course CS101',
+      courseName: ltiUser.courseName,
     });
   });
 
@@ -236,12 +254,35 @@ describe('CourseWithdrawalController', () => {
     expect(response.status).toBe(400);
   });
 
+  it('/api/courses/:courseId/admin returns the withdrawal settings using the LTI-provided course name', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue(settings);
+
+    const response = await request(httpServer()).get(
+      `/api/courses/${withdrawal.courseId}/admin`,
+    );
+
+    const body = response.body as CourseWithdrawalSettingsInfo;
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      courseName: ltiUser.courseName,
+      enabled: settings.enabled,
+    });
+  });
+
+  it('/api/courses/:courseId/admin returns 404 when course withdrawal settings do not exist', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue(null);
+
+    const response = await request(httpServer()).get('/api/courses/CS999/admin');
+
+    expect(response.status).toBe(404);
+  });
+
   it('getCourseInfo returns mock course info', async () => {
-    const courseInfo = await service.getCourseInfo('CS101');
+    const courseInfo = await service.getCourseInfo('CS101', withdrawal.studentId);
 
     expect(courseInfo).toEqual({
-      courseName: 'Mock Course CS101',
-      section: 'Mock Section CS101',
+      sectionName: 'Mock Section name CS101',
       teachers: ['Mock Teacher 1', 'Mock Teacher 2'],
     });
   });

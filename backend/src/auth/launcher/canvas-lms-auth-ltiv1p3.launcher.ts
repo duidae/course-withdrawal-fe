@@ -97,6 +97,7 @@ export class CanvasLmsAuthLauncherLtiv1p3 {
     return {
       canvasUserId: userId,
       roles,
+      courseName: (lti.courseName as string | undefined) ?? '',
     };
   }
 

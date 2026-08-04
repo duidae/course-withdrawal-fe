@@ -1,5 +1,11 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { CanvasLmsAuthGuard } from '@ntucool/nestjs-canvas-lms-auth/dist/canvas-lms-auth.guard';
+import { User } from '@ntucool/nestjs-canvas-lms-auth';
+import { Permissions } from '../auth/decorators/permission.decorator';
+import { Permission } from '../auth/models/enums/permission.enum';
+import { type LtiAuthUser } from '../auth/models/lti-auth-user.model';
 import type {
+  CourseWithdrawalSettingsInfo,
   CreateWithdrawalInput,
   PaginatedResult,
   Withdrawal,
@@ -7,11 +13,13 @@ import type {
 
 import { CourseWithdrawalService } from './course-withdrawal.service';
 
-@Controller('api')
+@Controller('api/courses/:courseId')
+@UseGuards(CanvasLmsAuthGuard)
 export class CourseWithdrawalController {
   constructor(private readonly courseWithdrawalService: CourseWithdrawalService) {}
 
-  @Get('courses/:courseId/withdrawal-list')
+  @Get('withdrawal-list')
+  @Permissions(['courseId', Permission.GeneralView])
   getWithdrawals(
     @Param('courseId') courseId: string,
     @Query('page') page = 1,
@@ -24,15 +32,20 @@ export class CourseWithdrawalController {
     );
   }
 
-  @Get('courses/:courseId/students/:studentId/withdrawal')
+  @Get('students/:studentId/withdrawal')
   getWithdrawal(
     @Param('courseId') courseId: string,
     @Param('studentId') studentId: string,
+    @User() user: LtiAuthUser,
   ): Promise<Withdrawal> {
-    return this.courseWithdrawalService.getWithdrawal(courseId, studentId);
+    return this.courseWithdrawalService.getWithdrawal(
+      courseId,
+      studentId,
+      user.courseName,
+    );
   }
 
-  @Post('courses/:courseId/students/:studentId/withdrawal')
+  @Post('students/:studentId/withdrawal')
   createWithdrawal(
     @Param('courseId') courseId: string,
     @Param('studentId') studentId: string,
@@ -41,10 +54,14 @@ export class CourseWithdrawalController {
     return this.courseWithdrawalService.createWithdrawal(courseId, studentId, body);
   }
 
-  /* TODO: admin part
-  @Get('courses/:courseId')
-  getCourse(@Param('courseId') courseId: string): CourseInfo {
-    return this.courseWithdrawalService.getCourse(courseId);
+  @Get('/admin')
+  getCourse(
+    @Param('courseId') courseId: string,
+    @User() user: LtiAuthUser,
+  ): Promise<CourseWithdrawalSettingsInfo> {
+    return this.courseWithdrawalService.getCourseWithdrawalSettings(
+      courseId,
+      user.courseName,
+    );
   }
-  */
 }
