@@ -15,21 +15,24 @@ import {
   repositoryMockFactory,
   type MockRepository,
 } from '../test-utils/mock/repository.mock';
+import { AdminCourseWithdrawalService } from './admin-course-withdrawal.service';
+import { CourseWithdrawalCommonService } from './course-withdrawal-common.service';
 import { CourseWithdrawalController } from './course-withdrawal.controller';
 import {
-  CourseWithdrawalService,
   WithdrawalStatus,
   type BatchReviewResult,
   type CourseWithdrawalSettingsInfo,
   type PaginatedResult,
   type Withdrawal,
-} from './course-withdrawal.service';
+} from './course-withdrawal.types';
+import { StudentCourseWithdrawalService } from './student-course-withdrawal.service';
+import { TeacherCourseWithdrawalService } from './teacher-course-withdrawal.service';
 
 describe('CourseWithdrawalController', () => {
   let app: INestApplication;
   let repository: MockRepository<CourseWithdrawal>;
   let settingsRepository: MockRepository<CourseWithdrawalSetting>;
-  let service: CourseWithdrawalService;
+  let commonService: CourseWithdrawalCommonService;
   const canvasApiService = {
     courses: { get: jest.fn() },
     users: {
@@ -76,7 +79,10 @@ describe('CourseWithdrawalController', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [CourseWithdrawalController],
       providers: [
-        CourseWithdrawalService,
+        CourseWithdrawalCommonService,
+        StudentCourseWithdrawalService,
+        TeacherCourseWithdrawalService,
+        AdminCourseWithdrawalService,
         {
           provide: getRepositoryToken(CourseWithdrawal, CourseWithdrawalDbName),
           useFactory: repositoryMockFactory,
@@ -107,7 +113,7 @@ describe('CourseWithdrawalController', () => {
     settingsRepository = moduleFixture.get<MockRepository<CourseWithdrawalSetting>>(
       getRepositoryToken(CourseWithdrawalSetting, CourseWithdrawalDbName),
     );
-    service = moduleFixture.get(CourseWithdrawalService);
+    commonService = moduleFixture.get(CourseWithdrawalCommonService);
 
     app = moduleFixture.createNestApplication();
     app.useGlobalFilters(new ResponseErrorFilter());
@@ -426,7 +432,7 @@ describe('CourseWithdrawalController', () => {
   });
 
   it('getCourseInfo returns mock section and teacher names', async () => {
-    const courseInfo = await service.getCourseInfo('CS101', ltiUser);
+    const courseInfo = await commonService.getCourseInfo('CS101', ltiUser);
 
     expect(courseInfo).toEqual({
       sectionName: `Mock Section name CS101 ${ltiUser.courseName}`,
@@ -435,7 +441,7 @@ describe('CourseWithdrawalController', () => {
   });
 
   it('getStudentInfo returns mock student info', async () => {
-    const studentInfo = await service.getStudentInfo('B11000000');
+    const studentInfo = await commonService.getStudentInfo('B11000000');
 
     expect(studentInfo).toEqual({
       name: 'Mock Student name B11000000',
@@ -448,7 +454,7 @@ describe('CourseWithdrawalController', () => {
   it('getReviewerName returns the reviewer name from the Canvas API', async () => {
     canvasApiService.users.get.mockResolvedValue({ name: '林教授' });
 
-    const reviewerName = await service.getReviewerName('T00000001');
+    const reviewerName = await commonService.getReviewerName('T00000001');
 
     expect(canvasApiService.users.get).toHaveBeenCalledWith('T00000001');
     expect(reviewerName).toBe('林教授');
@@ -457,7 +463,7 @@ describe('CourseWithdrawalController', () => {
   it('getReviewerName returns undefined when the Canvas API call fails', async () => {
     canvasApiService.users.get.mockRejectedValue(new Error('not found'));
 
-    const reviewerName = await service.getReviewerName('unknown');
+    const reviewerName = await commonService.getReviewerName('unknown');
 
     expect(reviewerName).toBeUndefined();
   });
