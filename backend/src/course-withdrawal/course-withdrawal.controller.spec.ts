@@ -19,6 +19,7 @@ import { CourseWithdrawalController } from './course-withdrawal.controller';
 import {
   CourseWithdrawalService,
   WithdrawalStatus,
+  type BatchReviewResult,
   type CourseWithdrawalSettingsInfo,
   type PaginatedResult,
   type Withdrawal,
@@ -333,6 +334,45 @@ describe('CourseWithdrawalController', () => {
       .send({ status: CourseWithdrawalStatus.Approved });
 
     expect(response.status).toBe(404);
+  });
+
+  it('PATCH /api/courses/:courseId/withdrawals/batch-review approves multiple withdrawals with partial success', async () => {
+    repository.findOneBy!.mockImplementation((where: { studentId: string }) =>
+      Promise.resolve(
+        where.studentId === 'missing-student'
+          ? null
+          : { ...withdrawal, studentId: where.studentId },
+      ),
+    );
+    repository.save!.mockImplementation((input: object) => Promise.resolve(input));
+
+    const response = await request(httpServer())
+      .patch(`/api/courses/${withdrawal.courseId}/withdrawals/batch-review`)
+      .send({
+        studentIds: [withdrawal.studentId, 'missing-student'],
+        status: CourseWithdrawalStatus.Approved,
+        reviewComment: 'batch approved',
+      });
+
+    const body = response.body as BatchReviewResult[];
+
+    expect(response.status).toBe(200);
+    expect(body).toHaveLength(2);
+    expect(body[0].studentId).toBe(withdrawal.studentId);
+    expect(body[0].success).toBe(true);
+    expect(body[0].withdrawal?.status).toBe(CourseWithdrawalStatus.Approved);
+    expect(body[0].withdrawal?.reviewComment).toBe('batch approved');
+    expect(body[1].studentId).toBe('missing-student');
+    expect(body[1].success).toBe(false);
+    expect(typeof body[1].error).toBe('string');
+  });
+
+  it('PATCH /api/courses/:courseId/withdrawals/batch-review rejects an empty studentIds array', async () => {
+    const response = await request(httpServer())
+      .patch(`/api/courses/${withdrawal.courseId}/withdrawals/batch-review`)
+      .send({ studentIds: [], status: CourseWithdrawalStatus.Approved });
+
+    expect(response.status).toBe(400);
   });
 
   it('/api/admin-list returns withdrawal settings and counts for every configured course', async () => {
