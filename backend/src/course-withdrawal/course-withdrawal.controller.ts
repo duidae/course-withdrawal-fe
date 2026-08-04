@@ -13,6 +13,7 @@ import { User } from '@ntucool/nestjs-canvas-lms-auth';
 import { Permissions } from '../auth/decorators/permission.decorator';
 import { Permission } from '../auth/models/enums/permission.enum';
 import { type LtiAuthUser } from '../auth/models/lti-auth-user.model';
+import { AdminCourseWithdrawalService } from './admin-course-withdrawal.service';
 import type {
   BatchReviewResult,
   BatchReviewWithdrawalInput,
@@ -21,14 +22,18 @@ import type {
   PaginatedResult,
   ReviewWithdrawalInput,
   Withdrawal,
-} from './course-withdrawal.service';
-
-import { CourseWithdrawalService } from './course-withdrawal.service';
+} from './course-withdrawal.types';
+import { StudentCourseWithdrawalService } from './student-course-withdrawal.service';
+import { TeacherCourseWithdrawalService } from './teacher-course-withdrawal.service';
 
 @Controller('api')
 @UseGuards(CanvasLmsAuthGuard)
 export class CourseWithdrawalController {
-  constructor(private readonly courseWithdrawalService: CourseWithdrawalService) {}
+  constructor(
+    private readonly studentCourseWithdrawalService: StudentCourseWithdrawalService,
+    private readonly teacherCourseWithdrawalService: TeacherCourseWithdrawalService,
+    private readonly adminCourseWithdrawalService: AdminCourseWithdrawalService,
+  ) {}
 
   @Get('courses/:courseId/withdrawal-list')
   @Permissions(['courseId', Permission.GeneralView])
@@ -37,7 +42,7 @@ export class CourseWithdrawalController {
     @Query('page') page = 1,
     @Query('pageSize') pageSize = 10,
   ): Promise<PaginatedResult<Withdrawal>> {
-    return this.courseWithdrawalService.getWithdrawals(
+    return this.teacherCourseWithdrawalService.getWithdrawals(
       courseId,
       Number(page),
       Number(pageSize),
@@ -50,7 +55,7 @@ export class CourseWithdrawalController {
     @Param('studentId') studentId: string,
     @User() user: LtiAuthUser,
   ): Promise<Withdrawal> {
-    return this.courseWithdrawalService.getWithdrawal(courseId, studentId, user);
+    return this.studentCourseWithdrawalService.getWithdrawal(courseId, studentId, user);
   }
 
   @Post('courses/:courseId/students/:studentId/withdrawal')
@@ -60,7 +65,12 @@ export class CourseWithdrawalController {
     @Body() body: CreateWithdrawalInput,
     @User() user: LtiAuthUser,
   ): Promise<Withdrawal> {
-    return this.courseWithdrawalService.createWithdrawal(courseId, studentId, body, user);
+    return this.studentCourseWithdrawalService.createWithdrawal(
+      courseId,
+      studentId,
+      body,
+      user,
+    );
   }
 
   @Patch('courses/:courseId/students/:studentId/withdrawal')
@@ -70,7 +80,12 @@ export class CourseWithdrawalController {
     @Body() body: ReviewWithdrawalInput,
     @User() user: LtiAuthUser,
   ): Promise<Withdrawal> {
-    return this.courseWithdrawalService.reviewWithdrawal(courseId, studentId, body, user);
+    return this.teacherCourseWithdrawalService.reviewWithdrawal(
+      courseId,
+      studentId,
+      body,
+      user,
+    );
   }
 
   @Patch('courses/:courseId/withdrawals/batch-review')
@@ -79,11 +94,15 @@ export class CourseWithdrawalController {
     @Body() body: BatchReviewWithdrawalInput,
     @User() user: LtiAuthUser,
   ): Promise<BatchReviewResult[]> {
-    return this.courseWithdrawalService.batchReviewWithdrawals(courseId, body, user);
+    return this.teacherCourseWithdrawalService.batchReviewWithdrawals(
+      courseId,
+      body,
+      user,
+    );
   }
 
   @Get('/admin-list')
   getCourses(): Promise<CourseWithdrawalSettingsInfo[]> {
-    return this.courseWithdrawalService.getCourseWithdrawalSettings();
+    return this.adminCourseWithdrawalService.getCourseWithdrawalSettings();
   }
 }

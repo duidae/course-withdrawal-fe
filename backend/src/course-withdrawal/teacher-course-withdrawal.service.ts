@@ -1,0 +1,140 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { type LtiAuthUser } from '../auth/models/lti-auth-user.model';
+import { CourseWithdrawalDbName } from '../database/course-withdrawal-db/config/db.config';
+import { CourseWithdrawal } from '../database/course-withdrawal-db/entities/course-withdrawal.entity';
+import { CourseWithdrawalSetting } from '../database/course-withdrawal-db/entities/course-withdrawal-settings.entity';
+import { CourseWithdrawalStatus } from '../database/course-withdrawal-db/entities/course-withdrawal-status.enum';
+import { DbError, InvalidInputError, NotFoundError } from '../shared/errors';
+import { CourseWithdrawalCommonService } from './course-withdrawal-common.service';
+import {
+  type BatchReviewResult,
+  type BatchReviewWithdrawalInput,
+  type PaginatedResult,
+  type ReviewWithdrawalInput,
+  type Withdrawal,
+} from './course-withdrawal.types';
+
+@Injectable()
+export class TeacherCourseWithdrawalService {
+  constructor(
+    @InjectRepository(CourseWithdrawal, CourseWithdrawalDbName)
+    private readonly courseWithdrawalRepository: Repository<CourseWithdrawal>,
+    private readonly common: CourseWithdrawalCommonService,
+  ) {}
+
+  async getWithdrawals(
+    courseId: string,
+    page = 1,
+    pageSize = 10,
+  ): Promise<PaginatedResult<Withdrawal>> {
+    const settings = await this.common.getWithdrawalSettings(courseId);
+
+    let entities: CourseWithdrawal[];
+    let total: number;
+
+    try {
+      [entities, total] = await this.courseWithdrawalRepository.findAndCount({
+        where: { courseId },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        order: { createdAt: 'DESC' },
+      });
+    } catch (error) {
+      throw new DbError((error as Error).message);
+    }
+
+    const data = await Promise.all(
+      entities.map((entity) => this.toWithdrawalListItem(entity, settings)),
+    );
+
+    return { data, total, page, pageSize };
+  }
+
+  private async toWithdrawalListItem(
+    entity: CourseWithdrawal,
+    settings: CourseWithdrawalSetting,
+  ): Promise<Withdrawal> {
+    const [studentInfo, reviewerName] = await Promise.all([
+      this.common.getStudentInfo(entity.studentId),
+      entity.reviewerId ? this.common.getReviewerName(entity.reviewerId) : undefined,
+    ]);
+
+    return {
+      status: this.common.getEffectiveStatus(settings, entity.status),
+      studnetName: studentInfo.name,
+      sectionName: studentInfo.sectionName,
+      studentId: entity.studentId,
+      reason: entity.reason,
+      submittedAt: entity.createdAt,
+      endAt: settings.endAt,
+      reviewComment: entity.reviewComment,
+      reviewerName,
+      reviewedAt: entity.reviewedAt,
+    };
+  }
+
+  async reviewWithdrawal(
+    courseId: string,
+    studentId: string,
+    input: ReviewWithdrawalInput,
+    user: LtiAuthUser,
+  ): Promise<Withdrawal> {
+    if (
+      input.status !== CourseWithdrawalStatus.Approved &&
+      input.status !== CourseWithdrawalStatus.Declined
+    ) {
+      throw new InvalidInputError('status must be "approved" or "declined"');
+    }
+
+    let entity: CourseWithdrawal | null;
+    try {
+      entity = await this.courseWithdrawalRepository.findOneBy({ courseId, studentId });
+    } catch (error) {
+      throw new DbError((error as Error).message);
+    }
+
+    if (!entity) {
+      throw new NotFoundError('withdrawal');
+    }
+
+    try {
+      entity.status = input.status;
+      entity.reviewerId = String(user.canvasUserId);
+      entity.reviewComment = input.reviewComment;
+      entity.reviewedAt = new Date();
+
+      const saved = await this.courseWithdrawalRepository.save(entity);
+      return { ...this.common.toWithdrawal(saved), courseName: user.courseName };
+    } catch (error) {
+      throw new DbError((error as Error).message);
+    }
+  }
+
+  async batchReviewWithdrawals(
+    courseId: string,
+    input: BatchReviewWithdrawalInput,
+    user: LtiAuthUser,
+  ): Promise<BatchReviewResult[]> {
+    if (!input.studentIds?.length) {
+      throw new InvalidInputError('studentIds must be a non-empty array');
+    }
+
+    return Promise.all(
+      input.studentIds.map(async (studentId): Promise<BatchReviewResult> => {
+        try {
+          const withdrawal = await this.reviewWithdrawal(
+            courseId,
+            studentId,
+            { status: input.status, reviewComment: input.reviewComment },
+            user,
+          );
+          return { studentId, success: true, withdrawal };
+        } catch (error) {
+          return { studentId, success: false, error: (error as Error).message };
+        }
+      }),
+    );
+  }
+}
