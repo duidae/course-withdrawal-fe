@@ -35,6 +35,9 @@ export type Withdrawal = {
   courseName?: string;
   sectionName?: string;
   teachers?: string[];
+  studnetName?: string;
+  loginId?: string;
+  studentId?: string;
   reason?: string;
   submittedAt?: Date;
   reviewComment?: string;
@@ -220,13 +223,13 @@ export class CourseWithdrawalService {
     }
 
     const now = new Date();
-
     if (settings.startAt > now) {
       return {
         ...withdrawal,
         status: WithdrawalStatus.NotStarted,
       };
     }
+
     if (settings.endAt < now) {
       return {
         ...withdrawal,
