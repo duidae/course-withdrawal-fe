@@ -79,10 +79,14 @@ export class StudentCourseWithdrawalService {
       throw new InvalidInputError('reason is required');
     }
 
+    const courseInfo = await this.common.getCourseInfo(courseId, user);
+
     try {
       const entity = this.courseWithdrawalRepository.create({
         courseId,
         studentId,
+        sectionId: courseInfo.sectionId,
+        sectionName: courseInfo.sectionName,
         reason: input.reason,
         status: CourseWithdrawalStatus.Pending,
       });
