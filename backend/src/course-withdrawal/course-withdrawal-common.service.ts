@@ -70,8 +70,8 @@ export class CourseWithdrawalCommonService {
   ): Promise<{ name: string; loginId: string; studentId: string; sectionName: string }> {
     return Promise.resolve({
       name: `Mock Student name ${userId}`,
-      loginId: `Mock Student loginId ${userId}`,
-      studentId: `Mock Student studentId ${userId}`,
+      loginId: `Mock Student loginId ${userId}`, // external db student loginId
+      studentId: `Mock Student studentId ${userId}`, // external db student schoolCode_RegNo, school code zh_name/abbr
       sectionName: `Mock Section name ${userId}`,
     });
     /*
