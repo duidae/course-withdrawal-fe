@@ -35,20 +35,6 @@ export class CourseWithdrawalController {
     private readonly adminCourseWithdrawalService: AdminCourseWithdrawalService,
   ) {}
 
-  @Get('courses/:courseId/withdrawal-list')
-  @Permissions(['courseId', Permission.GeneralView])
-  getWithdrawals(
-    @Param('courseId') courseId: string,
-    @Query('page') page = 1,
-    @Query('pageSize') pageSize = 10,
-  ): Promise<PaginatedResult<Withdrawal>> {
-    return this.teacherCourseWithdrawalService.getWithdrawals(
-      courseId,
-      Number(page),
-      Number(pageSize),
-    );
-  }
-
   @Get('courses/:courseId/withdrawal')
   getWithdrawal(
     @Param('courseId') courseId: string,
@@ -66,16 +52,30 @@ export class CourseWithdrawalController {
     return this.studentCourseWithdrawalService.createWithdrawal(courseId, body, user);
   }
 
-  @Patch('courses/:courseId/students/:studentId/withdrawal')
+  @Get('courses/:courseId/withdrawal-list')
+  @Permissions(['courseId', Permission.GeneralView])
+  getWithdrawals(
+    @Param('courseId') courseId: string,
+    @Query('page') page = 1,
+    @Query('pageSize') pageSize = 10,
+  ): Promise<PaginatedResult<Withdrawal>> {
+    return this.teacherCourseWithdrawalService.getWithdrawals(
+      courseId,
+      Number(page),
+      Number(pageSize),
+    );
+  }
+
+  @Patch('courses/:courseId/students/:studentCanvasId/withdrawal')
   reviewWithdrawal(
     @Param('courseId') courseId: string,
-    @Param('studentId') studentId: string,
+    @Param('studentCanvasId') studentCanvasId: string,
     @Body() body: ReviewWithdrawalInput,
     @User() user: LtiAuthUser,
   ): Promise<Withdrawal> {
     return this.teacherCourseWithdrawalService.reviewWithdrawal(
       courseId,
-      studentId,
+      studentCanvasId,
       body,
       user,
     );
