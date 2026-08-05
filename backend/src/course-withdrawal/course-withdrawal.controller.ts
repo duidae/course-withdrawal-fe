@@ -49,40 +49,33 @@ export class CourseWithdrawalController {
     );
   }
 
-  @Get('courses/:courseId/students/:studentId/withdrawal')
+  @Get('courses/:courseId/withdrawal')
   getWithdrawal(
     @Param('courseId') courseId: string,
-    @Param('studentId') studentId: string,
     @User() user: LtiAuthUser,
   ): Promise<Withdrawal> {
-    return this.studentCourseWithdrawalService.getWithdrawal(courseId, studentId, user);
+    return this.studentCourseWithdrawalService.getWithdrawal(courseId, user);
   }
 
-  @Post('courses/:courseId/students/:studentId/withdrawal')
+  @Post('courses/:courseId/withdrawal')
   createWithdrawal(
     @Param('courseId') courseId: string,
-    @Param('studentId') studentId: string,
     @Body() body: CreateWithdrawalInput,
     @User() user: LtiAuthUser,
   ): Promise<Withdrawal> {
-    return this.studentCourseWithdrawalService.createWithdrawal(
-      courseId,
-      studentId,
-      body,
-      user,
-    );
+    return this.studentCourseWithdrawalService.createWithdrawal(courseId, body, user);
   }
 
-  @Patch('courses/:courseId/students/:studentId/withdrawal')
+  @Patch('courses/:courseId/students/:userId/withdrawal')
   reviewWithdrawal(
     @Param('courseId') courseId: string,
-    @Param('studentId') studentId: string,
+    @Param('userId') userId: number,
     @Body() body: ReviewWithdrawalInput,
     @User() user: LtiAuthUser,
   ): Promise<Withdrawal> {
     return this.teacherCourseWithdrawalService.reviewWithdrawal(
       courseId,
-      studentId,
+      userId,
       body,
       user,
     );

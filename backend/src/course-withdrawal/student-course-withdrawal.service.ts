@@ -21,18 +21,17 @@ export class StudentCourseWithdrawalService {
     private readonly common: CourseWithdrawalCommonService,
   ) {}
 
-  async getWithdrawal(
-    courseId: string,
-    studentId: string,
-    user: LtiAuthUser,
-  ): Promise<Withdrawal> {
+  async getWithdrawal(courseId: string, user: LtiAuthUser): Promise<Withdrawal> {
     const courseInfo = await this.common.getCourseInfo(courseId, user);
-    const studentInfo = await this.common.getStudentInfo(studentId);
+    const studentInfo = await this.common.getStudentInfo(user.canvasUserId);
     const settings = await this.common.getWithdrawalSettings(courseId);
 
     let entity: CourseWithdrawal | null;
     try {
-      entity = await this.courseWithdrawalRepository.findOneBy({ courseId, studentId });
+      entity = await this.courseWithdrawalRepository.findOneBy({
+        courseId,
+        canvasUserId: user.canvasUserId,
+      });
     } catch (error) {
       throw new DbError((error as Error).message);
     }
@@ -43,7 +42,7 @@ export class StudentCourseWithdrawalService {
       teachers: courseInfo.teachers,
       studnetName: studentInfo.name,
       loginId: studentInfo.loginId,
-      studentId,
+      studentId: studentInfo.studentId,
       notice: settings.noticeDelta,
     };
 
@@ -71,7 +70,6 @@ export class StudentCourseWithdrawalService {
 
   async createWithdrawal(
     courseId: string,
-    studentId: string,
     input: CreateWithdrawalInput,
     user: LtiAuthUser,
   ): Promise<Withdrawal> {
@@ -84,7 +82,7 @@ export class StudentCourseWithdrawalService {
     try {
       const entity = this.courseWithdrawalRepository.create({
         courseId,
-        studentId,
+        canvasUserId: user.canvasUserId,
         sectionId: courseInfo.sectionId,
         sectionName: courseInfo.sectionName,
         reason: input.reason,

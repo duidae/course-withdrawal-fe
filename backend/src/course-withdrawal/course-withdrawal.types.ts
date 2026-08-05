@@ -39,13 +39,13 @@ export type ReviewWithdrawalInput = {
 };
 
 export type BatchReviewWithdrawalInput = {
-  studentIds: string[];
+  userIds: number[];
   status: CourseWithdrawalStatus.Approved | CourseWithdrawalStatus.Declined;
   reviewComment?: string;
 };
 
 export type BatchReviewResult = {
-  studentId: string;
+  userId: number;
   success: boolean;
   withdrawal?: Withdrawal;
   error?: string;
