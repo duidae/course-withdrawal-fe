@@ -66,16 +66,16 @@ export class CourseWithdrawalController {
     return this.studentCourseWithdrawalService.createWithdrawal(courseId, body, user);
   }
 
-  @Patch('courses/:courseId/students/:userId/withdrawal')
+  @Patch('courses/:courseId/students/:studentId/withdrawal')
   reviewWithdrawal(
     @Param('courseId') courseId: string,
-    @Param('userId') userId: number,
+    @Param('studentId') studentId: string,
     @Body() body: ReviewWithdrawalInput,
     @User() user: LtiAuthUser,
   ): Promise<Withdrawal> {
     return this.teacherCourseWithdrawalService.reviewWithdrawal(
       courseId,
-      userId,
+      studentId,
       body,
       user,
     );

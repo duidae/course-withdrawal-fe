@@ -54,7 +54,7 @@ export class TeacherCourseWithdrawalService {
 
   async reviewWithdrawal(
     courseId: string,
-    userId: number,
+    studentId: string, // student canvas user id
     input: ReviewWithdrawalInput,
     user: LtiAuthUser,
   ): Promise<Withdrawal> {
@@ -69,7 +69,7 @@ export class TeacherCourseWithdrawalService {
     try {
       entity = await this.courseWithdrawalRepository.findOneBy({
         courseId,
-        canvasUserId: userId,
+        canvasUserId: Number(studentId),
       });
     } catch (error) {
       throw new DbError((error as Error).message);
@@ -97,22 +97,22 @@ export class TeacherCourseWithdrawalService {
     input: BatchReviewWithdrawalInput,
     user: LtiAuthUser,
   ): Promise<BatchReviewResult[]> {
-    if (!input.userIds?.length) {
-      throw new InvalidInputError('userIds must be a non-empty array');
+    if (!input.studentIds?.length) {
+      throw new InvalidInputError('studentIds must be a non-empty array');
     }
 
     return Promise.all(
-      input.userIds.map(async (userId): Promise<BatchReviewResult> => {
+      input.studentIds.map(async (studentId): Promise<BatchReviewResult> => {
         try {
           const withdrawal = await this.reviewWithdrawal(
             courseId,
-            userId,
+            studentId.toString(),
             { status: input.status, reviewComment: input.reviewComment },
             user,
           );
-          return { userId, success: true, withdrawal };
+          return { studentId, success: true, withdrawal };
         } catch (error) {
-          return { userId, success: false, error: (error as Error).message };
+          return { studentId, success: false, error: (error as Error).message };
         }
       }),
     );
