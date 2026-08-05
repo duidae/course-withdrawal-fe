@@ -13,8 +13,8 @@ export class CourseWithdrawalSetting {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ length: 255 })
-  courseId!: string;
+  @Column()
+  courseId!: number;
 
   @Column({
     type: 'timestamp with time zone',

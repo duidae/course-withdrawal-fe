@@ -60,7 +60,7 @@ export type CourseInfo = {
 export type CourseWithdrawalSettingsInfo = {
   term: string;
   courseName: string;
-  courseId: string;
+  courseId: number;
   withdrawalCount: number;
   enabled: boolean;
 };

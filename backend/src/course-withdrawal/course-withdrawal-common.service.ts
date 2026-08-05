@@ -30,7 +30,7 @@ export class CourseWithdrawalCommonService {
     private readonly canvasApiService: CanvasApiService,
   ) {}
 
-  async getCourseInfo(courseId: string, user: LtiAuthUser): Promise<CourseInfo> {
+  async getCourseInfo(courseId: number, user: LtiAuthUser): Promise<CourseInfo> {
     return Promise.resolve({
       sectionId: `Mock Section id ${courseId}`,
       sectionName: `Mock Section name ${courseId} ${user.courseName}`,
@@ -97,7 +97,7 @@ export class CourseWithdrawalCommonService {
     }
   }
 
-  async getWithdrawalSettings(courseId: string): Promise<CourseWithdrawalSetting> {
+  async getWithdrawalSettings(courseId: number): Promise<CourseWithdrawalSetting> {
     let settings: CourseWithdrawalSetting | null;
 
     try {
@@ -155,7 +155,7 @@ export class CourseWithdrawalCommonService {
   }
 
   async getCourseTermAndName(
-    courseId: string,
+    courseId: number,
   ): Promise<{ term: string; courseName: string }> {
     try {
       const course = await this.canvasApiService.courses.get(courseId, {
@@ -167,7 +167,7 @@ export class CourseWithdrawalCommonService {
     }
   }
 
-  async getWithdrawalCount(courseId: string): Promise<number> {
+  async getWithdrawalCount(courseId: number): Promise<number> {
     try {
       return await this.courseWithdrawalRepository.count({ where: { courseId } });
     } catch (error) {

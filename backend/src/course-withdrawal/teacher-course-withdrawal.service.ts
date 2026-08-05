@@ -25,7 +25,7 @@ export class TeacherCourseWithdrawalService {
   ) {}
 
   async getWithdrawals(
-    courseId: string,
+    courseId: number,
     page = 1,
     pageSize = 10,
   ): Promise<PaginatedResult<Withdrawal>> {
@@ -53,7 +53,7 @@ export class TeacherCourseWithdrawalService {
   }
 
   async reviewWithdrawal(
-    courseId: string,
+    courseId: number,
     studentCanvasId: string,
     input: ReviewWithdrawalInput,
     user: LtiAuthUser,
@@ -93,7 +93,7 @@ export class TeacherCourseWithdrawalService {
   }
 
   async batchReviewWithdrawals(
-    courseId: string,
+    courseId: number,
     input: BatchReviewWithdrawalInput,
     user: LtiAuthUser,
   ): Promise<BatchReviewResult[]> {
