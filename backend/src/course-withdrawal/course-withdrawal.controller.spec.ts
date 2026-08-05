@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { type ExecutionContext, type INestApplication } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { CanvasApiService } from '@ntucool/nestjs-canvas-api';
+import { CanvasApiService, RoleType } from '@ntucool/nestjs-canvas-api';
 import { CanvasLmsAuthGuard } from '@ntucool/nestjs-canvas-lms-auth/dist/canvas-lms-auth.guard';
 import request from 'supertest';
 
@@ -49,10 +49,10 @@ describe('CourseWithdrawalController', () => {
 
   const withdrawal: CourseWithdrawal = {
     id: '11111111-1111-1111-1111-111111111111',
-    studentId: 'B11000000',
-    courseId: 'CS101',
-    sectionId: 'Mock Section id CS101',
-    sectionName: 'Mock Section name CS101 LTI Course Name',
+    canvasUserId: 1,
+    courseId: 101,
+    sectionId: 'Mock Section id 101',
+    sectionName: 'Mock Section name 101 LTI Course Name',
     status: CourseWithdrawalStatus.Pending,
     reason: '故申請停修。',
     createdAt: new Date('2026-05-11T08:00:00Z'),
@@ -61,13 +61,17 @@ describe('CourseWithdrawalController', () => {
 
   const ltiUser: LtiAuthUser = {
     canvasUserId: 1,
-    roles: [],
+    roles: [
+      RoleType.StudentEnrollment,
+      RoleType.TeacherEnrollment,
+      RoleType.AccountAdmin,
+    ],
     courseName: 'LTI Course Name',
   };
 
   const settings: CourseWithdrawalSetting = {
     id: '22222222-2222-2222-2222-222222222222',
-    courseId: 'CS101',
+    courseId: 101,
     startAt: new Date('2026-01-01T00:00:00Z'),
     endAt: new Date('2099-01-01T00:00:00Z'),
     enabled: true,
@@ -126,6 +130,14 @@ describe('CourseWithdrawalController', () => {
     await app.close();
   });
 
+  afterEach(() => {
+    ltiUser.roles = [
+      RoleType.StudentEnrollment,
+      RoleType.TeacherEnrollment,
+      RoleType.AccountAdmin,
+    ];
+  });
+
   const httpServer = () => app.getHttpServer() as Parameters<typeof request>[0];
 
   it('/api/courses/:courseId/withdrawal-list returns paginated withdrawals', async () => {
@@ -147,19 +159,29 @@ describe('CourseWithdrawalController', () => {
     expect(body.data[0]).toMatchObject({
       status: withdrawal.status,
       reason: withdrawal.reason,
-      studnetName: 'Mock Student name B11000000',
-      sectionName: 'Mock Section name B11000000',
-      studentId: withdrawal.studentId,
+      studnetName: `Mock Student name ${withdrawal.canvasUserId}`,
+      sectionName: `Mock Section name ${withdrawal.canvasUserId}`,
+      studentId: `Mock Student studentId ${withdrawal.canvasUserId}`,
       endAt: settings.endAt.toISOString(),
     });
   });
 
-  it('/api/courses/:courseId/students/:studentId/withdrawal returns the requested withdrawal', async () => {
+  it('/api/courses/:courseId/withdrawal-list rejects a user without a teacher/TA role', async () => {
+    ltiUser.roles = [RoleType.StudentEnrollment];
+
+    const response = await request(httpServer()).get(
+      `/api/courses/${withdrawal.courseId}/withdrawal-list`,
+    );
+
+    expect(response.status).toBe(403);
+  });
+
+  it('/api/courses/:courseId/withdrawal returns the requested withdrawal', async () => {
     settingsRepository.findOneBy!.mockResolvedValue(settings);
     repository.findOneBy!.mockResolvedValue(withdrawal);
 
     const response = await request(httpServer()).get(
-      `/api/courses/${withdrawal.courseId}/students/${withdrawal.studentId}/withdrawal`,
+      `/api/courses/${withdrawal.courseId}/withdrawal`,
     );
 
     const body = response.body as Withdrawal;
@@ -174,7 +196,17 @@ describe('CourseWithdrawalController', () => {
     });
   });
 
-  it('/api/courses/:courseId/students/:studentId/withdrawal resolves the reviewer name via the Canvas API', async () => {
+  it('/api/courses/:courseId/withdrawal rejects a user without the student role', async () => {
+    ltiUser.roles = [RoleType.TeacherEnrollment];
+
+    const response = await request(httpServer()).get(
+      `/api/courses/${withdrawal.courseId}/withdrawal`,
+    );
+
+    expect(response.status).toBe(403);
+  });
+
+  it('/api/courses/:courseId/withdrawal resolves the reviewer name via the Canvas API', async () => {
     settingsRepository.findOneBy!.mockResolvedValue(settings);
     repository.findOneBy!.mockResolvedValue({
       ...withdrawal,
@@ -184,7 +216,7 @@ describe('CourseWithdrawalController', () => {
     canvasApiService.users.get.mockResolvedValue({ name: '林教授' });
 
     const response = await request(httpServer()).get(
-      `/api/courses/${withdrawal.courseId}/students/${withdrawal.studentId}/withdrawal`,
+      `/api/courses/${withdrawal.courseId}/withdrawal`,
     );
 
     const body = response.body as Withdrawal;
@@ -194,12 +226,12 @@ describe('CourseWithdrawalController', () => {
     expect(body.reviewerName).toBe('林教授');
   });
 
-  it('/api/courses/:courseId/students/:studentId/withdrawal returns a notSubmitted status when no withdrawal exists', async () => {
+  it('/api/courses/:courseId/withdrawal returns a notSubmitted status when no withdrawal exists', async () => {
     settingsRepository.findOneBy!.mockResolvedValue(settings);
     repository.findOneBy!.mockResolvedValue(null);
 
     const response = await request(httpServer()).get(
-      `/api/courses/${withdrawal.courseId}/students/unknown-student/withdrawal`,
+      `/api/courses/${withdrawal.courseId}/withdrawal`,
     );
 
     const body = response.body as Withdrawal;
@@ -211,7 +243,7 @@ describe('CourseWithdrawalController', () => {
     });
   });
 
-  it('/api/courses/:courseId/students/:studentId/withdrawal returns overdue for a pending withdrawal past the deadline', async () => {
+  it('/api/courses/:courseId/withdrawal returns overdue for a pending withdrawal past the deadline', async () => {
     settingsRepository.findOneBy!.mockResolvedValue({
       ...settings,
       endAt: new Date('2000-01-01T00:00:00Z'),
@@ -219,7 +251,7 @@ describe('CourseWithdrawalController', () => {
     repository.findOneBy!.mockResolvedValue(withdrawal);
 
     const response = await request(httpServer()).get(
-      `/api/courses/${withdrawal.courseId}/students/${withdrawal.studentId}/withdrawal`,
+      `/api/courses/${withdrawal.courseId}/withdrawal`,
     );
 
     const body = response.body as Withdrawal;
@@ -228,26 +260,22 @@ describe('CourseWithdrawalController', () => {
     expect(body.status).toBe(WithdrawalStatus.Overdue);
   });
 
-  it('/api/courses/:courseId/students/:studentId/withdrawal returns 404 when course withdrawal settings do not exist', async () => {
+  it('/api/courses/:courseId/withdrawal returns 404 when course withdrawal settings do not exist', async () => {
     settingsRepository.findOneBy!.mockResolvedValue(null);
 
-    const response = await request(httpServer()).get(
-      `/api/courses/CS999/students/${withdrawal.studentId}/withdrawal`,
-    );
+    const response = await request(httpServer()).get('/api/courses/999/withdrawal');
 
     expect(response.status).toBe(404);
   });
 
-  it('POST /api/courses/:courseId/students/:studentId/withdrawal creates a withdrawal', async () => {
+  it('POST /api/courses/:courseId/withdrawal creates a withdrawal', async () => {
     repository.create!.mockImplementation((input: object) => input);
     repository.save!.mockImplementation((input: object) =>
       Promise.resolve({ ...withdrawal, ...input }),
     );
 
     const response = await request(httpServer())
-      .post(
-        `/api/courses/${withdrawal.courseId}/students/${withdrawal.studentId}/withdrawal`,
-      )
+      .post(`/api/courses/${withdrawal.courseId}/withdrawal`)
       .send({ reason: withdrawal.reason });
 
     const body = response.body as Withdrawal;
@@ -256,7 +284,7 @@ describe('CourseWithdrawalController', () => {
     expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         courseId: withdrawal.courseId,
-        studentId: withdrawal.studentId,
+        canvasUserId: ltiUser.canvasUserId,
         sectionId: `Mock Section id ${withdrawal.courseId}`,
         sectionName: `Mock Section name ${withdrawal.courseId} ${ltiUser.courseName}`,
         reason: withdrawal.reason,
@@ -270,23 +298,31 @@ describe('CourseWithdrawalController', () => {
     });
   });
 
-  it('POST /api/courses/:courseId/students/:studentId/withdrawal rejects a blank reason', async () => {
+  it('POST /api/courses/:courseId/withdrawal rejects a blank reason', async () => {
     const response = await request(httpServer())
-      .post(
-        `/api/courses/${withdrawal.courseId}/students/${withdrawal.studentId}/withdrawal`,
-      )
+      .post(`/api/courses/${withdrawal.courseId}/withdrawal`)
       .send({ reason: '   ' });
 
     expect(response.status).toBe(400);
   });
 
-  it('PATCH /api/courses/:courseId/students/:studentId/withdrawal approves a withdrawal', async () => {
+  it('POST /api/courses/:courseId/withdrawal rejects a user without the student role', async () => {
+    ltiUser.roles = [RoleType.TeacherEnrollment];
+
+    const response = await request(httpServer())
+      .post(`/api/courses/${withdrawal.courseId}/withdrawal`)
+      .send({ reason: withdrawal.reason });
+
+    expect(response.status).toBe(403);
+  });
+
+  it('PATCH /api/courses/:courseId/students/:studentCanvasId/withdrawal approves a withdrawal', async () => {
     repository.findOneBy!.mockResolvedValue({ ...withdrawal });
     repository.save!.mockImplementation((input: object) => Promise.resolve(input));
 
     const response = await request(httpServer())
       .patch(
-        `/api/courses/${withdrawal.courseId}/students/${withdrawal.studentId}/withdrawal`,
+        `/api/courses/${withdrawal.courseId}/students/${withdrawal.canvasUserId}/withdrawal`,
       )
       .send({ status: CourseWithdrawalStatus.Approved, reviewComment: 'looks good' });
 
@@ -310,13 +346,13 @@ describe('CourseWithdrawalController', () => {
     });
   });
 
-  it('PATCH /api/courses/:courseId/students/:studentId/withdrawal declines a withdrawal', async () => {
+  it('PATCH /api/courses/:courseId/students/:studentCanvasId/withdrawal declines a withdrawal', async () => {
     repository.findOneBy!.mockResolvedValue({ ...withdrawal });
     repository.save!.mockImplementation((input: object) => Promise.resolve(input));
 
     const response = await request(httpServer())
       .patch(
-        `/api/courses/${withdrawal.courseId}/students/${withdrawal.studentId}/withdrawal`,
+        `/api/courses/${withdrawal.courseId}/students/${withdrawal.canvasUserId}/withdrawal`,
       )
       .send({ status: CourseWithdrawalStatus.Declined });
 
@@ -326,32 +362,44 @@ describe('CourseWithdrawalController', () => {
     expect(body.status).toBe(CourseWithdrawalStatus.Declined);
   });
 
-  it('PATCH /api/courses/:courseId/students/:studentId/withdrawal rejects an invalid status', async () => {
+  it('PATCH /api/courses/:courseId/students/:studentCanvasId/withdrawal rejects an invalid status', async () => {
     const response = await request(httpServer())
       .patch(
-        `/api/courses/${withdrawal.courseId}/students/${withdrawal.studentId}/withdrawal`,
+        `/api/courses/${withdrawal.courseId}/students/${withdrawal.canvasUserId}/withdrawal`,
       )
       .send({ status: CourseWithdrawalStatus.Pending });
 
     expect(response.status).toBe(400);
   });
 
-  it('PATCH /api/courses/:courseId/students/:studentId/withdrawal returns 404 when the withdrawal does not exist', async () => {
+  it('PATCH /api/courses/:courseId/students/:studentCanvasId/withdrawal returns 404 when the withdrawal does not exist', async () => {
     repository.findOneBy!.mockResolvedValue(null);
 
     const response = await request(httpServer())
-      .patch(`/api/courses/${withdrawal.courseId}/students/unknown-student/withdrawal`)
+      .patch(`/api/courses/${withdrawal.courseId}/students/999/withdrawal`)
       .send({ status: CourseWithdrawalStatus.Approved });
 
     expect(response.status).toBe(404);
   });
 
+  it('PATCH /api/courses/:courseId/students/:studentCanvasId/withdrawal rejects a user without a teacher/TA role', async () => {
+    ltiUser.roles = [RoleType.StudentEnrollment];
+
+    const response = await request(httpServer())
+      .patch(
+        `/api/courses/${withdrawal.courseId}/students/${withdrawal.canvasUserId}/withdrawal`,
+      )
+      .send({ status: CourseWithdrawalStatus.Approved });
+
+    expect(response.status).toBe(403);
+  });
+
   it('PATCH /api/courses/:courseId/withdrawals/batch-review approves multiple withdrawals with partial success', async () => {
-    repository.findOneBy!.mockImplementation((where: { studentId: string }) =>
+    repository.findOneBy!.mockImplementation((where: { canvasUserId: number }) =>
       Promise.resolve(
-        where.studentId === 'missing-student'
+        where.canvasUserId === 999
           ? null
-          : { ...withdrawal, studentId: where.studentId },
+          : { ...withdrawal, canvasUserId: where.canvasUserId },
       ),
     );
     repository.save!.mockImplementation((input: object) => Promise.resolve(input));
@@ -359,7 +407,7 @@ describe('CourseWithdrawalController', () => {
     const response = await request(httpServer())
       .patch(`/api/courses/${withdrawal.courseId}/withdrawals/batch-review`)
       .send({
-        studentIds: [withdrawal.studentId, 'missing-student'],
+        studentCanvasIds: [String(withdrawal.canvasUserId), '999'],
         status: CourseWithdrawalStatus.Approved,
         reviewComment: 'batch approved',
       });
@@ -368,24 +416,24 @@ describe('CourseWithdrawalController', () => {
 
     expect(response.status).toBe(200);
     expect(body).toHaveLength(2);
-    expect(body[0].studentId).toBe(withdrawal.studentId);
+    expect(body[0].studentCanvasId).toBe(String(withdrawal.canvasUserId));
     expect(body[0].success).toBe(true);
     expect(body[0].withdrawal?.status).toBe(CourseWithdrawalStatus.Approved);
     expect(body[0].withdrawal?.reviewComment).toBe('batch approved');
-    expect(body[1].studentId).toBe('missing-student');
+    expect(body[1].studentCanvasId).toBe('999');
     expect(body[1].success).toBe(false);
     expect(typeof body[1].error).toBe('string');
   });
 
-  it('PATCH /api/courses/:courseId/withdrawals/batch-review rejects an empty studentIds array', async () => {
+  it('PATCH /api/courses/:courseId/withdrawals/batch-review rejects an empty studentCanvasIds array', async () => {
     const response = await request(httpServer())
       .patch(`/api/courses/${withdrawal.courseId}/withdrawals/batch-review`)
-      .send({ studentIds: [], status: CourseWithdrawalStatus.Approved });
+      .send({ studentCanvasIds: [], status: CourseWithdrawalStatus.Approved });
 
     expect(response.status).toBe(400);
   });
 
-  it('/api/admin-list returns withdrawal settings and counts for every configured course', async () => {
+  it('/api/admin/courses returns withdrawal settings and counts for every configured course', async () => {
     settingsRepository.find!.mockResolvedValue([settings]);
     repository.count!.mockResolvedValue(3);
     canvasApiService.courses.get.mockResolvedValue({
@@ -393,7 +441,7 @@ describe('CourseWithdrawalController', () => {
       term: { name: '114-2' },
     });
 
-    const response = await request(httpServer()).get('/api/admin-list');
+    const response = await request(httpServer()).get('/api/admin/courses');
 
     const body = response.body as CourseWithdrawalSettingsInfo[];
 
@@ -416,43 +464,51 @@ describe('CourseWithdrawalController', () => {
     ]);
   });
 
-  it('/api/admin-list wraps Canvas API failures as a CanvasApiError', async () => {
+  it('/api/admin/courses wraps Canvas API failures as a CanvasApiError', async () => {
     settingsRepository.find!.mockResolvedValue([settings]);
     repository.count!.mockResolvedValue(3);
     canvasApiService.courses.get.mockRejectedValue(new Error('unauthorized'));
 
-    const response = await request(httpServer()).get('/api/admin-list');
+    const response = await request(httpServer()).get('/api/admin/courses');
 
     expect(response.status).toBe(400);
   });
 
-  it('/api/admin-list returns an empty array when no courses are configured', async () => {
+  it('/api/admin/courses returns an empty array when no courses are configured', async () => {
     settingsRepository.find!.mockResolvedValue([]);
 
-    const response = await request(httpServer()).get('/api/admin-list');
+    const response = await request(httpServer()).get('/api/admin/courses');
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual([]);
   });
 
+  it('/api/admin/courses rejects a user without the admin role', async () => {
+    ltiUser.roles = [RoleType.TeacherEnrollment];
+
+    const response = await request(httpServer()).get('/api/admin/courses');
+
+    expect(response.status).toBe(403);
+  });
+
   it('getCourseInfo returns mock section and teacher names', async () => {
-    const courseInfo = await commonService.getCourseInfo('CS101', ltiUser);
+    const courseInfo = await commonService.getCourseInfo(101, ltiUser);
 
     expect(courseInfo).toEqual({
-      sectionId: 'Mock Section id CS101',
-      sectionName: `Mock Section name CS101 ${ltiUser.courseName}`,
+      sectionId: 'Mock Section id 101',
+      sectionName: `Mock Section name 101 ${ltiUser.courseName}`,
       teachers: ['Mock Teacher 1', 'Mock Teacher 2'],
     });
   });
 
   it('getStudentInfo returns mock student info', async () => {
-    const studentInfo = await commonService.getStudentInfo('B11000000');
+    const studentInfo = await commonService.getStudentInfo(1);
 
     expect(studentInfo).toEqual({
-      name: 'Mock Student name B11000000',
-      loginId: 'Mock Student loginId B11000000',
-      studentId: 'Mock Student studentId B11000000',
-      sectionName: 'Mock Section name B11000000',
+      name: 'Mock Student name 1',
+      loginId: 'Mock Student loginId 1',
+      studentId: 'Mock Student studentId 1',
+      sectionName: 'Mock Section name 1',
     });
   });
 

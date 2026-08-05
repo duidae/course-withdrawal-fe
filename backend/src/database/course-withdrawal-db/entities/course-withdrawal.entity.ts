@@ -9,7 +9,7 @@ import {
 import { CourseWithdrawalStatus } from './course-withdrawal-status.enum';
 
 @Entity({ name: 'course_withdrawals' })
-@Index(['studentId', 'courseId'], { unique: true })
+@Index(['canvasUserId', 'courseId'], { unique: true })
 export class CourseWithdrawal {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -17,8 +17,8 @@ export class CourseWithdrawal {
   @Column()
   canvasUserId!: number;
 
-  @Column({ length: 255 })
-  courseId!: string;
+  @Column()
+  courseId!: number;
 
   @Column({ length: 255 })
   sectionId!: string;
