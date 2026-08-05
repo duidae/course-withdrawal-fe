@@ -19,12 +19,19 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest<{ user?: LtiAuthUser }>();
+    const request = context
+      .switchToHttp()
+      .getRequest<{ user?: LtiAuthUser; params: Record<string, string> }>();
     const hasRequiredRole = requiredRoles.some((role) =>
       request.user?.roles.includes(role),
     );
 
     if (!hasRequiredRole) {
+      throw new ForbiddenError();
+    }
+
+    const { courseId } = request.params;
+    if (courseId !== undefined && Number(courseId) !== request.user?.courseId) {
       throw new ForbiddenError();
     }
 

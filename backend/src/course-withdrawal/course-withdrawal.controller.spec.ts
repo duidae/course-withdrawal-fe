@@ -61,6 +61,7 @@ describe('CourseWithdrawalController', () => {
 
   const ltiUser: LtiAuthUser = {
     canvasUserId: 1,
+    courseId: 101,
     roles: [
       RoleType.StudentEnrollment,
       RoleType.TeacherEnrollment,
@@ -136,6 +137,7 @@ describe('CourseWithdrawalController', () => {
       RoleType.TeacherEnrollment,
       RoleType.AccountAdmin,
     ];
+    ltiUser.courseId = 101;
   });
 
   const httpServer = () => app.getHttpServer() as Parameters<typeof request>[0];
@@ -171,6 +173,14 @@ describe('CourseWithdrawalController', () => {
 
     const response = await request(httpServer()).get(
       `/api/courses/${withdrawal.courseId}/withdrawal-list`,
+    );
+
+    expect(response.status).toBe(403);
+  });
+
+  it('/api/courses/:courseId/withdrawal-list rejects a teacher/TA of a different course', async () => {
+    const response = await request(httpServer()).get(
+      `/api/courses/${withdrawal.courseId + 1}/withdrawal-list`,
     );
 
     expect(response.status).toBe(403);
@@ -263,7 +273,9 @@ describe('CourseWithdrawalController', () => {
   it('/api/courses/:courseId/withdrawal returns 404 when course withdrawal settings do not exist', async () => {
     settingsRepository.findOneBy!.mockResolvedValue(null);
 
-    const response = await request(httpServer()).get('/api/courses/999/withdrawal');
+    const response = await request(httpServer()).get(
+      `/api/courses/${withdrawal.courseId}/withdrawal`,
+    );
 
     expect(response.status).toBe(404);
   });

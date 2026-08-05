@@ -50,7 +50,11 @@ export class CanvasLmsAuthLauncherLtiv1p3 {
     target: LtiAuthUser | undefined,
     assign: LtiAuthUser,
   ): LtiAuthUser {
-    if (!target || target.canvasUserId !== assign.canvasUserId) {
+    if (
+      !target ||
+      target.canvasUserId !== assign.canvasUserId ||
+      target.courseId !== assign.courseId
+    ) {
       return assign;
     }
 
@@ -92,10 +96,12 @@ export class CanvasLmsAuthLauncherLtiv1p3 {
 
   private getContext(lti: Ltiv1p3LaunchData): LtiAuthUser {
     const userId = parseInt(lti.userId as string, 10);
+    const courseId = Number(lti.courseId);
     const roles = this.getRoles(lti.roles);
 
     return {
       canvasUserId: userId,
+      courseId,
       roles,
       courseName: (lti.courseName as string | undefined) ?? '',
     };
