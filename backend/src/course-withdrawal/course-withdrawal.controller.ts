@@ -18,10 +18,13 @@ import { AdminCourseWithdrawalService } from './admin-course-withdrawal.service'
 import type {
   BatchReviewResult,
   BatchReviewWithdrawalInput,
+  CourseWithdrawalSettingsDetail,
   CourseWithdrawalSettingsInfo,
+  CreateCourseWithdrawalSettingsInput,
   CreateWithdrawalInput,
   PaginatedResult,
   ReviewWithdrawalInput,
+  UpdateCourseWithdrawalSettingsInput,
   Withdrawal,
 } from './course-withdrawal.types';
 import { StudentCourseWithdrawalService } from './student-course-withdrawal.service';
@@ -107,5 +110,33 @@ export class CourseWithdrawalController {
   @Roles(RoleType.AccountAdmin)
   getCourses(): Promise<CourseWithdrawalSettingsInfo[]> {
     return this.adminCourseWithdrawalService.getCourseWithdrawalSettings();
+  }
+
+  @Post('admin/courses/:courseId')
+  @Roles(RoleType.AccountAdmin)
+  createCourseWithdrawalSettings(
+    @Param('courseId') courseId: string,
+    @Body() body: CreateCourseWithdrawalSettingsInput,
+    @User() user: LtiAuthUser,
+  ): Promise<CourseWithdrawalSettingsDetail> {
+    return this.adminCourseWithdrawalService.createCourseWithdrawalSettings(
+      Number(courseId),
+      body,
+      user,
+    );
+  }
+
+  @Patch('admin/courses/:courseId')
+  @Roles(RoleType.AccountAdmin)
+  updateCourseWithdrawalSettings(
+    @Param('courseId') courseId: string,
+    @Body() body: UpdateCourseWithdrawalSettingsInput,
+    @User() user: LtiAuthUser,
+  ): Promise<CourseWithdrawalSettingsDetail> {
+    return this.adminCourseWithdrawalService.updateCourseWithdrawalSettings(
+      Number(courseId),
+      body,
+      user,
+    );
   }
 }

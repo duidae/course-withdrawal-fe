@@ -65,6 +65,24 @@ export type CourseWithdrawalSettingsInfo = {
   enabled: boolean;
 };
 
+export type CreateCourseWithdrawalSettingsInput = {
+  startAt: string;
+  endAt: string;
+  noticeDelta?: object;
+  enabled?: boolean;
+};
+
+export type UpdateCourseWithdrawalSettingsInput =
+  Partial<CreateCourseWithdrawalSettingsInput>;
+
+export type CourseWithdrawalSettingsDetail = {
+  courseId: number;
+  startAt: Date;
+  endAt: Date;
+  noticeDelta?: object;
+  enabled: boolean;
+};
+
 export type UserInfo = {
   name: string;
   loginId: string;
