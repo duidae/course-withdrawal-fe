@@ -21,7 +21,7 @@ export class StudentCourseWithdrawalService {
     private readonly common: CourseWithdrawalCommonService,
   ) {}
 
-  async getWithdrawal(courseId: string, user: LtiAuthUser): Promise<Withdrawal> {
+  async getWithdrawal(courseId: number, user: LtiAuthUser): Promise<Withdrawal> {
     const courseInfo = await this.common.getCourseInfo(courseId, user);
     const studentInfo = await this.common.getStudentInfo(user.canvasUserId);
     const settings = await this.common.getWithdrawalSettings(courseId);
@@ -69,7 +69,7 @@ export class StudentCourseWithdrawalService {
   }
 
   async createWithdrawal(
-    courseId: string,
+    courseId: number,
     input: CreateWithdrawalInput,
     user: LtiAuthUser,
   ): Promise<Withdrawal> {
