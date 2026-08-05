@@ -14,8 +14,8 @@ export class CourseWithdrawal {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ length: 255 })
-  studentId!: string;
+  @Column()
+  canvasUserId!: number;
 
   @Column({ length: 255 })
   courseId!: string;
