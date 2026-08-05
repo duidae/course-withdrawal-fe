@@ -129,16 +129,14 @@ export class CourseWithdrawalCommonService {
       return status;
     }
 
+    // Derived status: NotEnabled/NotStarted/Overdue
     const now = new Date();
-
     if (!settings.enabled) {
       return WithdrawalStatus.NotEnabled;
     }
-
     if (settings.startAt > now) {
       return WithdrawalStatus.NotStarted;
     }
-
     if (settings.endAt < now) {
       return WithdrawalStatus.Overdue;
     }
