@@ -113,26 +113,32 @@ export class CourseWithdrawalCommonService {
     return settings;
   }
 
+  // Get derived status(NotEnabled/NotStarted/Overdue)
+  // from Pending/Approved/Declined/NotSubmitted
   getEffectiveStatus(
     settings: CourseWithdrawalSetting,
+    // status: Pending/Approved/Declined/NotSubmitted
     status: CourseWithdrawalStatus | typeof WithdrawalStatus.NotSubmitted,
   ): WithdrawalStatus {
-    const isPending =
+    const canApply =
       status === CourseWithdrawalStatus.Pending ||
       status === WithdrawalStatus.NotSubmitted;
 
-    if (!isPending) {
+    // !canApply: Approved/Declined
+    if (!canApply) {
       return status;
     }
+
+    const now = new Date();
 
     if (!settings.enabled) {
       return WithdrawalStatus.NotEnabled;
     }
 
-    const now = new Date();
     if (settings.startAt > now) {
       return WithdrawalStatus.NotStarted;
     }
+
     if (settings.endAt < now) {
       return WithdrawalStatus.Overdue;
     }
