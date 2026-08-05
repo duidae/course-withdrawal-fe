@@ -20,8 +20,11 @@ export class CourseWithdrawal {
   @Column({ length: 255 })
   courseId!: string;
 
-  @Column({ length: 255, nullable: true })
-  sectionName?: string;
+  @Column({ length: 255 })
+  sectionId!: string;
+
+  @Column({ length: 255 })
+  sectionName!: string;
 
   @Column({
     type: 'enum',
