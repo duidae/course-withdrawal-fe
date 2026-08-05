@@ -503,6 +503,111 @@ describe('CourseWithdrawalController', () => {
     expect(response.status).toBe(403);
   });
 
+  it('POST /api/admin/courses/:courseId creates withdrawal settings', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue(null);
+    settingsRepository.create!.mockImplementation((input: object) => input);
+    settingsRepository.save!.mockImplementation((input: object) =>
+      Promise.resolve({ ...settings, ...input }),
+    );
+
+    const response = await request(httpServer())
+      .post(`/api/admin/courses/${settings.courseId}`)
+      .send({
+        startAt: settings.startAt.toISOString(),
+        endAt: settings.endAt.toISOString(),
+        enabled: true,
+      });
+
+    const body = response.body as CourseWithdrawalSetting;
+
+    expect(response.status).toBe(201);
+    expect(settingsRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        courseId: settings.courseId,
+        createdBy: String(ltiUser.canvasUserId),
+        updatedBy: String(ltiUser.canvasUserId),
+        enabled: true,
+      }),
+    );
+    expect(body).toMatchObject({ courseId: settings.courseId, enabled: true });
+  });
+
+  it('POST /api/admin/courses/:courseId rejects an endAt before startAt', async () => {
+    const response = await request(httpServer())
+      .post(`/api/admin/courses/${settings.courseId}`)
+      .send({ startAt: '2026-02-01T00:00:00Z', endAt: '2026-01-01T00:00:00Z' });
+
+    expect(response.status).toBe(400);
+  });
+
+  it('POST /api/admin/courses/:courseId rejects a course that already has settings', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue(settings);
+
+    const response = await request(httpServer())
+      .post(`/api/admin/courses/${settings.courseId}`)
+      .send({
+        startAt: settings.startAt.toISOString(),
+        endAt: settings.endAt.toISOString(),
+      });
+
+    expect(response.status).toBe(400);
+  });
+
+  it('POST /api/admin/courses/:courseId rejects a user without the admin role', async () => {
+    ltiUser.roles = [RoleType.TeacherEnrollment];
+
+    const response = await request(httpServer())
+      .post(`/api/admin/courses/${settings.courseId}`)
+      .send({
+        startAt: settings.startAt.toISOString(),
+        endAt: settings.endAt.toISOString(),
+      });
+
+    expect(response.status).toBe(403);
+  });
+
+  it('PATCH /api/admin/courses/:courseId updates withdrawal settings', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue({ ...settings });
+    settingsRepository.save!.mockImplementation((input: object) =>
+      Promise.resolve(input),
+    );
+
+    const response = await request(httpServer())
+      .patch(`/api/admin/courses/${settings.courseId}`)
+      .send({ enabled: false });
+
+    const body = response.body as CourseWithdrawalSetting;
+
+    expect(response.status).toBe(200);
+    expect(settingsRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        enabled: false,
+        updatedBy: String(ltiUser.canvasUserId),
+      }),
+    );
+    expect(body).toMatchObject({ courseId: settings.courseId, enabled: false });
+  });
+
+  it('PATCH /api/admin/courses/:courseId returns 404 when settings do not exist', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue(null);
+
+    const response = await request(httpServer())
+      .patch(`/api/admin/courses/${settings.courseId}`)
+      .send({ enabled: false });
+
+    expect(response.status).toBe(404);
+  });
+
+  it('PATCH /api/admin/courses/:courseId rejects a user without the admin role', async () => {
+    ltiUser.roles = [RoleType.TeacherEnrollment];
+
+    const response = await request(httpServer())
+      .patch(`/api/admin/courses/${settings.courseId}`)
+      .send({ enabled: false });
+
+    expect(response.status).toBe(403);
+  });
+
   it('getCourseInfo returns mock section and teacher names', async () => {
     const courseInfo = await commonService.getCourseInfo(101, ltiUser);
 
