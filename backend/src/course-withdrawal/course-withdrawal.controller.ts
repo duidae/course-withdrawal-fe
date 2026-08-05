@@ -10,8 +10,6 @@ import {
 } from '@nestjs/common';
 import { CanvasLmsAuthGuard } from '@ntucool/nestjs-canvas-lms-auth/dist/canvas-lms-auth.guard';
 import { User } from '@ntucool/nestjs-canvas-lms-auth';
-import { Permissions } from '../auth/decorators/permission.decorator';
-import { Permission } from '../auth/models/enums/permission.enum';
 import { type LtiAuthUser } from '../auth/models/lti-auth-user.model';
 import { AdminCourseWithdrawalService } from './admin-course-withdrawal.service';
 import type {
@@ -53,7 +51,6 @@ export class CourseWithdrawalController {
   }
 
   @Get('courses/:courseId/withdrawal-list')
-  @Permissions(['courseId', Permission.GeneralView])
   getWithdrawals(
     @Param('courseId') courseId: string,
     @Query('page') page = 1,
@@ -94,7 +91,7 @@ export class CourseWithdrawalController {
     );
   }
 
-  @Get('/admin-list')
+  @Get('admin/courses')
   getCourses(): Promise<CourseWithdrawalSettingsInfo[]> {
     return this.adminCourseWithdrawalService.getCourseWithdrawalSettings();
   }
