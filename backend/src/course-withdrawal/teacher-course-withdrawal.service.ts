@@ -16,6 +16,8 @@ import {
   type Withdrawal,
 } from './course-withdrawal.types';
 
+const defaultPageSize = 10;
+
 @Injectable()
 export class TeacherCourseWithdrawalService {
   constructor(
@@ -27,7 +29,7 @@ export class TeacherCourseWithdrawalService {
   async getWithdrawals(
     courseId: number,
     page = 1,
-    pageSize = 10,
+    pageSize = defaultPageSize,
   ): Promise<PaginatedResult<Withdrawal>> {
     const settings = await this.common.getWithdrawalSettings(courseId);
 
