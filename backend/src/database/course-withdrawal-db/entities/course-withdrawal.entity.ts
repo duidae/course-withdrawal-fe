@@ -20,8 +20,8 @@ export class CourseWithdrawal {
   @Column()
   courseId!: number;
 
-  @Column({ length: 255 })
-  sectionId!: string;
+  @Column()
+  sectionId!: number;
 
   @Column({ length: 255 })
   sectionName!: string;

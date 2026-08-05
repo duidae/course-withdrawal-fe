@@ -52,7 +52,7 @@ export type BatchReviewResult = {
 };
 
 export type CourseInfo = {
-  sectionId: string;
+  sectionId: number;
   sectionName: string;
   teachers: string[];
 };

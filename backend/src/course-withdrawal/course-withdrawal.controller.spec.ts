@@ -51,7 +51,7 @@ describe('CourseWithdrawalController', () => {
     id: '11111111-1111-1111-1111-111111111111',
     canvasUserId: 1,
     courseId: 101,
-    sectionId: 'Mock Section id 101',
+    sectionId: 1011,
     sectionName: 'Mock Section name 101 LTI Course Name',
     status: CourseWithdrawalStatus.Pending,
     reason: '故申請停修。',
@@ -285,7 +285,7 @@ describe('CourseWithdrawalController', () => {
       expect.objectContaining({
         courseId: withdrawal.courseId,
         canvasUserId: ltiUser.canvasUserId,
-        sectionId: `Mock Section id ${withdrawal.courseId}`,
+        sectionId: withdrawal.courseId * 10 + 1,
         sectionName: `Mock Section name ${withdrawal.courseId} ${ltiUser.courseName}`,
         reason: withdrawal.reason,
         status: CourseWithdrawalStatus.Pending,
@@ -495,7 +495,7 @@ describe('CourseWithdrawalController', () => {
     const courseInfo = await commonService.getCourseInfo(101, ltiUser);
 
     expect(courseInfo).toEqual({
-      sectionId: 'Mock Section id 101',
+      sectionId: 1011,
       sectionName: `Mock Section name 101 ${ltiUser.courseName}`,
       teachers: ['Mock Teacher 1', 'Mock Teacher 2'],
     });

@@ -32,7 +32,7 @@ export class CourseWithdrawalCommonService {
 
   async getCourseInfo(courseId: number, user: LtiAuthUser): Promise<CourseInfo> {
     return Promise.resolve({
-      sectionId: `Mock Section id ${courseId}`,
+      sectionId: courseId * 10 + 1,
       sectionName: `Mock Section name ${courseId} ${user.courseName}`,
       teachers: [`Mock Teacher 1`, `Mock Teacher 2`],
     });
@@ -55,7 +55,7 @@ export class CourseWithdrawalCommonService {
       });
 
       return {
-        sectionId: sectionId ?? '',
+        sectionId: sectionId ?? 0,
         sectionName: section?.name ?? '',
         teachers: teachers.map((teacher) => teacher.name),
       };
