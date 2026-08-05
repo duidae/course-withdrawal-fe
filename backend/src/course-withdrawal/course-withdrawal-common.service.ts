@@ -66,7 +66,7 @@ export class CourseWithdrawalCommonService {
   }
 
   async getStudentInfo(
-    userId: string,
+    userId: number,
   ): Promise<{ name: string; loginId: string; studentId: string; sectionName: string }> {
     return Promise.resolve({
       name: `Mock Student name ${userId}`,

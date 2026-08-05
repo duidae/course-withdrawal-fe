@@ -52,32 +52,9 @@ export class TeacherCourseWithdrawalService {
     return { data, total, page, pageSize };
   }
 
-  private async toWithdrawalListItem(
-    entity: CourseWithdrawal,
-    settings: CourseWithdrawalSetting,
-  ): Promise<Withdrawal> {
-    const [studentInfo, reviewerName] = await Promise.all([
-      this.common.getStudentInfo(entity.studentId),
-      entity.reviewerId ? this.common.getReviewerName(entity.reviewerId) : undefined,
-    ]);
-
-    return {
-      status: this.common.getEffectiveStatus(settings, entity.status),
-      studnetName: studentInfo.name,
-      sectionName: studentInfo.sectionName,
-      studentId: entity.studentId,
-      reason: entity.reason,
-      submittedAt: entity.createdAt,
-      endAt: settings.endAt,
-      reviewComment: entity.reviewComment,
-      reviewerName,
-      reviewedAt: entity.reviewedAt,
-    };
-  }
-
   async reviewWithdrawal(
     courseId: string,
-    studentId: string,
+    userId: number,
     input: ReviewWithdrawalInput,
     user: LtiAuthUser,
   ): Promise<Withdrawal> {
@@ -90,7 +67,10 @@ export class TeacherCourseWithdrawalService {
 
     let entity: CourseWithdrawal | null;
     try {
-      entity = await this.courseWithdrawalRepository.findOneBy({ courseId, studentId });
+      entity = await this.courseWithdrawalRepository.findOneBy({
+        courseId,
+        canvasUserId: userId,
+      });
     } catch (error) {
       throw new DbError((error as Error).message);
     }
@@ -117,24 +97,47 @@ export class TeacherCourseWithdrawalService {
     input: BatchReviewWithdrawalInput,
     user: LtiAuthUser,
   ): Promise<BatchReviewResult[]> {
-    if (!input.studentIds?.length) {
-      throw new InvalidInputError('studentIds must be a non-empty array');
+    if (!input.userIds?.length) {
+      throw new InvalidInputError('userIds must be a non-empty array');
     }
 
     return Promise.all(
-      input.studentIds.map(async (studentId): Promise<BatchReviewResult> => {
+      input.userIds.map(async (userId): Promise<BatchReviewResult> => {
         try {
           const withdrawal = await this.reviewWithdrawal(
             courseId,
-            studentId,
+            userId,
             { status: input.status, reviewComment: input.reviewComment },
             user,
           );
-          return { studentId, success: true, withdrawal };
+          return { userId, success: true, withdrawal };
         } catch (error) {
-          return { studentId, success: false, error: (error as Error).message };
+          return { userId, success: false, error: (error as Error).message };
         }
       }),
     );
+  }
+
+  private async toWithdrawalListItem(
+    entity: CourseWithdrawal,
+    settings: CourseWithdrawalSetting,
+  ): Promise<Withdrawal> {
+    const [studentInfo, reviewerName] = await Promise.all([
+      this.common.getStudentInfo(entity.canvasUserId),
+      entity.reviewerId ? this.common.getReviewerName(entity.reviewerId) : undefined,
+    ]);
+
+    return {
+      status: this.common.getEffectiveStatus(settings, entity.status),
+      studnetName: studentInfo.name,
+      sectionName: studentInfo.sectionName,
+      studentId: studentInfo.studentId,
+      reason: entity.reason,
+      submittedAt: entity.createdAt,
+      endAt: settings.endAt,
+      reviewComment: entity.reviewComment,
+      reviewerName,
+      reviewedAt: entity.reviewedAt,
+    };
   }
 }
