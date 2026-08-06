@@ -35,6 +35,8 @@ export const messages_Zh: Record<string, string> = {
   "teacherDashboard.ticket.title": "停修申請單",
   "teacherDashboard.ticket.courseName": "課程名稱",
   "teacherDashboard.ticket.reason.label": "停修原因",
+  "teacherDashboard.ticket.overdue.title": "學生所屬班別的審核期限已過",
+  "teacherDashboard.ticket.overdue.desc": "若需要調整學生申請狀態，請聯繫 NTU COOL 團隊。",
   "teacherDashboard.ticket.reply.label": "教師回覆",
   "teacherDashboard.ticket.comment": "審核評語（選填）",
   "teacherDashboard.ticket.confirm": "送出回覆",

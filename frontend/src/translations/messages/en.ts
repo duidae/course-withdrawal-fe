@@ -37,6 +37,8 @@ export const messages_En: Record<string, string> = {
   "teacherDashboard.ticket.title": "Withdrawal Application",
   "teacherDashboard.ticket.courseName": "Course Title",
   "teacherDashboard.ticket.reason.label": "Withdrawal Reason",
+  "teacherDashboard.ticket.overdue.title": "The review deadline for this student's section has passed.",
+  "teacherDashboard.ticket.overdue.desc": "If you need to change the review deadline or decision, please contact the NTU COOL team.",
   "teacherDashboard.ticket.reply.label": "Instructor's Reply",
   "teacherDashboard.ticket.comment": "Reviewer's Comment (Optional)",
   "teacherDashboard.ticket.confirm": "Confirm",

@@ -7,6 +7,8 @@ import TextField from "@mui/material/TextField";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
 import { BaseDialog } from "../../cool-ui/components/dialogs/BaseDialog";
 
 import { type Withdrawal } from "../../models";
@@ -22,6 +24,8 @@ type TicketDialogProps = {
   onCancel: () => void;
 };
 
+// TODO: overdue
+
 export const TicketReviewDialog = ({
   courseName,
   withdrawal,
@@ -35,6 +39,8 @@ export const TicketReviewDialog = ({
   const isReplyOverLimit = reply.length > maxReplyLength;
 
   console.log(decision);
+  // TODO: handle overdue
+  const isOverdue = true;
 
   return (
     <BaseDialog
@@ -45,7 +51,7 @@ export const TicketReviewDialog = ({
       confirmBtnText={f({ id: "teacherDashboard.ticket.confirm" })}
       onCancel={onCancel}
       cancelBtnText={f({ id: "teacherDashboard.ticket.cancel" })}
-      disableConfirmBtn={isReplyOverLimit}
+      disableConfirmBtn={isOverdue || isReplyOverLimit}
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -88,6 +94,14 @@ export const TicketReviewDialog = ({
             {withdrawal.reason}
           </Paper>
         </Box>
+        {isOverdue && (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Alert severity="warning">
+              <AlertTitle>{f({ id: "teacherDashboard.ticket.overdue.title" })}</AlertTitle>
+              {f({ id: "teacherDashboard.ticket.overdue.desc" })}
+            </Alert>
+          </Box>
+        )}
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             <Typography variant="subtitle1">
