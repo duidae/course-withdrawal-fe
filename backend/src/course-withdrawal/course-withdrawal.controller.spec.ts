@@ -137,9 +137,11 @@ describe('CourseWithdrawalController', () => {
     externalStudentRepository = moduleFixture.get<MockRepository<ExternalStudent>>(
       getRepositoryToken(ExternalStudent, ExternalSisDbName),
     );
-    externalStudentRepository.findOneBy!.mockResolvedValue({
+    externalStudentRepository.findOne!.mockResolvedValue({
+      loginId: 'mock-login-1',
       schoolCode: 'NTU',
       regNo: 'R00000001',
+      school: { zhName: '國立臺灣大學' },
     });
     commonService = moduleFixture.get(CourseWithdrawalCommonService);
 
@@ -638,23 +640,25 @@ describe('CourseWithdrawalController', () => {
     });
   });
 
-  it('getStudentInfo returns the Canvas name/loginId joined with the external SIS db studentId', async () => {
+  it('getStudentInfo returns the Canvas name joined with the external SIS db student/school info', async () => {
     const studentInfo = await commonService.getStudentInfo(1);
 
     expect(canvasApiService.users.get).toHaveBeenCalledWith(1);
-    expect(externalStudentRepository.findOneBy).toHaveBeenCalledWith({
-      loginId: 'mock-login-1',
+    expect(externalStudentRepository.findOne).toHaveBeenCalledWith({
+      where: { id: 1 },
+      relations: ['school'],
     });
     expect(studentInfo).toEqual({
       name: 'Mock Student name 1',
       loginId: 'mock-login-1',
       studentId: 'NTU_R00000001',
+      schoolName: '國立臺灣大學',
       sectionName: 'Mock Section name 1',
     });
   });
 
   it('getStudentInfo throws NotFoundError when the student is not in the external SIS db', async () => {
-    externalStudentRepository.findOneBy!.mockResolvedValueOnce(null);
+    externalStudentRepository.findOne!.mockResolvedValueOnce(null);
 
     await expect(commonService.getStudentInfo(1)).rejects.toThrow(
       'The external student does not exist.',
