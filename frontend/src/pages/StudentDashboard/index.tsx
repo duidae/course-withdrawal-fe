@@ -13,9 +13,10 @@ import { getStudent } from "../../apis/course-withdrawal.api";
 import { StatusChip } from "../../components/StatusChip";
 import { NoticeContent } from "./NoticeContent";
 import { CourseTimeline } from "./CourseTimeline";
-import { ApplicationPanel, defaultCharCount } from "./ApplicationPanel";
+import { ApplicationPanel } from "./ApplicationPanel";
 import { type CourseSettings } from "./types";
 import { BaseWithdrawalStatus, type Withdrawal } from "../../models";
+import { maxTextInputLength } from "../constants";
 
 const reviewedStatus: ReadonlySet<BaseWithdrawalStatus> = new Set([
   BaseWithdrawalStatus.APPROVED,
@@ -63,7 +64,7 @@ export const StudentDashboard = ({
   }
 
   const hasSubmitted = student.status !== BaseWithdrawalStatus.NOTSUBMITTED;
-  const isDisabled = !reason.trim() || reason.length > defaultCharCount || !confirmed;
+  const isDisabled = !reason.trim() || reason.length > maxTextInputLength || !confirmed;
   const isSectionEnabled = courseSettings.isEnabled !== false;
   const isAppExpired =
     !hasSubmitted && isSectionEnabled
