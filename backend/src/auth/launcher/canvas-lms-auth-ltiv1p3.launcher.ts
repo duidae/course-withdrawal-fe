@@ -98,10 +98,15 @@ export class CanvasLmsAuthLauncherLtiv1p3 {
     const userId = parseInt(lti.userId as string, 10);
     const courseId = Number(lti.courseId);
     const roles = this.getRoles(lti.roles);
+    const loginId =
+      (lti.userLoginId as string | undefined) ??
+      (lti.user_login_id as string | undefined) ??
+      undefined;
 
     return {
       canvasUserId: userId,
       courseId,
+      loginId,
       roles,
       courseName: (lti.courseName as string | undefined) ?? '',
       userName: (lti.userName as string | undefined) ?? '',
