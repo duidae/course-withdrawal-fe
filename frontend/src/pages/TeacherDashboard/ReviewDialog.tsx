@@ -32,6 +32,7 @@ export const TicketReviewDialog = ({
 }: TicketDialogProps) => {
   const [reply, setReply] = useState("");
   const { formatMessage: f } = useIntl();
+  const isReplyOverLimit = reply.length > maxReplyLength;
 
   console.log(decision);
 
@@ -44,6 +45,7 @@ export const TicketReviewDialog = ({
       confirmBtnText={f({ id: "teacherDashboard.ticket.confirm" })}
       onCancel={onCancel}
       cancelBtnText={f({ id: "teacherDashboard.ticket.cancel" })}
+      disableConfirmBtn={isReplyOverLimit}
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -117,11 +119,12 @@ export const TicketReviewDialog = ({
             minRows={3}
             onChange={(e) => setReply(e.target.value)}
             fullWidth
+            error={isReplyOverLimit}
             slotProps={{ inputLabel: { shrink: true } }}
           />
           <Typography
             variant="caption"
-            color="textSecondary"
+            color={isReplyOverLimit ? "error" : "textSecondary"}
             sx={{ alignSelf: "flex-end" }}
           >
             {reply.length} / {maxReplyLength}
@@ -153,6 +156,7 @@ export const BatchReviewDialog = ({
 }: BatchReviewDialog) => {
   const [reply, setReply] = useState("");
   const { formatMessage: f } = useIntl();
+  const isReplyOverLimit = reply.length > maxReplyLength;
 
   return (
     <BaseDialog
@@ -168,6 +172,7 @@ export const BatchReviewDialog = ({
       confirmBtnText={f({ id: "teacherDashboard.batch.confirm" })}
       onCancel={onCancel}
       cancelBtnText={f({ id: "teacherDashboard.ticket.cancel" })}
+      disableConfirmBtn={isReplyOverLimit}
     >
       <Box
         sx={{
@@ -202,11 +207,11 @@ export const BatchReviewDialog = ({
             value={reply}
             label={f({ id: "teacherDashboard.batch.comment.label" })}
             multiline
-            onChange={(e) => setReply(e.target.value.slice(0, maxReplyLength))}
+            onChange={(e) => setReply(e.target.value)}
             fullWidth
+            error={isReplyOverLimit}
             slotProps={{
               inputLabel: { shrink: true },
-              htmlInput: { maxLength: maxReplyLength },
             }}
             sx={{
               flex: 1,
@@ -222,7 +227,7 @@ export const BatchReviewDialog = ({
           />
           <Typography
             variant="caption"
-            color="textSecondary"
+            color={isReplyOverLimit ? "error" : "textSecondary"}
             sx={{ alignSelf: "flex-end" }}
           >
             {reply.length} / {maxReplyLength}

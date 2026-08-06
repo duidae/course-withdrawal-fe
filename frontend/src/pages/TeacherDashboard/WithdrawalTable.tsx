@@ -241,11 +241,11 @@ export const WithdrawalTable = ({
                     sx={{ ...cellSx, verticalAlign: "middle" }}
                   >
                     <IconButton
-                      color="secondary"
                       aria-label={f({ id: "teacherDashboard.field.action" })}
                       onClick={() => onReview(s)}
+                      sx={{ color: "action.active" }}
                     >
-                      <EditIcon />
+                      <EditIcon fontSize="small" />
                     </IconButton>
                   </TableCell>
                 </TableRow>
