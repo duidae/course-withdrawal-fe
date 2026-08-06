@@ -18,7 +18,8 @@ type ApplicationPanelProps = {
   onReasonChange: (value: string) => void;
 };
 
-const defaultCharCount = 500;
+// TODO unite 500
+export const defaultCharCount = 500;
 
 export const ApplicationPanel = ({
   sectionEnabled,
@@ -105,20 +106,25 @@ export const ApplicationPanel = ({
     </Alert>
   );
 
+  const isReasonOverLimit = reason.length > defaultCharCount;
+
   const applicationEditorJSX = (
     <Stack spacing={1}>
       <TextField
         multiline
         rows={4}
-        label={f({ id: "studentDashboard.field.reason" })}
+        label={f({ id: "studentDashboard.field.reason.label" })}
         value={reason}
-        onChange={(e) =>
-          e.target.value.length <= 500 && onReasonChange(e.target.value)
-        }
+        onChange={(e) => onReasonChange(e.target.value)}
+        error={isReasonOverLimit}
       />
       <Typography
         variant="body1"
-        sx={{ textAlign: "right", color: "text.secondary" }}
+        sx={{
+          textAlign: "right",
+          fontSize: 12,
+          color: isReasonOverLimit ? "error.main" : "text.secondary",
+        }}
       >
         {`${reason.length} / ${defaultCharCount}`}
       </Typography>

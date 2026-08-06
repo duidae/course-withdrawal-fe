@@ -60,6 +60,7 @@ export const messages_Zh: Record<string, string> = {
   "studentDashboard.field.loginId": "登入ID",
   "studentDashboard.field.studentId": "學號",
   "studentDashboard.field.reason": "停修原因",
+  "studentDashboard.field.reason.label": "停修原因（必填）",
   "studentDashboard.timeline.start": "申請開始時間",
   "studentDashboard.timeline.end": "申請截止時間",
   "studentDashboard.timeline.teacherDeadline": "教師審核期限",

@@ -62,6 +62,7 @@ export const messages_En: Record<string, string> = {
   "studentDashboard.field.loginId": "Login ID",
   "studentDashboard.field.studentId": "Student ID",
   "studentDashboard.field.reason": "Withdrawal Reason",
+  "studentDashboard.field.reason.label": "Withdrawal Reason (Required)",
   "studentDashboard.timeline.start": "Application Opens",
   "studentDashboard.timeline.end": "Application Closes",
   "studentDashboard.timeline.teacherDeadline": "Instructor Review Deadline",

@@ -16,6 +16,7 @@ type CourseTimelineProps = {
 const tableCellStyle = {
   border: "1px solid",
   borderColor: "divider",
+  borderRadius: "4px",
   padding: "6px 16px",
   lineHeight: 1.66,
 };

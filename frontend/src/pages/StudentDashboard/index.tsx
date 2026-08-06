@@ -13,7 +13,7 @@ import { getStudent } from "../../apis/course-withdrawal.api";
 import { StatusChip } from "../../components/StatusChip";
 import { NoticeContent } from "./NoticeContent";
 import { CourseTimeline } from "./CourseTimeline";
-import { ApplicationPanel } from "./ApplicationPanel";
+import { ApplicationPanel, defaultCharCount } from "./ApplicationPanel";
 import { type CourseSettings } from "./types";
 import { BaseWithdrawalStatus, type Withdrawal } from "../../models";
 
@@ -63,7 +63,7 @@ export const StudentDashboard = ({
   }
 
   const hasSubmitted = student.status !== BaseWithdrawalStatus.NOTSUBMITTED;
-  const isDisabled = !reason.trim() || !confirmed;
+  const isDisabled = !reason.trim() || reason.length > defaultCharCount || !confirmed;
   const isSectionEnabled = courseSettings.isEnabled !== false;
   const isAppExpired =
     !hasSubmitted && isSectionEnabled
@@ -74,7 +74,10 @@ export const StudentDashboard = ({
           new Date();
   const isReviewed = reviewedStatus.has(student.status);
 
-  const canSubmit = !hasSubmitted && !isAppExpired && isSectionEnabled;
+  const canSubmit =
+    !hasSubmitted &&
+    !isAppExpired &&
+    isSectionEnabled;
 
   const onSubmit = () => {
     console.log("submit");
@@ -93,7 +96,7 @@ export const StudentDashboard = ({
         <Stack spacing={3}>
           <Stack spacing={2}>
             <Box>
-              <Typography variant="subtitle1" sx={{ lineHeight: 1.75 }}>
+              <Typography variant="h5" sx={{ lineHeight: 1.75 }}>
                 {f({ id: "studentDashboard.field.courseTitle" })}：
                 {courseSettings.name}
               </Typography>
@@ -168,6 +171,7 @@ export const StudentDashboard = ({
               <FormControlLabel
                 control={
                   <Checkbox
+                    size="small"
                     checked={confirmed}
                     onChange={(e) => setConfirmed(e.target.checked)}
                   />
@@ -189,6 +193,7 @@ export const StudentDashboard = ({
           <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
             <Button
               variant="contained"
+              size="large"
               disabled={isDisabled}
               onClick={onSubmit}
               sx={{ fontWeight: 500 }}

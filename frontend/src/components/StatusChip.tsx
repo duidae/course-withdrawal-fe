@@ -16,6 +16,8 @@ const getChipStyle = (status: string): ChipStyle => {
       return { color: "success" };
     case BaseWithdrawalStatus.DECLINED:
       return { color: "error" };
+    case BaseWithdrawalStatus.NOTSUBMITTED:
+      return { color: "default", sx: { color: "text.secondary" } };
     case BaseWithdrawalStatus.OVERDUE:
     default:
       return { color: "default", sx: { color: "text.secondary" } };
@@ -47,7 +49,7 @@ export const StatusChip = ({ status, isTeacher }: StatusChipProps) => {
     <Chip
       label={f({ id: i18nKey })}
       size="medium"
-      variant="outlined"
+      variant={status === BaseWithdrawalStatus.NOTSUBMITTED ? "filled" : "outlined"}
       color={style.color}
       sx={style.sx}
     />
