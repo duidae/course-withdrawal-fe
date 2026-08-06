@@ -216,7 +216,7 @@ export const WithdrawalTable = ({
                     />
                   </TableCell>
                   <TableCell sx={cellSx}>
-                    <StatusChip status={s.status} />
+                    <StatusChip status={s.status} isTeacher={true} />
                   </TableCell>
                   <TableCell sx={{ ...cellSx, verticalAlign: "middle" }}>
                     <DateTimeCell value={s.displayDeadline} />

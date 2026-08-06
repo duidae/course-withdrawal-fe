@@ -22,12 +22,12 @@ const getChipStyle = (status: string): ChipStyle => {
   }
 };
 
-const getStatusI18nKey = (status: BaseWithdrawalStatus) => {
+const getStatusI18nKey = (status: BaseWithdrawalStatus, isTeacher: boolean = false) => {
   const statusLabelIds: Record<BaseWithdrawalStatus, string> = {
     [BaseWithdrawalStatus.PENDING]: "teacherDashboard.status.pending",
     [BaseWithdrawalStatus.OVERDUE]: "teacherDashboard.status.overdue",
-    [BaseWithdrawalStatus.APPROVED]: "teacherDashboard.status.approved",
-    [BaseWithdrawalStatus.DECLINED]: "teacherDashboard.status.declined",
+    [BaseWithdrawalStatus.APPROVED]: isTeacher ? "teacherDashboard.status.approved" : "studentDashboard.status.approved",
+    [BaseWithdrawalStatus.DECLINED]: isTeacher ? "teacherDashboard.status.declined" : "studentDashboard.status.declined",
     [BaseWithdrawalStatus.NOTSUBMITTED]: "studentDashboard.status.notSubmitted",
   };
   return statusLabelIds[status] ?? status;
@@ -35,11 +35,12 @@ const getStatusI18nKey = (status: BaseWithdrawalStatus) => {
 
 type StatusChipProps = {
   status: BaseWithdrawalStatus;
+  isTeacher?: boolean;
 };
 
-export const StatusChip = ({ status }: StatusChipProps) => {
+export const StatusChip = ({ status, isTeacher }: StatusChipProps) => {
   const { formatMessage: f } = useIntl();
-  const i18nKey = getStatusI18nKey(status);
+  const i18nKey = getStatusI18nKey(status, isTeacher);
   const style = getChipStyle(status);
 
   return (
