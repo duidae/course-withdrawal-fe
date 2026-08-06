@@ -4,7 +4,7 @@ import {
   CanvasApiService,
   /*
   EnrollmentType,
-  ResourceName,
+  ResourceName
   */
 } from '@ntucool/nestjs-canvas-api';
 import { Repository } from 'typeorm';
@@ -69,20 +69,10 @@ export class CourseWithdrawalCommonService {
     */
   }
 
-  async getStudentInfo(userId: number): Promise<{
-    name: string;
+  async getStudentInfoFromExternalDB(userId: number): Promise<{
     loginId: string;
     studentId: string;
-    sectionName: string;
-    schoolName: string;
   }> {
-    let user;
-    try {
-      user = await this.canvasApiService.users.get(userId);
-    } catch (error) {
-      throw new CanvasApiError((error as Error).message);
-    }
-
     let externalStudent: ExternalStudent | null;
     try {
       externalStudent = await this.externalStudentRepository.findOne({
@@ -98,13 +88,26 @@ export class CourseWithdrawalCommonService {
     }
 
     return {
-      name: user.name,
       loginId: externalStudent.loginId,
-      studentId: `${externalStudent.schoolCode}_${externalStudent.regNo}`,
-      schoolName: externalStudent.school.zhName,
-      // TODO: derive real section name, requires courseId which isn't passed to this method
-      sectionName: `Mock Section name ${userId}`,
+      studentId: `${externalStudent.school.abbr}_${externalStudent.regNo}`,
     };
+  }
+
+  async getStudentInfo(userId: number): Promise<{
+    name: string;
+    loginId: string;
+    studentId: string;
+  }> {
+    let user;
+    try {
+      user = await this.canvasApiService.users.get(userId);
+    } catch (error) {
+      throw new CanvasApiError((error as Error).message);
+    }
+
+    const { loginId, studentId } = await this.getStudentInfoFromExternalDB(userId);
+
+    return { name: user.name, loginId, studentId };
   }
 
   async getReviewerName(reviewerId: string): Promise<string | undefined> {

@@ -78,6 +78,7 @@ describe('CourseWithdrawalController', () => {
       RoleType.AccountAdmin,
     ],
     courseName: 'LTI Course Name',
+    userName: 'LTI User Name',
   };
 
   const settings: CourseWithdrawalSetting = {
@@ -141,7 +142,7 @@ describe('CourseWithdrawalController', () => {
       loginId: 'mock-login-1',
       schoolCode: 'NTU',
       regNo: 'R00000001',
-      school: { zhName: '國立臺灣大學' },
+      school: { zhName: '國立臺灣大學', abbr: 'NTU' },
     });
     commonService = moduleFixture.get(CourseWithdrawalCommonService);
 
@@ -185,7 +186,6 @@ describe('CourseWithdrawalController', () => {
       status: withdrawal.status,
       reason: withdrawal.reason,
       studnetName: `Mock Student name ${withdrawal.canvasUserId}`,
-      sectionName: `Mock Section name ${withdrawal.canvasUserId}`,
       studentId: 'NTU_R00000001',
       endAt: settings.endAt.toISOString(),
     });
@@ -640,7 +640,7 @@ describe('CourseWithdrawalController', () => {
     });
   });
 
-  it('getStudentInfo returns the Canvas name joined with the external SIS db student/school info', async () => {
+  it('getStudentInfo returns the Canvas name joined with the external SIS db loginId/studentId', async () => {
     const studentInfo = await commonService.getStudentInfo(1);
 
     expect(canvasApiService.users.get).toHaveBeenCalledWith(1);
@@ -652,8 +652,6 @@ describe('CourseWithdrawalController', () => {
       name: 'Mock Student name 1',
       loginId: 'mock-login-1',
       studentId: 'NTU_R00000001',
-      schoolName: '國立臺灣大學',
-      sectionName: 'Mock Section name 1',
     });
   });
 

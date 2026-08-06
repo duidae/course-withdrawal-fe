@@ -132,7 +132,7 @@ export class TeacherCourseWithdrawalService {
     return {
       status: this.common.getEffectiveStatus(settings, entity.status),
       studnetName: studentInfo.name,
-      sectionName: studentInfo.sectionName,
+      loginId: studentInfo.loginId,
       studentId: studentInfo.studentId,
       reason: entity.reason,
       submittedAt: entity.createdAt,

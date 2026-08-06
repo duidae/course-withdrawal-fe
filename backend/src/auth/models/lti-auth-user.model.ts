@@ -6,4 +6,5 @@ export type LtiAuthUser = AuthUser & {
   courseId: number;
   roles: RoleType[];
   courseName: string;
+  userName: string;
 };
