@@ -10,6 +10,8 @@ import { CourseWithdrawalDbName } from '../database/course-withdrawal-db/config/
 import { CourseWithdrawal } from '../database/course-withdrawal-db/entities/course-withdrawal.entity';
 import { CourseWithdrawalSetting } from '../database/course-withdrawal-db/entities/course-withdrawal-settings.entity';
 import { CourseWithdrawalStatus } from '../database/course-withdrawal-db/entities/course-withdrawal-status.enum';
+import { ExternalSisDbName } from '../database/external-sis-db/config/db.config';
+import { ExternalStudent } from '../database/external-sis-db/entities/external-student.entity';
 import { ResponseErrorFilter } from '../shared/errors';
 import {
   repositoryMockFactory,
@@ -32,11 +34,19 @@ describe('CourseWithdrawalController', () => {
   let app: INestApplication;
   let repository: MockRepository<CourseWithdrawal>;
   let settingsRepository: MockRepository<CourseWithdrawalSetting>;
+  let externalStudentRepository: MockRepository<ExternalStudent>;
   let commonService: CourseWithdrawalCommonService;
   const canvasApiService = {
     courses: { get: jest.fn() },
     users: {
-      get: jest.fn(),
+      // Default: numeric ids (canvasUserId) resolve as students, string ids (reviewerId) as reviewers.
+      get: jest.fn((id: string | number) =>
+        Promise.resolve(
+          id === 'T00000001'
+            ? { name: '林教授' }
+            : { name: `Mock Student name ${id}`, loginId: `mock-login-${id}` },
+        ),
+      ),
       list: jest.fn().mockResolvedValue([{ name: 'Teacher A' }, { name: 'Teacher B' }]),
     },
     enrollments: {
@@ -99,6 +109,10 @@ describe('CourseWithdrawalController', () => {
           useFactory: repositoryMockFactory,
         },
         {
+          provide: getRepositoryToken(ExternalStudent, ExternalSisDbName),
+          useFactory: repositoryMockFactory,
+        },
+        {
           provide: CanvasApiService,
           useValue: canvasApiService,
         },
@@ -120,6 +134,13 @@ describe('CourseWithdrawalController', () => {
     settingsRepository = moduleFixture.get<MockRepository<CourseWithdrawalSetting>>(
       getRepositoryToken(CourseWithdrawalSetting, CourseWithdrawalDbName),
     );
+    externalStudentRepository = moduleFixture.get<MockRepository<ExternalStudent>>(
+      getRepositoryToken(ExternalStudent, ExternalSisDbName),
+    );
+    externalStudentRepository.findOneBy!.mockResolvedValue({
+      schoolCode: 'NTU',
+      regNo: 'R00000001',
+    });
     commonService = moduleFixture.get(CourseWithdrawalCommonService);
 
     app = moduleFixture.createNestApplication();
@@ -163,7 +184,7 @@ describe('CourseWithdrawalController', () => {
       reason: withdrawal.reason,
       studnetName: `Mock Student name ${withdrawal.canvasUserId}`,
       sectionName: `Mock Section name ${withdrawal.canvasUserId}`,
-      studentId: `Mock Student studentId ${withdrawal.canvasUserId}`,
+      studentId: 'NTU_R00000001',
       endAt: settings.endAt.toISOString(),
     });
   });
@@ -223,7 +244,6 @@ describe('CourseWithdrawalController', () => {
       status: CourseWithdrawalStatus.Approved,
       reviewerId: 'T00000001',
     });
-    canvasApiService.users.get.mockResolvedValue({ name: '林教授' });
 
     const response = await request(httpServer()).get(
       `/api/courses/${withdrawal.courseId}/withdrawal`,
@@ -618,20 +638,30 @@ describe('CourseWithdrawalController', () => {
     });
   });
 
-  it('getStudentInfo returns mock student info', async () => {
+  it('getStudentInfo returns the Canvas name/loginId joined with the external SIS db studentId', async () => {
     const studentInfo = await commonService.getStudentInfo(1);
 
+    expect(canvasApiService.users.get).toHaveBeenCalledWith(1);
+    expect(externalStudentRepository.findOneBy).toHaveBeenCalledWith({
+      loginId: 'mock-login-1',
+    });
     expect(studentInfo).toEqual({
       name: 'Mock Student name 1',
-      loginId: 'Mock Student loginId 1',
-      studentId: 'Mock Student studentId 1',
+      loginId: 'mock-login-1',
+      studentId: 'NTU_R00000001',
       sectionName: 'Mock Section name 1',
     });
   });
 
-  it('getReviewerName returns the reviewer name from the Canvas API', async () => {
-    canvasApiService.users.get.mockResolvedValue({ name: '林教授' });
+  it('getStudentInfo throws NotFoundError when the student is not in the external SIS db', async () => {
+    externalStudentRepository.findOneBy!.mockResolvedValueOnce(null);
 
+    await expect(commonService.getStudentInfo(1)).rejects.toThrow(
+      'The external student does not exist.',
+    );
+  });
+
+  it('getReviewerName returns the reviewer name from the Canvas API', async () => {
     const reviewerName = await commonService.getReviewerName('T00000001');
 
     expect(canvasApiService.users.get).toHaveBeenCalledWith('T00000001');

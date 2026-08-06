@@ -13,6 +13,8 @@ import { CourseWithdrawalDbName } from '../database/course-withdrawal-db/config/
 import { CourseWithdrawal } from '../database/course-withdrawal-db/entities/course-withdrawal.entity';
 import { CourseWithdrawalSetting } from '../database/course-withdrawal-db/entities/course-withdrawal-settings.entity';
 import { CourseWithdrawalStatus } from '../database/course-withdrawal-db/entities/course-withdrawal-status.enum';
+import { ExternalSisDbName } from '../database/external-sis-db/config/db.config';
+import { ExternalStudent } from '../database/external-sis-db/entities/external-student.entity';
 import { CanvasApiError, DbError, NotFoundError } from '../shared/errors';
 import {
   type CourseInfo,
@@ -27,6 +29,8 @@ export class CourseWithdrawalCommonService {
     private readonly courseWithdrawalRepository: Repository<CourseWithdrawal>,
     @InjectRepository(CourseWithdrawalSetting, CourseWithdrawalDbName)
     private readonly courseWithdrawalSettingRepository: Repository<CourseWithdrawalSetting>,
+    @InjectRepository(ExternalStudent, ExternalSisDbName)
+    private readonly externalStudentRepository: Repository<ExternalStudent>,
     private readonly canvasApiService: CanvasApiService,
   ) {}
 
@@ -68,21 +72,33 @@ export class CourseWithdrawalCommonService {
   async getStudentInfo(
     userId: number,
   ): Promise<{ name: string; loginId: string; studentId: string; sectionName: string }> {
-    return Promise.resolve({
-      name: `Mock Student name ${userId}`,
-      loginId: `Mock Student loginId ${userId}`, // external db student loginId
-      studentId: `Mock Student studentId ${userId}`, // external db student schoolCode_RegNo, school code zh_name/abbr
-      sectionName: `Mock Section name ${userId}`,
-    });
-    /*
+    let user;
     try {
-      const user = await this.canvasApiService.users.get(userId);
-      // TODO: get student info (incl. section) in external db
-      return { name: user.name, loginId: user.loginId };
+      user = await this.canvasApiService.users.get(userId);
     } catch (error) {
       throw new CanvasApiError((error as Error).message);
     }
-    */
+
+    let externalStudent: ExternalStudent | null;
+    try {
+      externalStudent = await this.externalStudentRepository.findOneBy({
+        id: userId, // TODO: verify external student id mapping, currently using canvas user id as external student id
+      });
+    } catch (error) {
+      throw new DbError((error as Error).message);
+    }
+
+    if (!externalStudent) {
+      throw new NotFoundError('external student');
+    }
+
+    return {
+      name: user.name,
+      loginId: externalStudent.loginId,
+      studentId: `${externalStudent.schoolCode}_${externalStudent.regNo}`,
+      // TODO: derive real section name, requires courseId which isn't passed to this method
+      sectionName: `Mock Section name ${userId}`,
+    };
   }
 
   async getReviewerName(reviewerId: string): Promise<string | undefined> {
