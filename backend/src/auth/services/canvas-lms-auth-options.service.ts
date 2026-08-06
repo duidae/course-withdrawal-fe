@@ -48,6 +48,7 @@ export class CanvasLmsAuthOptionsService implements CanvasLmsAuthModuleOptionsFa
           account_id: '$Canvas.account.id',
           user_id: '$Canvas.user.id',
           sis_user_id: '$Canvas.user.sisSourceId',
+          user_name: '$Person.name.full',
           course_id: '$Canvas.course.id',
           course_name: '$Canvas.course.name',
           sis_course_id: '$Canvas.course.sisSourceId',
