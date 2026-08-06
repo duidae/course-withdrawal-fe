@@ -69,14 +69,11 @@ export class CourseWithdrawalCommonService {
     */
   }
 
-  async getStudentInfoFromExternalDB(userId: number): Promise<{
-    loginId: string;
-    studentId: string;
-  }> {
+  async getStudentId(loginId: string): Promise<string> {
     let externalStudent: ExternalStudent | null;
     try {
       externalStudent = await this.externalStudentRepository.findOne({
-        where: { id: userId }, // TODO: verify external student id mapping, currently using canvas user id as external student id
+        where: { loginId },
         relations: ['school'],
       });
     } catch (error) {
@@ -87,10 +84,7 @@ export class CourseWithdrawalCommonService {
       throw new NotFoundError('external student');
     }
 
-    return {
-      loginId: externalStudent.loginId,
-      studentId: `${externalStudent.school.abbr}_${externalStudent.regNo}`,
-    };
+    return `${externalStudent.school.abbr}_${externalStudent.regNo}`;
   }
 
   async getStudentInfo(userId: number): Promise<{
@@ -105,9 +99,9 @@ export class CourseWithdrawalCommonService {
       throw new CanvasApiError((error as Error).message);
     }
 
-    const { loginId, studentId } = await this.getStudentInfoFromExternalDB(userId);
+    const studentId = await this.getStudentId(user.loginId);
 
-    return { name: user.name, loginId, studentId };
+    return { name: user.name, loginId: user.loginId, studentId };
   }
 
   async getReviewerName(reviewerId: string): Promise<string | undefined> {

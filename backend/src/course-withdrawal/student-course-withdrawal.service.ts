@@ -23,7 +23,7 @@ export class StudentCourseWithdrawalService {
 
   async getWithdrawal(courseId: number, user: LtiAuthUser): Promise<Withdrawal> {
     const courseInfo = await this.common.getCourseInfo(courseId, user);
-    const studentInfo = await this.common.getStudentInfoFromExternalDB(user.canvasUserId);
+    const studentId = await this.common.getStudentId(user.canvasUserId);
     const settings = await this.common.getWithdrawalSettings(courseId);
 
     let entity: CourseWithdrawal | null;
@@ -41,8 +41,8 @@ export class StudentCourseWithdrawalService {
       sectionName: courseInfo.sectionName,
       teachers: courseInfo.teachers,
       studnetName: user.userName,
-      loginId: studentInfo.loginId,
-      studentId: studentInfo.studentId,
+      loginId: user.loginId,
+      studentId: studentId,
       notice: settings.noticeDelta,
     };
 
