@@ -69,9 +69,13 @@ export class CourseWithdrawalCommonService {
     */
   }
 
-  async getStudentInfo(
-    userId: number,
-  ): Promise<{ name: string; loginId: string; studentId: string; sectionName: string }> {
+  async getStudentInfo(userId: number): Promise<{
+    name: string;
+    loginId: string;
+    studentId: string;
+    sectionName: string;
+    schoolName: string;
+  }> {
     let user;
     try {
       user = await this.canvasApiService.users.get(userId);
@@ -81,8 +85,9 @@ export class CourseWithdrawalCommonService {
 
     let externalStudent: ExternalStudent | null;
     try {
-      externalStudent = await this.externalStudentRepository.findOneBy({
-        id: userId, // TODO: verify external student id mapping, currently using canvas user id as external student id
+      externalStudent = await this.externalStudentRepository.findOne({
+        where: { id: userId }, // TODO: verify external student id mapping, currently using canvas user id as external student id
+        relations: ['school'],
       });
     } catch (error) {
       throw new DbError((error as Error).message);
@@ -96,6 +101,7 @@ export class CourseWithdrawalCommonService {
       name: user.name,
       loginId: externalStudent.loginId,
       studentId: `${externalStudent.schoolCode}_${externalStudent.regNo}`,
+      schoolName: externalStudent.school.zhName,
       // TODO: derive real section name, requires courseId which isn't passed to this method
       sectionName: `Mock Section name ${userId}`,
     };
