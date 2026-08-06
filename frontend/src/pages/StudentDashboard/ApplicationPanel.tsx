@@ -7,6 +7,7 @@ import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
 import { AccordionItem } from "./AccordionItem";
 import { type Application } from "./types";
+import { maxTextInputLength } from "../constants";
 
 type ApplicationPanelProps = {
   sectionEnabled: boolean;
@@ -17,9 +18,6 @@ type ApplicationPanelProps = {
   reason: string;
   onReasonChange: (value: string) => void;
 };
-
-// TODO unite 500
-export const defaultCharCount = 500;
 
 export const ApplicationPanel = ({
   sectionEnabled,
@@ -106,7 +104,7 @@ export const ApplicationPanel = ({
     </Alert>
   );
 
-  const isReasonOverLimit = reason.length > defaultCharCount;
+  const isReasonOverLimit = reason.length > maxTextInputLength;
 
   const applicationEditorJSX = (
     <Stack spacing={1}>
@@ -126,7 +124,7 @@ export const ApplicationPanel = ({
           color: isReasonOverLimit ? "error.main" : "text.secondary",
         }}
       >
-        {`${reason.length} / ${defaultCharCount}`}
+        {`${reason.length} / ${maxTextInputLength}`}
       </Typography>
     </Stack>
   );

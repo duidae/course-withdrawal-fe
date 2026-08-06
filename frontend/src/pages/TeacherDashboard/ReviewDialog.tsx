@@ -12,8 +12,7 @@ import AlertTitle from '@mui/material/AlertTitle';
 import { BaseDialog } from "../../cool-ui/components/dialogs/BaseDialog";
 
 import { type Withdrawal } from "../../models";
-
-const maxReplyLength = 500;
+import { maxTextInputLength } from "../constants";
 
 type TicketDialogProps = {
   courseName: string;
@@ -36,7 +35,7 @@ export const TicketReviewDialog = ({
 }: TicketDialogProps) => {
   const [reply, setReply] = useState("");
   const { formatMessage: f } = useIntl();
-  const isReplyOverLimit = reply.length > maxReplyLength;
+  const isReplyOverLimit = reply.length > maxTextInputLength;
 
   console.log(decision);
   // TODO: handle overdue
@@ -141,7 +140,7 @@ export const TicketReviewDialog = ({
             color={isReplyOverLimit ? "error" : "textSecondary"}
             sx={{ alignSelf: "flex-end" }}
           >
-            {reply.length} / {maxReplyLength}
+            {reply.length} / {maxTextInputLength}
           </Typography>
         </Box>
       </Box>
@@ -170,7 +169,7 @@ export const BatchReviewDialog = ({
 }: BatchReviewDialog) => {
   const [reply, setReply] = useState("");
   const { formatMessage: f } = useIntl();
-  const isReplyOverLimit = reply.length > maxReplyLength;
+  const isReplyOverLimit = reply.length > maxTextInputLength;
 
   return (
     <BaseDialog
@@ -244,7 +243,7 @@ export const BatchReviewDialog = ({
             color={isReplyOverLimit ? "error" : "textSecondary"}
             sx={{ alignSelf: "flex-end" }}
           >
-            {reply.length} / {maxReplyLength}
+            {reply.length} / {maxTextInputLength}
           </Typography>
         </Box>
       </Box>
