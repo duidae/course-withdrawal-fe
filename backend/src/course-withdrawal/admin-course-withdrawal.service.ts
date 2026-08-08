@@ -75,8 +75,8 @@ export class AdminCourseWithdrawalService {
         endAt,
         noticeDelta: input.noticeDelta,
         enabled: input.enabled ?? true,
-        createdBy: String(user.canvasUserId),
-        updatedBy: String(user.canvasUserId),
+        createdBy: user.canvasUserId,
+        updatedBy: user.canvasUserId,
       });
 
       const saved = await this.courseWithdrawalSettingRepository.save(entity);
@@ -107,7 +107,7 @@ export class AdminCourseWithdrawalService {
       if (input.enabled !== undefined) {
         entity.enabled = input.enabled;
       }
-      entity.updatedBy = String(user.canvasUserId);
+      entity.updatedBy = user.canvasUserId;
 
       const saved = await this.courseWithdrawalSettingRepository.save(entity);
       return this.toSettingsDetail(saved);

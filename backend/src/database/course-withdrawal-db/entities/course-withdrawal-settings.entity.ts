@@ -37,15 +37,11 @@ export class CourseWithdrawalSetting {
   })
   enabled!: boolean;
 
-  @Column({
-    length: 255,
-  })
-  createdBy!: string;
+  @Column()
+  createdBy!: number;
 
-  @Column({
-    length: 255,
-  })
-  updatedBy!: string;
+  @Column()
+  updatedBy!: number;
 
   @CreateDateColumn({
     type: 'timestamp with time zone',
