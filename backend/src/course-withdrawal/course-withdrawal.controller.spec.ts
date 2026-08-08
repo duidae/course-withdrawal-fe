@@ -39,10 +39,10 @@ describe('CourseWithdrawalController', () => {
   const canvasApiService = {
     courses: { get: jest.fn() },
     users: {
-      // Default: numeric ids (canvasUserId) resolve as students, string ids (reviewerId) as reviewers.
-      get: jest.fn((id: string | number) =>
+      // Default: id 2 (reviewerId) resolves as the reviewer, other numeric ids as students.
+      get: jest.fn((id: number) =>
         Promise.resolve(
-          id === 'T00000001'
+          id === 2
             ? { name: '林教授' }
             : { name: `Mock Student name ${id}`, loginId: `mock-login-${id}` },
         ),
@@ -244,7 +244,7 @@ describe('CourseWithdrawalController', () => {
     repository.findOneBy!.mockResolvedValue({
       ...withdrawal,
       status: CourseWithdrawalStatus.Approved,
-      reviewerId: 'T00000001',
+      reviewerId: 2,
     });
 
     const response = await request(httpServer()).get(
@@ -254,7 +254,7 @@ describe('CourseWithdrawalController', () => {
     const body = response.body as Withdrawal;
 
     expect(response.status).toBe(200);
-    expect(canvasApiService.users.get).toHaveBeenCalledWith('T00000001');
+    expect(canvasApiService.users.get).toHaveBeenCalledWith(2);
     expect(body.reviewerName).toBe('林教授');
   });
 
@@ -366,7 +366,7 @@ describe('CourseWithdrawalController', () => {
     expect(repository.save).toHaveBeenCalledWith(
       expect.objectContaining({
         status: CourseWithdrawalStatus.Approved,
-        reviewerId: String(ltiUser.canvasUserId),
+        reviewerId: ltiUser.canvasUserId,
         reviewComment: 'looks good',
       }),
     );
@@ -664,16 +664,16 @@ describe('CourseWithdrawalController', () => {
   });
 
   it('getReviewerName returns the reviewer name from the Canvas API', async () => {
-    const reviewerName = await commonService.getReviewerName('T00000001');
+    const reviewerName = await commonService.getReviewerName(2);
 
-    expect(canvasApiService.users.get).toHaveBeenCalledWith('T00000001');
+    expect(canvasApiService.users.get).toHaveBeenCalledWith(2);
     expect(reviewerName).toBe('林教授');
   });
 
   it('getReviewerName returns undefined when the Canvas API call fails', async () => {
     canvasApiService.users.get.mockRejectedValue(new Error('not found'));
 
-    const reviewerName = await commonService.getReviewerName('unknown');
+    const reviewerName = await commonService.getReviewerName(999);
 
     expect(reviewerName).toBeUndefined();
   });

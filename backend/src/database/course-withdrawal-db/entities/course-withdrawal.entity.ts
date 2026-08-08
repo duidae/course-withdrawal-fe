@@ -36,8 +36,8 @@ export class CourseWithdrawal {
   @Column({ type: 'text' })
   reason!: string;
 
-  @Column({ length: 255, nullable: true })
-  reviewerId?: string;
+  @Column({ nullable: true })
+  reviewerId?: number;
 
   @Column({ type: 'text', nullable: true })
   reviewComment?: string;
