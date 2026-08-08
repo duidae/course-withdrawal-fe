@@ -97,6 +97,18 @@ export class StudentCourseWithdrawalService {
       throw new InvalidInputError('reason is required');
     }
 
+    const settings = await this.common.getWithdrawalSettings(courseId);
+    const effectiveStatus = this.common.getEffectiveStatus(
+      settings,
+      WithdrawalStatus.NotSubmitted,
+    );
+
+    if (effectiveStatus !== WithdrawalStatus.NotSubmitted) {
+      throw new InvalidInputError(
+        `course withdrawal is not open for submission: ${effectiveStatus}`,
+      );
+    }
+
     const courseInfo = await this.common.getCourseInfo(courseId, user);
 
     try {

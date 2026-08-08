@@ -303,6 +303,7 @@ describe('CourseWithdrawalController', () => {
   });
 
   it('POST /api/courses/:courseId/withdrawal creates a withdrawal', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue(settings);
     repository.create!.mockImplementation((input: object) => input);
     repository.save!.mockImplementation((input: object) =>
       Promise.resolve({ ...withdrawal, ...input }),
@@ -336,6 +337,42 @@ describe('CourseWithdrawalController', () => {
     const response = await request(httpServer())
       .post(`/api/courses/${withdrawal.courseId}/withdrawal`)
       .send({ reason: '   ' });
+
+    expect(response.status).toBe(400);
+  });
+
+  it('POST /api/courses/:courseId/withdrawal rejects submission when withdrawal is not enabled', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue({ ...settings, enabled: false });
+
+    const response = await request(httpServer())
+      .post(`/api/courses/${withdrawal.courseId}/withdrawal`)
+      .send({ reason: withdrawal.reason });
+
+    expect(response.status).toBe(400);
+  });
+
+  it('POST /api/courses/:courseId/withdrawal rejects submission before the withdrawal period starts', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue({
+      ...settings,
+      startAt: new Date('2099-01-01T00:00:00Z'),
+    });
+
+    const response = await request(httpServer())
+      .post(`/api/courses/${withdrawal.courseId}/withdrawal`)
+      .send({ reason: withdrawal.reason });
+
+    expect(response.status).toBe(400);
+  });
+
+  it('POST /api/courses/:courseId/withdrawal rejects submission after the withdrawal period ends', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue({
+      ...settings,
+      endAt: new Date('2000-01-01T00:00:00Z'),
+    });
+
+    const response = await request(httpServer())
+      .post(`/api/courses/${withdrawal.courseId}/withdrawal`)
+      .send({ reason: withdrawal.reason });
 
     expect(response.status).toBe(400);
   });
