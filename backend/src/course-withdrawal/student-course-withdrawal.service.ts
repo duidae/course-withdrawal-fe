@@ -22,6 +22,10 @@ export class StudentCourseWithdrawalService {
   ) {}
 
   async getWithdrawal(courseId: number, user: LtiAuthUser): Promise<Withdrawal> {
+    if (!user || !user.canvasUserId) {
+      throw new InvalidInputError('Invalid user');
+    }
+
     if (courseId !== user.courseId) {
       throw new InvalidInputError("courseId does not match the user's courseId");
     }
@@ -81,12 +85,12 @@ export class StudentCourseWithdrawalService {
     input: CreateWithdrawalInput,
     user: LtiAuthUser,
   ): Promise<Withdrawal> {
-    if (courseId !== user.courseId) {
-      throw new InvalidInputError("courseId does not match the user's courseId");
+    if (!user || !user.canvasUserId) {
+      throw new InvalidInputError('Invalid user');
     }
 
-    if (!user.loginId) {
-      throw new InvalidInputError('loginId is required for the user');
+    if (courseId !== user.courseId) {
+      throw new InvalidInputError("courseId does not match the user's courseId");
     }
 
     if (!input.reason?.trim()) {
