@@ -1,0 +1,147 @@
+import { request } from "./request";
+
+// Mirrors backend/src/course-withdrawal/course-withdrawal.types.ts.
+// Dates arrive over HTTP as ISO strings, not Date instances.
+
+const WithdrawalStatus = {
+  Pending: "pending",
+  Approved: "approved",
+  Declined: "declined",
+  NotSubmitted: "notSubmitted",
+  NotStarted: "notStarted",
+  NotEnabled: "notEnabled",
+  Overdue: "overdue",
+} as const;
+
+type WithdrawalStatus = (typeof WithdrawalStatus)[keyof typeof WithdrawalStatus];
+
+type Withdrawal = {
+  status: WithdrawalStatus;
+  courseName?: string;
+  sectionName?: string;
+  teachers?: string[];
+  studnetName?: string;
+  loginId?: string;
+  studentId?: string;
+  reason?: string;
+  submittedAt?: string;
+  endAt?: string;
+  reviewComment?: string;
+  reviewerName?: string;
+  reviewedAt?: string;
+  notice?: object;
+};
+
+type CreateWithdrawalInput = {
+  reason: string;
+};
+
+type ReviewWithdrawalInput = {
+  status: typeof WithdrawalStatus.Approved | typeof WithdrawalStatus.Declined;
+  reviewComment?: string;
+};
+
+type BatchReviewWithdrawalInput = {
+  studentCanvasIds: string[];
+  status: typeof WithdrawalStatus.Approved | typeof WithdrawalStatus.Declined;
+  reviewComment?: string;
+};
+
+type BatchReviewResult = {
+  studentCanvasId: string;
+  success: boolean;
+  withdrawal?: Withdrawal;
+  error?: string;
+};
+
+type PaginatedResult<T> = {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+type GetWithdrawalListParams = {
+  page?: number;
+  pageSize?: number;
+};
+
+const defaultPageSize = 10;
+
+// GET /api/courses/:courseId/withdrawal
+// Returns the authenticated student's own withdrawal for the course
+// (identity comes from the session, there is no by-id lookup).
+const getWithdrawal = async (courseId: number): Promise<Withdrawal> => {
+  const response = await request.get<Withdrawal>(
+    `/api/courses/${courseId}/withdrawal`,
+  );
+  return response.data;
+};
+
+// POST /api/courses/:courseId/withdrawal
+const createWithdrawal = async (
+  courseId: number,
+  input: CreateWithdrawalInput,
+): Promise<Withdrawal> => {
+  const response = await request.post<Withdrawal>(
+    `/api/courses/${courseId}/withdrawal`,
+    input,
+  );
+  return response.data;
+};
+
+// GET /api/courses/:courseId/withdrawal-list
+const getWithdrawalList = async (
+  courseId: number,
+  params: GetWithdrawalListParams = {},
+): Promise<PaginatedResult<Withdrawal>> => {
+  const { page = 1, pageSize = defaultPageSize } = params;
+  const response = await request.get<PaginatedResult<Withdrawal>>(
+    `/api/courses/${courseId}/withdrawal-list`,
+    { params: { page, pageSize } },
+  );
+  return response.data;
+};
+
+// PATCH /api/courses/:courseId/students/:studentCanvasId/withdrawal
+const reviewWithdrawal = async (
+  courseId: number,
+  studentCanvasId: string,
+  input: ReviewWithdrawalInput,
+): Promise<Withdrawal> => {
+  const response = await request.patch<Withdrawal>(
+    `/api/courses/${courseId}/students/${studentCanvasId}/withdrawal`,
+    input,
+  );
+  return response.data;
+};
+
+// PATCH /api/courses/:courseId/withdrawals/batch-review
+const batchReviewWithdrawals = async (
+  courseId: number,
+  input: BatchReviewWithdrawalInput,
+): Promise<BatchReviewResult[]> => {
+  const response = await request.patch<BatchReviewResult[]>(
+    `/api/courses/${courseId}/withdrawals/batch-review`,
+    input,
+  );
+  return response.data;
+};
+
+export {
+  WithdrawalStatus,
+  getWithdrawal,
+  createWithdrawal,
+  getWithdrawalList,
+  reviewWithdrawal,
+  batchReviewWithdrawals,
+};
+export type {
+  Withdrawal,
+  CreateWithdrawalInput,
+  ReviewWithdrawalInput,
+  BatchReviewWithdrawalInput,
+  BatchReviewResult,
+  PaginatedResult,
+  GetWithdrawalListParams,
+};
