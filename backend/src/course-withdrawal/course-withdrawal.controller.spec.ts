@@ -670,11 +670,11 @@ describe('CourseWithdrawalController', () => {
     expect(reviewerName).toBe('林教授');
   });
 
-  it('getReviewerName returns undefined when the Canvas API call fails', async () => {
+  it('getReviewerName throws a CanvasApiError when the Canvas API call fails', async () => {
     canvasApiService.users.get.mockRejectedValue(new Error('not found'));
 
-    const reviewerName = await commonService.getReviewerName(999);
-
-    expect(reviewerName).toBeUndefined();
+    await expect(commonService.getReviewerName(999)).rejects.toThrow(
+      'Canvas API error: not found',
+    );
   });
 });
