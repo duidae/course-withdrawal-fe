@@ -104,7 +104,7 @@ export class CourseWithdrawalCommonService {
     return { name: user.name, loginId: user.loginId, studentId };
   }
 
-  async getReviewerName(reviewerId: string): Promise<string | undefined> {
+  async getReviewerName(reviewerId: number): Promise<string | undefined> {
     try {
       const reviewer = await this.canvasApiService.users.get(reviewerId);
       return reviewer.name;
