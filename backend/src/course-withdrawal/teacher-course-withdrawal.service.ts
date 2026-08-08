@@ -60,6 +60,10 @@ export class TeacherCourseWithdrawalService {
     input: ReviewWithdrawalInput,
     user: LtiAuthUser,
   ): Promise<Withdrawal> {
+    if (!user) {
+      throw new InvalidInputError('Invalid user');
+    }
+
     if (
       input.status !== CourseWithdrawalStatus.Approved &&
       input.status !== CourseWithdrawalStatus.Declined
