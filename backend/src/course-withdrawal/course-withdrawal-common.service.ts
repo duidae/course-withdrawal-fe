@@ -109,10 +109,7 @@ export class CourseWithdrawalCommonService {
       const reviewer = await this.canvasApiService.users.get(reviewerId);
       return reviewer.name;
     } catch (error) {
-      console.error('Failed to get reviewer name:', (error as Error).message);
-      return undefined;
-      //TODO: check throw error or just return undefined
-      //throw new CanvasApiError((error as Error).message);
+      throw new CanvasApiError((error as Error).message);
     }
   }
 
