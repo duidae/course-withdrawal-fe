@@ -81,6 +81,14 @@ export class StudentCourseWithdrawalService {
     input: CreateWithdrawalInput,
     user: LtiAuthUser,
   ): Promise<Withdrawal> {
+    if (courseId !== user.courseId) {
+      throw new InvalidInputError("courseId does not match the user's courseId");
+    }
+
+    if (!user.loginId) {
+      throw new InvalidInputError('loginId is required for the user');
+    }
+
     if (!input.reason?.trim()) {
       throw new InvalidInputError('reason is required');
     }
