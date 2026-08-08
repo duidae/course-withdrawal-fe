@@ -1,5 +1,6 @@
 //import { request } from "./request";
 import { type Withdrawal } from "../models";
+import { defaultPageSize } from "../pages/constants";
 
 import { INIT_COURSES, INIT_STUDENTS } from "./mockup";
 
@@ -26,8 +27,6 @@ type PaginatedResult<T> = {
   page: number;
   pageSize: number;
 };
-
-const defaultPageSize = 10;
 
 const getWithdrawals = async (
   params: GetWithdrawalsParams = {},

@@ -19,6 +19,7 @@ import { TruncatedReason } from "./TruncatedReason";
 import { StatusChip } from "../../components/StatusChip";
 import { WithdrawalStatus } from "./types";
 import { type Withdrawal } from "../../models";
+import { defaultPageSize } from "../constants";
 
 export type WithdrawalTableRow = Withdrawal & {
   displayDeadline: string;
@@ -35,8 +36,6 @@ type WithdrawalTableProps = {
   onToggleSelect: (id: number) => void;
   onReview: (withdrawal: Withdrawal) => void;
 };
-
-const defaultPageSize = 10;
 
 export const WithdrawalTable = ({
   rows,
