@@ -87,8 +87,8 @@ describe('CourseWithdrawalController', () => {
     startAt: new Date('2026-01-01T00:00:00Z'),
     endAt: new Date('2099-01-01T00:00:00Z'),
     enabled: true,
-    createdBy: 'admin',
-    updatedBy: 'admin',
+    createdBy: 0,
+    updatedBy: 0,
     createdAt: new Date('2026-01-01T00:00:00Z'),
     updatedAt: new Date('2026-01-01T00:00:00Z'),
   };
@@ -546,8 +546,8 @@ describe('CourseWithdrawalController', () => {
     expect(settingsRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         courseId: settings.courseId,
-        createdBy: String(ltiUser.canvasUserId),
-        updatedBy: String(ltiUser.canvasUserId),
+        createdBy: ltiUser.canvasUserId,
+        updatedBy: ltiUser.canvasUserId,
         enabled: true,
       }),
     );
@@ -604,7 +604,7 @@ describe('CourseWithdrawalController', () => {
     expect(settingsRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
         enabled: false,
-        updatedBy: String(ltiUser.canvasUserId),
+        updatedBy: ltiUser.canvasUserId,
       }),
     );
     expect(body).toMatchObject({ courseId: settings.courseId, enabled: false });
