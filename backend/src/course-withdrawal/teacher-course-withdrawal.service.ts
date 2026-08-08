@@ -83,7 +83,7 @@ export class TeacherCourseWithdrawalService {
 
     try {
       entity.status = input.status;
-      entity.reviewerId = String(user.canvasUserId);
+      entity.reviewerId = user.canvasUserId;
       entity.reviewComment = input.reviewComment;
       entity.reviewedAt = new Date();
 
