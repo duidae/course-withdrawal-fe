@@ -14,6 +14,7 @@ import {
   type PaginatedResult,
   type ReviewWithdrawalInput,
   type Withdrawal,
+  WithdrawalStatus,
 } from './course-withdrawal.types';
 
 const defaultPageSize = 10;
@@ -69,6 +70,18 @@ export class TeacherCourseWithdrawalService {
       input.status !== CourseWithdrawalStatus.Declined
     ) {
       throw new InvalidInputError('status must be "approved" or "declined"');
+    }
+
+    const settings = await this.common.getWithdrawalSettings(courseId);
+    const effectiveStatus = this.common.getEffectiveStatus(
+      settings,
+      WithdrawalStatus.NotSubmitted,
+    );
+
+    if (effectiveStatus !== WithdrawalStatus.NotSubmitted) {
+      throw new InvalidInputError(
+        `course withdrawal is not open for review: ${effectiveStatus}`,
+      );
     }
 
     let entity: CourseWithdrawal | null;

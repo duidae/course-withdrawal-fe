@@ -388,6 +388,7 @@ describe('CourseWithdrawalController', () => {
   });
 
   it('PATCH /api/courses/:courseId/students/:studentCanvasId/withdrawal approves a withdrawal', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue(settings);
     repository.findOneBy!.mockResolvedValue({ ...withdrawal });
     repository.save!.mockImplementation((input: object) => Promise.resolve(input));
 
@@ -418,6 +419,7 @@ describe('CourseWithdrawalController', () => {
   });
 
   it('PATCH /api/courses/:courseId/students/:studentCanvasId/withdrawal declines a withdrawal', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue(settings);
     repository.findOneBy!.mockResolvedValue({ ...withdrawal });
     repository.save!.mockImplementation((input: object) => Promise.resolve(input));
 
@@ -443,7 +445,20 @@ describe('CourseWithdrawalController', () => {
     expect(response.status).toBe(400);
   });
 
+  it('PATCH /api/courses/:courseId/students/:studentCanvasId/withdrawal rejects review when withdrawal is not enabled', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue({ ...settings, enabled: false });
+
+    const response = await request(httpServer())
+      .patch(
+        `/api/courses/${withdrawal.courseId}/students/${withdrawal.canvasUserId}/withdrawal`,
+      )
+      .send({ status: CourseWithdrawalStatus.Approved });
+
+    expect(response.status).toBe(400);
+  });
+
   it('PATCH /api/courses/:courseId/students/:studentCanvasId/withdrawal returns 404 when the withdrawal does not exist', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue(settings);
     repository.findOneBy!.mockResolvedValue(null);
 
     const response = await request(httpServer())
@@ -466,6 +481,7 @@ describe('CourseWithdrawalController', () => {
   });
 
   it('PATCH /api/courses/:courseId/withdrawals/batch-review approves multiple withdrawals with partial success', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue(settings);
     repository.findOneBy!.mockImplementation((where: { canvasUserId: number }) =>
       Promise.resolve(
         where.canvasUserId === 999
@@ -502,6 +518,23 @@ describe('CourseWithdrawalController', () => {
       .send({ studentCanvasIds: [], status: CourseWithdrawalStatus.Approved });
 
     expect(response.status).toBe(400);
+  });
+
+  it('PATCH /api/courses/:courseId/withdrawals/batch-review reports per-item failure when withdrawal is not enabled', async () => {
+    settingsRepository.findOneBy!.mockResolvedValue({ ...settings, enabled: false });
+
+    const response = await request(httpServer())
+      .patch(`/api/courses/${withdrawal.courseId}/withdrawals/batch-review`)
+      .send({
+        studentCanvasIds: [String(withdrawal.canvasUserId)],
+        status: CourseWithdrawalStatus.Approved,
+      });
+
+    const body = response.body as BatchReviewResult[];
+
+    expect(response.status).toBe(200);
+    expect(body[0].success).toBe(false);
+    expect(typeof body[0].error).toBe('string');
   });
 
   it('/api/admin/courses returns withdrawal settings and counts for every configured course', async () => {
