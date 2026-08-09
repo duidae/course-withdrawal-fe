@@ -1,50 +1,22 @@
 import { request } from "./request";
-
-// Mirrors backend/src/course-withdrawal/course-withdrawal.types.ts.
-// Dates arrive over HTTP as ISO strings, not Date instances.
-
-const WithdrawalStatus = {
-  Pending: "pending",
-  Approved: "approved",
-  Declined: "declined",
-  NotSubmitted: "notSubmitted",
-  NotStarted: "notStarted",
-  NotEnabled: "notEnabled",
-  Overdue: "overdue",
-} as const;
-
-type WithdrawalStatus =
-  (typeof WithdrawalStatus)[keyof typeof WithdrawalStatus];
-
-type Withdrawal = {
-  status: WithdrawalStatus;
-  courseName?: string;
-  sectionName?: string;
-  teachers?: string[];
-  studnetName?: string;
-  loginId?: string;
-  studentId?: string;
-  reason?: string;
-  submittedAt?: string;
-  endAt?: string;
-  reviewComment?: string;
-  reviewerName?: string;
-  reviewedAt?: string;
-  notice?: object;
-};
+import { BaseWithdrawalStatus, type Withdrawal } from "../models";
 
 type CreateWithdrawalInput = {
   reason: string;
 };
 
 type ReviewWithdrawalInput = {
-  status: typeof WithdrawalStatus.Approved | typeof WithdrawalStatus.Declined;
+  status:
+    | typeof BaseWithdrawalStatus.APPROVED
+    | typeof BaseWithdrawalStatus.DECLINED;
   reviewComment?: string;
 };
 
 type BatchReviewWithdrawalInput = {
   studentCanvasIds: string[];
-  status: typeof WithdrawalStatus.Approved | typeof WithdrawalStatus.Declined;
+  status:
+    | typeof BaseWithdrawalStatus.APPROVED
+    | typeof BaseWithdrawalStatus.DECLINED;
   reviewComment?: string;
 };
 
@@ -68,7 +40,6 @@ type GetWithdrawalsParams = {
 };
 
 export type {
-  Withdrawal,
   CreateWithdrawalInput,
   ReviewWithdrawalInput,
   BatchReviewWithdrawalInput,

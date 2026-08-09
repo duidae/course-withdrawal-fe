@@ -25,16 +25,18 @@ const reviewedStatus: ReadonlySet<BaseWithdrawalStatus> = new Set([
 ]);
 
 type StudentDashboardProps = {
-  studentId: number;
+  courseId: number;
   courseSettings: CourseSettings;
 };
 
 export const StudentDashboard = ({
-  studentId,
+  courseId,
   courseSettings,
 }: StudentDashboardProps) => {
   const { formatMessage: f } = useIntl();
-  const [student, setStudent] = useState<Withdrawal | undefined>();
+  const [withdrawal, setWithdrawal] = useState<Withdrawal | undefined>(
+    undefined,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [reason, setReason] = useState("");
   const [confirmed, setConfirmed] = useState(false);
@@ -42,14 +44,16 @@ export const StudentDashboard = ({
   useEffect(() => {
     const fetchApplication = async () => {
       setIsLoading(true);
-      const result = await getWithdrawal(studentId);
-      setStudent(result);
+      const result = await getWithdrawal(courseId);
+      if (result) {
+        setWithdrawal(result);
+      }
       setIsLoading(false);
     };
     fetchApplication();
-  }, [studentId]);
+  }, [courseId]);
 
-  if (isLoading || !student) {
+  if (isLoading || !withdrawal) {
     return (
       <Box
         sx={{
@@ -63,7 +67,7 @@ export const StudentDashboard = ({
     );
   }
 
-  const hasSubmitted = student.status !== BaseWithdrawalStatus.NOTSUBMITTED;
+  const hasSubmitted = withdrawal.status !== BaseWithdrawalStatus.NOTSUBMITTED;
   const isDisabled =
     !reason.trim() || reason.length > maxTextInputLength || !confirmed;
   const isSectionEnabled = courseSettings.isEnabled !== false;
@@ -74,7 +78,7 @@ export const StudentDashboard = ({
         !!courseSettings.et &&
         new Date(courseSettings.et.replaceAll("/", "-").replace(" ", "T")) <
           new Date();
-  const isReviewed = reviewedStatus.has(student.status);
+  const isReviewed = reviewedStatus.has(withdrawal.status);
 
   const canSubmit = !hasSubmitted && !isAppExpired && isSectionEnabled;
 
@@ -88,7 +92,7 @@ export const StudentDashboard = ({
         <Typography variant="h1">
           {f({ id: "studentDashboard.title" })}
         </Typography>
-        <StatusChip status={student.status} />
+        <StatusChip status={withdrawal.status} />
       </Stack>
 
       <Stack spacing={3}>
@@ -119,14 +123,15 @@ export const StudentDashboard = ({
             <Stack spacing={0.5}>
               <Typography variant="caption" sx={{ lineHeight: 1.66 }}>
                 {f({ id: "studentDashboard.field.studentName" })}：
-                {student.name}
+                {withdrawal.studnetName}
               </Typography>
               <Typography variant="caption" sx={{ lineHeight: 1.66 }}>
-                {f({ id: "studentDashboard.field.loginId" })}：{student.loginId}
+                {f({ id: "studentDashboard.field.loginId" })}：
+                {withdrawal.loginId}
               </Typography>
               <Typography variant="caption" sx={{ lineHeight: 1.66 }}>
                 {f({ id: "studentDashboard.field.studentId" })}：
-                {student.studentId}
+                {withdrawal.studentId}
               </Typography>
             </Stack>
 
@@ -135,7 +140,7 @@ export const StudentDashboard = ({
               hasSubmitted={hasSubmitted}
               isAppExpired={isAppExpired}
               isReviewed={isReviewed}
-              application={student}
+              application={withdrawal}
               reason={reason}
               onReasonChange={setReason}
             />

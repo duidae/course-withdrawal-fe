@@ -4,23 +4,26 @@ export const BaseWithdrawalStatus = {
   APPROVED: "approved",
   DECLINED: "declined",
   NOTSUBMITTED: "notSubmitted",
+  NOTSTARTED: "notStarted",
+  NOTENABLED: "notEnabled",
 } as const;
 
 export type BaseWithdrawalStatus =
   (typeof BaseWithdrawalStatus)[keyof typeof BaseWithdrawalStatus];
 
 export type Withdrawal = {
-  id: number;
-  name: string;
-  school: string;
-  studentId: string;
-  loginId: string;
-  applyTime: string;
-  deadline: string;
-  reason: string;
   status: BaseWithdrawalStatus;
-  reviewTime?: string;
-  approver?: string;
-  lastModified?: number;
-  _orig?: string;
+  courseName?: string;
+  sectionName?: string;
+  teachers?: string[];
+  studnetName?: string;
+  loginId?: string;
+  studentId?: string;
+  reason?: string;
+  submittedAt?: string;
+  endAt?: string;
+  reviewComment?: string;
+  reviewerName?: string;
+  reviewedAt?: string;
+  notice?: object;
 };

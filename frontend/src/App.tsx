@@ -57,11 +57,8 @@ const AppRoutes: FC = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/courses/:id" element={<CourseLayout />}>
-          <Route path="/courses/:id/teacher" element={<TeacherDashboard />} />
-          <Route
-            path="/courses/:id/student"
-            element={<StudentDashboardRoute />}
-          />
+          <Route path="teacher" element={<TeacherDashboard />} />
+          <Route path="student" element={<StudentDashboardRoute />} />
         </Route>
         {/*
         <Route
