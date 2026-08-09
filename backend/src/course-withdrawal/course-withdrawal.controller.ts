@@ -28,7 +28,7 @@ import type {
   Withdrawal,
 } from './course-withdrawal.types';
 import { StudentCourseWithdrawalService } from './student-course-withdrawal.service';
-import { TeacherCourseWithdrawalService } from './teacher-course-withdrawal.service';
+import { TeacherCourseWithdrawalService, defaultPageSize } from './teacher-course-withdrawal.service';
 
 @Controller('api')
 @UseGuards(CanvasLmsAuthGuard, RolesGuard)
@@ -62,12 +62,12 @@ export class CourseWithdrawalController {
     );
   }
 
-  @Get('courses/:courseId/withdrawal-list')
+  @Get('courses/:courseId/withdrawals')
   @Roles(RoleType.TeacherEnrollment, RoleType.TaEnrollment)
   getWithdrawals(
     @Param('courseId') courseId: string,
     @Query('page') page = 1,
-    @Query('pageSize') pageSize = 10,
+    @Query('pageSize') pageSize = defaultPageSize,
   ): Promise<PaginatedResult<Withdrawal>> {
     return this.teacherCourseWithdrawalService.getWithdrawals(
       Number(courseId),

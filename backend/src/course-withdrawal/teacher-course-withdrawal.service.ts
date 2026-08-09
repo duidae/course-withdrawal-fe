@@ -17,7 +17,7 @@ import {
   WithdrawalStatus,
 } from './course-withdrawal.types';
 
-const defaultPageSize = 10;
+export const defaultPageSize = 10;
 
 @Injectable()
 export class TeacherCourseWithdrawalService {
