@@ -166,12 +166,12 @@ describe('CourseWithdrawalController', () => {
 
   const httpServer = () => app.getHttpServer() as Parameters<typeof request>[0];
 
-  it('/api/courses/:courseId/withdrawal-list returns paginated withdrawals', async () => {
+  it('/api/courses/:courseId/withdrawals returns paginated withdrawals', async () => {
     settingsRepository.findOneBy!.mockResolvedValue(settings);
     repository.findAndCount!.mockResolvedValue([[withdrawal], 1]);
 
     const response = await request(httpServer())
-      .get(`/api/courses/${withdrawal.courseId}/withdrawal-list`)
+      .get(`/api/courses/${withdrawal.courseId}/withdrawals`)
       .query({ page: 1, pageSize: 2 });
 
     const body = response.body as PaginatedResult<Withdrawal>;
@@ -191,19 +191,19 @@ describe('CourseWithdrawalController', () => {
     });
   });
 
-  it('/api/courses/:courseId/withdrawal-list rejects a user without a teacher/TA role', async () => {
+  it('/api/courses/:courseId/withdrawals rejects a user without a teacher/TA role', async () => {
     ltiUser.roles = [RoleType.StudentEnrollment];
 
     const response = await request(httpServer()).get(
-      `/api/courses/${withdrawal.courseId}/withdrawal-list`,
+      `/api/courses/${withdrawal.courseId}/withdrawals`,
     );
 
     expect(response.status).toBe(403);
   });
 
-  it('/api/courses/:courseId/withdrawal-list rejects a teacher/TA of a different course', async () => {
+  it('/api/courses/:courseId/withdrawals rejects a teacher/TA of a different course', async () => {
     const response = await request(httpServer()).get(
-      `/api/courses/${withdrawal.courseId + 1}/withdrawal-list`,
+      `/api/courses/${withdrawal.courseId + 1}/withdrawals`,
     );
 
     expect(response.status).toBe(403);
