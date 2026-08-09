@@ -53,7 +53,11 @@ export class AdminCourseWithdrawalService {
     input: CreateCourseWithdrawalSettingsInput,
     user: LtiAuthUser,
   ): Promise<CourseWithdrawalSettingsDetail> {
-    const { startAt, endAt } = this.parseAndValidateDates(input.startAt, input.endAt);
+    const { startAt, endAt, reviewDeadline } = this.parseAndValidateDates(
+      input.startAt,
+      input.endAt,
+      input.reviewDeadline,
+    );
 
     let existing: CourseWithdrawalSetting | null;
     try {
@@ -73,6 +77,7 @@ export class AdminCourseWithdrawalService {
         courseId,
         startAt,
         endAt,
+        reviewDeadline,
         noticeDelta: input.noticeDelta,
         enabled: input.enabled ?? true,
         createdBy: user.canvasUserId,
@@ -93,14 +98,16 @@ export class AdminCourseWithdrawalService {
   ): Promise<CourseWithdrawalSettingsDetail> {
     const entity = await this.common.getWithdrawalSettings(courseId);
 
-    const { startAt, endAt } = this.parseAndValidateDates(
+    const { startAt, endAt, reviewDeadline } = this.parseAndValidateDates(
       input.startAt ?? entity.startAt,
       input.endAt ?? entity.endAt,
+      input.reviewDeadline ?? entity.reviewDeadline,
     );
 
     try {
       entity.startAt = startAt;
       entity.endAt = endAt;
+      entity.reviewDeadline = reviewDeadline;
       if (input.noticeDelta !== undefined) {
         entity.noticeDelta = input.noticeDelta;
       }
@@ -119,7 +126,8 @@ export class AdminCourseWithdrawalService {
   private parseAndValidateDates(
     rawStartAt: string | Date,
     rawEndAt: string | Date,
-  ): { startAt: Date; endAt: Date } {
+    rawReviewDeadline?: string | Date,
+  ): { startAt: Date; endAt: Date; reviewDeadline?: Date } {
     const startAt = new Date(rawStartAt);
     const endAt = new Date(rawEndAt);
 
@@ -130,7 +138,18 @@ export class AdminCourseWithdrawalService {
       throw new InvalidInputError('startAt must be before endAt');
     }
 
-    return { startAt, endAt };
+    let reviewDeadline: Date | undefined;
+    if (rawReviewDeadline !== undefined) {
+      reviewDeadline = new Date(rawReviewDeadline);
+      if (Number.isNaN(reviewDeadline.getTime())) {
+        throw new InvalidInputError('reviewDeadline must be a valid date');
+      }
+      if (endAt > reviewDeadline) {
+        throw new InvalidInputError('endAt must be before or equal to reviewDeadline');
+      }
+    }
+
+    return { startAt, endAt, reviewDeadline };
   }
 
   private toSettingsDetail(
@@ -140,6 +159,7 @@ export class AdminCourseWithdrawalService {
       courseId: entity.courseId,
       startAt: entity.startAt,
       endAt: entity.endAt,
+      reviewDeadline: entity.reviewDeadline,
       noticeDelta: entity.noticeDelta,
       enabled: entity.enabled,
     };

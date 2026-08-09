@@ -21,6 +21,7 @@ export type Withdrawal = {
   reason?: string;
   submittedAt?: Date;
   endAt?: Date;
+  reviewDeadline?: Date;
   reviewComment?: string;
   reviewerName?: string;
   reviewedAt?: Date;
@@ -68,6 +69,7 @@ export type CourseWithdrawalSettingsInfo = {
 export type CreateCourseWithdrawalSettingsInput = {
   startAt: string;
   endAt: string;
+  reviewDeadline?: string;
   noticeDelta?: object;
   enabled?: boolean;
 };
@@ -79,6 +81,7 @@ export type CourseWithdrawalSettingsDetail = {
   courseId: number;
   startAt: Date;
   endAt: Date;
+  reviewDeadline?: Date;
   noticeDelta?: object;
   enabled: boolean;
 };

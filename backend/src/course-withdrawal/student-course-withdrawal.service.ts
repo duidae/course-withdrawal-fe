@@ -62,6 +62,7 @@ export class StudentCourseWithdrawalService {
       return {
         ...base,
         status: this.common.getEffectiveStatus(settings, WithdrawalStatus.NotSubmitted),
+        reviewDeadline: settings.reviewDeadline,
       };
     }
 
@@ -74,6 +75,7 @@ export class StudentCourseWithdrawalService {
       status: this.common.getEffectiveStatus(settings, entity.status),
       reason: entity.reason,
       submittedAt: entity.createdAt,
+      reviewDeadline: settings.reviewDeadline,
       reviewComment: entity.reviewComment,
       reviewerName,
       reviewedAt: entity.reviewedAt,

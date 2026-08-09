@@ -154,6 +154,7 @@ export class TeacherCourseWithdrawalService {
       reason: entity.reason,
       submittedAt: entity.createdAt,
       endAt: settings.endAt,
+      reviewDeadline: settings.reviewDeadline,
       reviewComment: entity.reviewComment,
       reviewerName,
       reviewedAt: entity.reviewedAt,

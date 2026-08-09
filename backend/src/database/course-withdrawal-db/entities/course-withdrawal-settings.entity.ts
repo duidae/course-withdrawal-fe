@@ -27,6 +27,12 @@ export class CourseWithdrawalSetting {
   endAt!: Date;
 
   @Column({
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
+  reviewDeadline?: Date;
+
+  @Column({
     type: 'jsonb',
     nullable: true,
   })
