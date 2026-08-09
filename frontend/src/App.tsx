@@ -14,6 +14,12 @@ const StudentDashboardRoute: FC = () => {
   return <StudentDashboard courseId={Number(courseId)} />;
 };
 
+const TeacherDashboardRoute: FC = () => {
+  const { courseId } = useParams();
+
+  return <TeacherDashboard courseId={Number(courseId)} />;
+};
+
 const AppRoutes: FC = () => {
   const { formatMessage: f } = useIntl();
   const appName = f({ id: "app.name" });
@@ -26,7 +32,7 @@ const AppRoutes: FC = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/courses/:id">
-          <Route path="teacher" element={<TeacherDashboard />} />
+          <Route path="teacher" element={<TeacherDashboardRoute />} />
           <Route path="student" element={<StudentDashboardRoute />} />
         </Route>
         {/*

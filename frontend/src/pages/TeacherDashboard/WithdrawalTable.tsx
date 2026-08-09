@@ -17,11 +17,10 @@ import { columns, cellSx } from "./constants";
 import { DateTimeCell } from "./DateTimeCell";
 import { TruncatedReason } from "./TruncatedReason";
 import { StatusChip } from "../../components/StatusChip";
-import { WithdrawalStatus } from "./types";
-import { type Withdrawal } from "../../models";
+import { type StudentRow, WithdrawalStatus } from "./types";
 import { defaultPageSize } from "../constants";
 
-export type WithdrawalTableRow = Withdrawal & {
+export type WithdrawalTableRow = StudentRow & {
   displayDeadline: string;
 };
 
@@ -34,7 +33,7 @@ type WithdrawalTableProps = {
   onSelectAll: (e: ChangeEvent<HTMLInputElement>) => void;
   isSelected: (id: number) => boolean;
   onToggleSelect: (id: number) => void;
-  onReview: (withdrawal: Withdrawal) => void;
+  onReview: (withdrawal: StudentRow) => void;
 };
 
 export const WithdrawalTable = ({

@@ -7,16 +7,16 @@ import TextField from "@mui/material/TextField";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
-import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
+import Alert from "@mui/material/Alert";
+import AlertTitle from "@mui/material/AlertTitle";
 import { BaseDialog } from "../../cool-ui/components/dialogs/BaseDialog";
 
-import { type Withdrawal } from "../../models";
+import { type StudentRow } from "./types";
 import { maxTextInputLength } from "../constants";
 
 type TicketDialogProps = {
   courseName: string;
-  withdrawal: Withdrawal;
+  withdrawal: StudentRow;
   decision: "approve" | "decline";
   onDecisionChange: (decision: "approve" | "decline") => void;
   onConfirm: () => void;
@@ -96,7 +96,9 @@ export const TicketReviewDialog = ({
         {isOverdue && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Alert severity="warning">
-              <AlertTitle>{f({ id: "teacherDashboard.ticket.overdue.title" })}</AlertTitle>
+              <AlertTitle>
+                {f({ id: "teacherDashboard.ticket.overdue.title" })}
+              </AlertTitle>
               {f({ id: "teacherDashboard.ticket.overdue.desc" })}
             </Alert>
           </Box>

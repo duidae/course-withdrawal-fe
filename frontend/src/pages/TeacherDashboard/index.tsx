@@ -19,16 +19,23 @@ import {
   BatchReviewDialog,
   BatchReviewActionType,
 } from "./ReviewDialog";
-import { type StudentRow, WithdrawalStatus } from "./types";
-import { type Withdrawal } from "../../models";
+import {
+  type StudentRow,
+  type StudentRowWithOrig,
+  WithdrawalStatus,
+} from "./types";
 
-export const TeacherDashboard: FC = () => {
+type TeacherDashboardProps = {
+  courseId: number;
+};
+
+export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
   const { formatMessage: f } = useIntl();
-  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
+  const [withdrawals, setWithdrawals] = useState<StudentRow[]>([]);
   const [adminCS] = useState(initCS());
   const [searchName, setSearchName] = useState("");
   const [searchErrorType, setSearchErrorType] = useState<string | null>(null);
-  const [reviewTicket, setReviewTicket] = useState<Withdrawal | undefined>(
+  const [reviewTicket, setReviewTicket] = useState<StudentRow | undefined>(
     undefined,
   );
   const [batchReviewActionType, setBatchReviewActionType] = useState<
@@ -72,18 +79,18 @@ export const TeacherDashboard: FC = () => {
 
   useEffect(() => {
     const fetchWithdrawals = async () => {
-      const first = await getWithdrawals({ page: 1 });
-      const all = [...first.data];
+      const first = await getWithdrawals(courseId, { page: 1, pageSize: 10 });
+      const all = [...(first.data as StudentRow[])];
       const totalPages = Math.ceil(first.total / first.pageSize);
       for (let page = 2; page <= totalPages; page++) {
-        const next = await getWithdrawals({ page });
-        all.push(...next.data);
+        const next = await getWithdrawals(courseId, { page, pageSize: 10 });
+        all.push(...(next.data as StudentRow[]));
       }
       setWithdrawals(all);
       setIsLoading(false);
     };
     fetchWithdrawals();
-  }, []);
+  }, [courseId]);
 
   const classOptions = [
     {
@@ -104,7 +111,7 @@ export const TeacherDashboard: FC = () => {
       }
     );
   };
-  const getEffectiveStatus = (withdrawal: Withdrawal) => {
+  const getEffectiveStatus = (withdrawal: StudentRow) => {
     if (withdrawal.status !== WithdrawalStatus.PENDING)
       return withdrawal.status;
     const sec = getSecForSchool(withdrawal.school);
@@ -113,11 +120,13 @@ export const TeacherDashboard: FC = () => {
     return deadline < new Date() ? WithdrawalStatus.OVERDUE : withdrawal.status;
   };
 
-  const effectiveWithdrawals: Withdrawal[] = withdrawals.map((w) => {
-    const eff = getEffectiveStatus(w);
-    return { ...w, status: eff, _orig: w.status };
-  });
-  const baseFiltered = effectiveWithdrawals.filter((s: Withdrawal) => {
+  const effectiveWithdrawals: Array<StudentRowWithOrig> = withdrawals.map(
+    (w) => {
+      const eff = getEffectiveStatus(w);
+      return { ...w, status: eff, _orig: w.status };
+    },
+  );
+  const baseFiltered = effectiveWithdrawals.filter((s) => {
     const nm =
       searchName === "" ||
       searchErrorType !== null ||
@@ -132,9 +141,9 @@ export const TeacherDashboard: FC = () => {
   const filtered = frozenOrder
     ? [
         ...frozenOrder
-          .map((id) => baseFiltered.find((s: Withdrawal) => s.id === id))
-          .filter((entry): entry is Withdrawal => entry !== undefined),
-        ...baseFiltered.filter((s: Withdrawal) => !frozenOrder.includes(s.id)),
+          .map((id) => baseFiltered.find((s) => s.id === id))
+          .filter((entry): entry is StudentRowWithOrig => entry !== undefined),
+        ...baseFiltered.filter((s) => !frozenOrder.includes(s.id)),
       ]
     : [...baseFiltered].sort((a, b) => {
         const d = statusOrder[a.status] - statusOrder[b.status];
@@ -142,8 +151,7 @@ export const TeacherDashboard: FC = () => {
         return d;
       });
   const selectableRows = filtered.filter(
-    (s): s is Withdrawal =>
-      s !== undefined && s.status !== WithdrawalStatus.OVERDUE,
+    (s) => s.status !== WithdrawalStatus.OVERDUE,
   );
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) setSelected(selectableRows.map((s) => s.id));
@@ -156,7 +164,7 @@ export const TeacherDashboard: FC = () => {
     );
   };
 
-  const onTicketReview = (withdrawal: Withdrawal) => {
+  const onTicketReview = (withdrawal: StudentRow) => {
     setReviewTicket(withdrawal);
   };
 
@@ -254,7 +262,7 @@ export const TeacherDashboard: FC = () => {
     selected.length > 0 && selected.length < selectableRows.length;
 
   const pendingCount = effectiveWithdrawals.filter(
-    (s: StudentRow) =>
+    (s) =>
       s.status === WithdrawalStatus.PENDING ||
       s.status === WithdrawalStatus.OVERDUE,
   ).length;
@@ -324,7 +332,7 @@ export const TeacherDashboard: FC = () => {
       />
       {reviewTicket !== undefined && (
         <TicketReviewDialog
-          courseName={courseName}
+          courseName={reviewTicket.courseName ?? ""}
           withdrawal={reviewTicket}
           decision={ticketDecision}
           onDecisionChange={setTicketDecision}

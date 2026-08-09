@@ -1,5 +1,7 @@
+// TODO: replace StudentRow with Withdrawal
 export type StudentRow = {
   id: number;
+  courseName?: string;
   name: string;
   school: string;
   studentId: string;
