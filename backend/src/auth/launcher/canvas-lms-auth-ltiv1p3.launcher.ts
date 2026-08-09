@@ -42,6 +42,7 @@ export class CanvasLmsAuthLauncherLtiv1p3 {
       context: finalLtiAuthUser,
       targetUrl: this.getPageTargetUrl(page, {
         locale: lti.locale,
+        lti,
       }),
     };
   }
@@ -66,18 +67,40 @@ export class CanvasLmsAuthLauncherLtiv1p3 {
     };
   }
 
-  private getPageTargetUrl(page: string, params: { locale: string }): URL {
+  private getPageTargetUrl(
+    page: string,
+    params: { locale: string; lti: Ltiv1p3LaunchData },
+  ): URL {
     const appUrl = new URL(this.configService.getOrThrow<string>('app.host'));
+    const courseId = params.lti.courseId ? String(params.lti.courseId) : 'course';
+    const roles = (params.lti.roles ?? []).map((role: string) => String(role).toLowerCase());
+
     let resultURL: URL;
 
-    switch (page) {
-      // TODO: Add and update course-withdrawal page (eg. admin, course) target URLs
-      case 'admin':
-      case 'course':
-      default:
-        resultURL = new URL(`${appUrl.origin}/withdrawal`);
-        break;
+    if (roles.includes('admin')) {
+      resultURL = new URL(`${appUrl.origin}/admin`);
+    } else if (roles.includes('teacher')) {
+      resultURL = new URL(`${appUrl.origin}/courses/${courseId}/teacher`);
+    } else if (roles.includes('student')) {
+      resultURL = new URL(`${appUrl.origin}/courses/${courseId}/student`);
+    } else {
+      switch (page) {
+        case 'admin':
+          resultURL = new URL(`${appUrl.origin}/admin`);
+          break;
+        case 'teacher':
+          resultURL = new URL(`${appUrl.origin}/courses/${courseId}/teacher`);
+          break;
+        case 'student':
+          resultURL = new URL(`${appUrl.origin}/courses/${courseId}/student`);
+          break;
+        case 'course':
+        default:
+          resultURL = new URL(`${appUrl.origin}/courses/${courseId}/student`);
+          break;
+      }
     }
+
     resultURL.searchParams.set('locale', params.locale);
 
     return resultURL;
@@ -88,6 +111,8 @@ export class CanvasLmsAuthLauncherLtiv1p3 {
       // TODO: Add and update course-withdrawal page (eg. admin, course) context
       case 'admin':
       case 'course':
+      case 'teacher':
+      case 'student':
         return this.getContext(lti);
       default:
         throw new Error(`Unsupported page: ${page}`);
