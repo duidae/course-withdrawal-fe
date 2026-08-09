@@ -1,5 +1,9 @@
 import { request } from "./request";
-import { BaseWithdrawalStatus, type Withdrawal } from "../models";
+import {
+  BaseWithdrawalStatus,
+  type Withdrawal,
+  type CourseWithdrawalSettingsInfo,
+} from "../models";
 
 type CreateWithdrawalInput = {
   reason: string;
@@ -99,6 +103,32 @@ export const batchReviewWithdrawals = async (
   const response = await request.patch<BatchReviewResult[]>(
     `/api/courses/${courseId}/withdrawals/batch-review`,
     input,
+  );
+  return response.data;
+};
+
+export const getAllCourseSettings = async (): Promise<
+  CourseWithdrawalSettingsInfo[]
+> => {
+  const response =
+    await request.get<CourseWithdrawalSettingsInfo[]>(`/api/admin/courses`);
+  return response.data;
+};
+
+export const createCourseSettings = async (
+  courseId: number,
+): Promise<CourseWithdrawalSettingsInfo> => {
+  const response = await request.post<CourseWithdrawalSettingsInfo>(
+    `/api/admin/courses/${courseId}`,
+  );
+  return response.data;
+};
+
+export const updateCourseSettings = async (
+  courseId: number,
+): Promise<CourseWithdrawalSettingsInfo> => {
+  const response = await request.patch<CourseWithdrawalSettingsInfo>(
+    `/api/admin/courses/${courseId}`,
   );
   return response.data;
 };

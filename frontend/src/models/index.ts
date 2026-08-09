@@ -29,3 +29,11 @@ export type Withdrawal = {
   reviewedAt?: string;
   notice?: object;
 };
+
+export type CourseWithdrawalSettingsInfo = {
+  term: string;
+  courseName: string;
+  courseId: number;
+  withdrawalCount: number;
+  enabled: boolean;
+};
