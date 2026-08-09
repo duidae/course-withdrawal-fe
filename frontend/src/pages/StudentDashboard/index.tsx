@@ -9,7 +9,7 @@ import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import CircularProgress from "@mui/material/CircularProgress";
-import { getStudent } from "../../apis/course-withdrawal.api";
+import { getWithdrawal } from "../../apis/course-withdrawal.api";
 import { StatusChip } from "../../components/StatusChip";
 import { NoticeContent } from "./NoticeContent";
 import { CourseTimeline } from "./CourseTimeline";
@@ -42,7 +42,7 @@ export const StudentDashboard = ({
   useEffect(() => {
     const fetchApplication = async () => {
       setIsLoading(true);
-      const result = await getStudent({ id: studentId });
+      const result = await getWithdrawal(studentId);
       setStudent(result);
       setIsLoading(false);
     };
@@ -64,7 +64,8 @@ export const StudentDashboard = ({
   }
 
   const hasSubmitted = student.status !== BaseWithdrawalStatus.NOTSUBMITTED;
-  const isDisabled = !reason.trim() || reason.length > maxTextInputLength || !confirmed;
+  const isDisabled =
+    !reason.trim() || reason.length > maxTextInputLength || !confirmed;
   const isSectionEnabled = courseSettings.isEnabled !== false;
   const isAppExpired =
     !hasSubmitted && isSectionEnabled
@@ -75,10 +76,7 @@ export const StudentDashboard = ({
           new Date();
   const isReviewed = reviewedStatus.has(student.status);
 
-  const canSubmit =
-    !hasSubmitted &&
-    !isAppExpired &&
-    isSectionEnabled;
+  const canSubmit = !hasSubmitted && !isAppExpired && isSectionEnabled;
 
   const onSubmit = () => {
     console.log("submit");

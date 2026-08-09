@@ -1,24 +1,58 @@
-//import { request } from "./request";
-import { type Withdrawal } from "../models";
-import { defaultPageSize } from "../pages/constants";
+import { request } from "./request";
 
-import { INIT_COURSES, INIT_STUDENTS } from "./mockup";
+// Mirrors backend/src/course-withdrawal/course-withdrawal.types.ts.
+// Dates arrive over HTTP as ISO strings, not Date instances.
 
-type GetWithdrawalsParams = {
-  page?: number;
-  pageSize?: number;
+const WithdrawalStatus = {
+  Pending: "pending",
+  Approved: "approved",
+  Declined: "declined",
+  NotSubmitted: "notSubmitted",
+  NotStarted: "notStarted",
+  NotEnabled: "notEnabled",
+  Overdue: "overdue",
+} as const;
+
+type WithdrawalStatus =
+  (typeof WithdrawalStatus)[keyof typeof WithdrawalStatus];
+
+type Withdrawal = {
+  status: WithdrawalStatus;
+  courseName?: string;
+  sectionName?: string;
+  teachers?: string[];
+  studnetName?: string;
+  loginId?: string;
+  studentId?: string;
+  reason?: string;
+  submittedAt?: string;
+  endAt?: string;
+  reviewComment?: string;
+  reviewerName?: string;
+  reviewedAt?: string;
+  notice?: object;
 };
 
-type GetStudentParams = {
-  id: number;
+type CreateWithdrawalInput = {
+  reason: string;
 };
 
-type GetCourseInfoParams = {
-  courseId: string;
+type ReviewWithdrawalInput = {
+  status: typeof WithdrawalStatus.Approved | typeof WithdrawalStatus.Declined;
+  reviewComment?: string;
 };
 
-type CourseInfo = {
-  courseName: string;
+type BatchReviewWithdrawalInput = {
+  studentCanvasIds: string[];
+  status: typeof WithdrawalStatus.Approved | typeof WithdrawalStatus.Declined;
+  reviewComment?: string;
+};
+
+type BatchReviewResult = {
+  studentCanvasId: string;
+  success: boolean;
+  withdrawal?: Withdrawal;
+  error?: string;
 };
 
 type PaginatedResult<T> = {
@@ -28,60 +62,72 @@ type PaginatedResult<T> = {
   pageSize: number;
 };
 
-const getWithdrawals = async (
+type GetWithdrawalsParams = {
+  page?: number;
+  pageSize?: number;
+};
+
+export type {
+  Withdrawal,
+  CreateWithdrawalInput,
+  ReviewWithdrawalInput,
+  BatchReviewWithdrawalInput,
+  BatchReviewResult,
+  PaginatedResult,
+  GetWithdrawalsParams,
+};
+
+const defaultPageSize = 10;
+
+export const getWithdrawal = async (courseId: number): Promise<Withdrawal> => {
+  const response = await request.get<Withdrawal>(
+    `/api/courses/${courseId}/withdrawal`,
+  );
+  return response.data;
+};
+
+export const createWithdrawal = async (
+  courseId: number,
+  input: CreateWithdrawalInput,
+): Promise<Withdrawal> => {
+  const response = await request.post<Withdrawal>(
+    `/api/courses/${courseId}/withdrawal`,
+    input,
+  );
+  return response.data;
+};
+
+export const getWithdrawals = async (
+  courseId: number,
   params: GetWithdrawalsParams = {},
 ): Promise<PaginatedResult<Withdrawal>> => {
   const { page = 1, pageSize = defaultPageSize } = params;
-  //const response = await request.get<PaginatedResult<Withdrawal>>(
-  //  "/api/withdrawals",
-  //  { params: { page, pageSize } },
-  //);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  const start = (page - 1) * pageSize;
-  const data = INIT_STUDENTS.slice(start, start + pageSize);
-  return { data, total: INIT_STUDENTS.length, page, pageSize };
+  const response = await request.get<PaginatedResult<Withdrawal>>(
+    `/api/courses/${courseId}/withdrawals`,
+    { params: { page, pageSize } },
+  );
+  return response.data;
 };
 
-const getStudent = async (
-  params: GetStudentParams,
-): Promise<Withdrawal | undefined> => {
-  const { id } = params;
-  //const response = await request.get<Withdrawal>(`/api/withdrawal/${id}`);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  // TODO: 未申請
-  const toApply: Withdrawal = {
-    id: 1,
-    name: "丁O寧",
-    school: "國立臺灣科技大學",
-    studentId: "臺科大_B11000000",
-    loginId: "B11000000@mail.ntust.edu.tw",
-    applyTime: "2026/05/11 08:00",
-    deadline: "2026/05/11 08:00",
-    reason:
-      "本課程《大型語言模型與資訊安全系統》內容極具前瞻性，惟修讀後發現個人在 Transformer 架構與對抗性攻擊（Adversarial Attacks）的數學基礎尚不完備，導致在實作 LLM 弱點掃描與防禦機制時，進度明顯落後。為確保學習品質，本人決定先補強相關先修知識，待準備充分後再行挑戰，故申請停修。",
-    status: "notSubmitted",
-  };
-
-  return id ? INIT_STUDENTS.find((s) => s.id === id) : toApply;
+export const reviewWithdrawal = async (
+  courseId: number,
+  studentCanvasId: string,
+  input: ReviewWithdrawalInput,
+): Promise<Withdrawal> => {
+  const response = await request.patch<Withdrawal>(
+    `/api/courses/${courseId}/students/${studentCanvasId}/withdrawal`,
+    input,
+  );
+  return response.data;
 };
 
-const getCourseInfo = async (
-  params: GetCourseInfoParams,
-): Promise<CourseInfo> => {
-  const { courseId } = params;
-  //const response = await request.get<CourseInfo>(
-  //  `/api/courses/${courseId}`,
-  //);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  const course = INIT_COURSES.find((c) => c.courseId === courseId);
-  return { courseName: course?.courseName ?? "" };
-};
-
-export { getWithdrawals, getStudent, getCourseInfo };
-export type {
-  GetWithdrawalsParams,
-  GetStudentParams,
-  PaginatedResult,
-  GetCourseInfoParams,
-  CourseInfo,
+export const batchReviewWithdrawals = async (
+  courseId: number,
+  input: BatchReviewWithdrawalInput,
+): Promise<BatchReviewResult[]> => {
+  const response = await request.patch<BatchReviewResult[]>(
+    `/api/courses/${courseId}/withdrawals/batch-review`,
+    input,
+  );
+  return response.data;
 };

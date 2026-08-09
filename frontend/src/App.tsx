@@ -26,11 +26,11 @@ const CourseLayout: FC = () => {
 };
 
 const StudentDashboardRoute: FC = () => {
-  const { studentId } = useParams();
+  const { courseId } = useParams();
 
   return (
     <StudentDashboard
-      studentId={Number(studentId)}
+      courseId={Number(courseId)}
       courseSettings={{
         name: "深度學習 Deep Learning",
         section: "國立成功大學",
@@ -57,9 +57,9 @@ const AppRoutes: FC = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/courses/:id" element={<CourseLayout />}>
-          <Route path="teacher" element={<TeacherDashboard />} />
+          <Route path="/courses/:id/teacher" element={<TeacherDashboard />} />
           <Route
-            path="students/:studentId"
+            path="/courses/:id/student"
             element={<StudentDashboardRoute />}
           />
         </Route>
