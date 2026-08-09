@@ -8,9 +8,9 @@ import { Box, Typography } from "@mui/material";
 
 type CourseTimelineProps = {
   sectionEnabled: boolean;
-  st: string;
-  et: string;
-  ad: string;
+  startAt: string;
+  endAt: string;
+  reviewDeadline: string;
 };
 
 const tableCellStyle = {
@@ -23,24 +23,24 @@ const tableCellStyle = {
 
 export const CourseTimeline = ({
   sectionEnabled,
-  st,
-  et,
-  ad,
+  startAt,
+  endAt,
+  reviewDeadline,
 }: CourseTimelineProps) => {
   const { formatMessage: f } = useIntl();
 
   const items = [
     {
       label: f({ id: "studentDashboard.timeline.start" }),
-      value: sectionEnabled ? st : "-",
+      value: sectionEnabled ? startAt : "-",
     },
     {
       label: f({ id: "studentDashboard.timeline.end" }),
-      value: sectionEnabled ? et : "-",
+      value: sectionEnabled ? endAt : "-",
     },
     {
       label: f({ id: "studentDashboard.timeline.teacherDeadline" }),
-      value: sectionEnabled ? ad : "-",
+      value: sectionEnabled ? reviewDeadline : "-",
     },
   ];
 

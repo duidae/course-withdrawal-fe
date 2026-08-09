@@ -14,7 +14,6 @@ import { StatusChip } from "../../components/StatusChip";
 import { NoticeContent } from "./NoticeContent";
 import { CourseTimeline } from "./CourseTimeline";
 import { ApplicationPanel } from "./ApplicationPanel";
-import { type CourseSettings } from "./types";
 import { BaseWithdrawalStatus, type Withdrawal } from "../../models";
 import { maxTextInputLength } from "../constants";
 
@@ -26,13 +25,9 @@ const reviewedStatus: ReadonlySet<BaseWithdrawalStatus> = new Set([
 
 type StudentDashboardProps = {
   courseId: number;
-  courseSettings: CourseSettings;
 };
 
-export const StudentDashboard = ({
-  courseId,
-  courseSettings,
-}: StudentDashboardProps) => {
+export const StudentDashboard = ({ courseId }: StudentDashboardProps) => {
   const { formatMessage: f } = useIntl();
   const [withdrawal, setWithdrawal] = useState<Withdrawal | undefined>(
     undefined,
@@ -70,14 +65,14 @@ export const StudentDashboard = ({
   const hasSubmitted = withdrawal.status !== BaseWithdrawalStatus.NOTSUBMITTED;
   const isDisabled =
     !reason.trim() || reason.length > maxTextInputLength || !confirmed;
-  const isSectionEnabled = courseSettings.isEnabled !== false;
+  // TODO: check status
+  const isSectionEnabled = !(
+    withdrawal.status === BaseWithdrawalStatus.NOTENABLED
+  );
   const isAppExpired =
     !hasSubmitted && isSectionEnabled
       ? false
-      : !hasSubmitted &&
-        !!courseSettings.et &&
-        new Date(courseSettings.et.replaceAll("/", "-").replace(" ", "T")) <
-          new Date();
+      : withdrawal.status === BaseWithdrawalStatus.OVERDUE;
   const isReviewed = reviewedStatus.has(withdrawal.status);
 
   const canSubmit = !hasSubmitted && !isAppExpired && isSectionEnabled;
@@ -101,23 +96,23 @@ export const StudentDashboard = ({
             <Box>
               <Typography variant="h5" sx={{ lineHeight: 1.75 }}>
                 {f({ id: "studentDashboard.field.courseTitle" })}：
-                {courseSettings.name}
+                {withdrawal.courseName}
               </Typography>
               <Typography variant="subtitle2" sx={{ lineHeight: 1.75 }}>
                 {f({ id: "studentDashboard.field.section" })}：
-                {courseSettings.section}
+                {withdrawal.sectionName}
               </Typography>
               <Typography variant="subtitle2" sx={{ lineHeight: 1.75 }}>
                 {f({ id: "studentDashboard.field.teachers" })}：
-                {courseSettings.teachers.join("、")}
+                {withdrawal?.teachers?.join("、")}
               </Typography>
             </Box>
 
             <CourseTimeline
               sectionEnabled={isSectionEnabled}
-              st={courseSettings.st}
-              et={courseSettings.et}
-              ad={courseSettings.ad}
+              startAt={withdrawal.startAt ?? "N/A"}
+              endAt={withdrawal.endAt ?? "N/A"}
+              reviewDeadline={withdrawal.reviewDeadline ?? "N/A"}
             />
 
             <Stack spacing={0.5}>
@@ -154,7 +149,7 @@ export const StudentDashboard = ({
                 {f({ id: "studentDashboard.notice.title" })}
               </Typography>
               <Paper variant="outlined">
-                {courseSettings.notes ? (
+                {withdrawal.notice ? (
                   <Box
                     className="ql-editor"
                     sx={{
@@ -163,7 +158,7 @@ export const StudentDashboard = ({
                       lineHeight: 1.5,
                       minHeight: "auto",
                     }}
-                    dangerouslySetInnerHTML={{ __html: courseSettings.notes }}
+                    dangerouslySetInnerHTML={{ __html: withdrawal.notice }}
                   />
                 ) : (
                   <NoticeContent />

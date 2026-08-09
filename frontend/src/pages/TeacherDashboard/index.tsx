@@ -21,11 +21,9 @@ import {
 } from "./ReviewDialog";
 import { type StudentRow, WithdrawalStatus } from "./types";
 import { type Withdrawal } from "../../models";
-import { useCourseInfo } from "../../contexts/course-info.context";
 
 export const TeacherDashboard: FC = () => {
   const { formatMessage: f } = useIntl();
-  const { courseName } = useCourseInfo();
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [adminCS] = useState(initCS());
   const [searchName, setSearchName] = useState("");

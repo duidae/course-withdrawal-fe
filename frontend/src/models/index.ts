@@ -16,12 +16,14 @@ export type Withdrawal = {
   courseName?: string;
   sectionName?: string;
   teachers?: string[];
+  startAt?: string;
+  endAt?: string;
+  reviewDeadline?: string;
   studnetName?: string;
   loginId?: string;
   studentId?: string;
   reason?: string;
   submittedAt?: string;
-  endAt?: string;
   reviewComment?: string;
   reviewerName?: string;
   reviewedAt?: string;
