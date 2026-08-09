@@ -90,14 +90,14 @@ const createWithdrawal = async (
   return response.data;
 };
 
-// GET /api/courses/:courseId/withdrawal-list
+// GET /api/courses/:courseId/withdrawals
 const getWithdrawalList = async (
   courseId: number,
   params: GetWithdrawalListParams = {},
 ): Promise<PaginatedResult<Withdrawal>> => {
   const { page = 1, pageSize = defaultPageSize } = params;
   const response = await request.get<PaginatedResult<Withdrawal>>(
-    `/api/courses/${courseId}/withdrawal-list`,
+    `/api/courses/${courseId}/withdrawals`,
     { params: { page, pageSize } },
   );
   return response.data;

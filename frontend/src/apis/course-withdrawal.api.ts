@@ -33,7 +33,7 @@ const getWithdrawals = async (
 ): Promise<PaginatedResult<Withdrawal>> => {
   const { page = 1, pageSize = defaultPageSize } = params;
   //const response = await request.get<PaginatedResult<Withdrawal>>(
-  //  "/api/withdrawal-list",
+  //  "/api/withdrawals",
   //  { params: { page, pageSize } },
   //);
   await new Promise((resolve) => setTimeout(resolve, 1000));
