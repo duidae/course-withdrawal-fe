@@ -1,154 +1,31 @@
-import { type CSSProperties, type ReactNode } from "react";
-import MenuItem from "@mui/material/MenuItem";
+import { useState } from "react";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import Switch from "@mui/material/Switch";
+import Tooltip from "@mui/material/Tooltip";
+import Paper from "@mui/material/Paper";
+import Table from "@mui/material/Table";
+import TableHead from "@mui/material/TableHead";
+import TableBody from "@mui/material/TableBody";
+import TableRow from "@mui/material/TableRow";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
-import CloseIcon from "@mui/icons-material/Close";
 
-const defaultColor = "#0099CC";
-
-type Course = {
-  id: string;
-  semester: string;
-  courseId: string;
-  courseName: string;
-  vis?: boolean;
-};
-
-type TogProps = {
-  on: boolean;
-  onChange: () => void;
-  disabled?: boolean;
-};
-
-function Tog({ on, onChange, disabled = false }: TogProps) {
-  const isOn = disabled ? true : on;
-  const trackBg = isOn ? "rgba(0,153,204,0.5)" : "rgba(0,0,0,0.38)";
-  const thumbBg = isOn ? defaultColor : "#FAFAFA";
-  return (
-    <span
-      onClick={disabled ? undefined : onChange}
-      style={{
-        display: "inline-block",
-        width: 34,
-        height: 14,
-        borderRadius: 7,
-        background: trackBg,
-        position: "relative",
-        cursor: disabled ? "not-allowed" : "pointer",
-        transition: "background .2s",
-        flexShrink: 0,
-        verticalAlign: "middle",
-        opacity: disabled ? 0.5 : 1,
-      }}
-    >
-      <span
-        style={{
-          position: "absolute",
-          top: -3,
-          left: isOn ? 16 : 2,
-          width: 20,
-          height: 20,
-          borderRadius: "50%",
-          background: thumbBg,
-          boxShadow: "0 1px 3px rgba(0,0,0,0.4)",
-          transition: "left .15s",
-        }}
-      />
-    </span>
-  );
-}
-
-type AdminBtnProps = {
-  children: ReactNode;
-  onClick?: () => void;
-  disabled?: boolean;
-  variant?: "primary" | "outline" | "ghost" | "dk";
-  icon?: "Plus" | "Edit" | "Close";
-  style?: CSSProperties;
-};
-
-const AdminBtn = ({
-  children,
-  onClick,
-  disabled = false,
-  variant = "primary",
-  icon,
-  style: st,
-}: AdminBtnProps) => {
-  const B = {
-    height: 36,
-    padding: "0 14px",
-    borderRadius: 4,
-    fontSize: 13,
-    cursor: disabled ? "not-allowed" : "pointer",
-    display: "flex",
-    alignItems: "center",
-    gap: 5,
-    whiteSpace: "nowrap",
-    flexShrink: 0,
-  } as const;
-  const V: Record<NonNullable<AdminBtnProps["variant"]>, CSSProperties> = {
-    primary: {
-      ...B,
-      background: disabled ? "#e0e0e0" : defaultColor,
-      color: disabled ? "rgba(0,0,0,0.38)" : "white",
-      border: "none",
-    },
-    outline: {
-      ...B,
-      background: "transparent",
-      color: disabled ? "rgba(0,0,0,0.38)" : defaultColor,
-      border: `1px solid ${disabled ? "rgba(0,0,0,0.12)" : "rgba(0,153,204,0.5)"}`,
-    },
-    ghost: { ...B, background: "none", color: defaultColor, border: "none" },
-    dk: {
-      ...B,
-      background: "transparent",
-      color: disabled ? "rgba(0,0,0,0.38)" : "rgba(0,0,0,0.87)",
-      border: `1px solid ${disabled ? "rgba(0,0,0,0.12)" : "rgba(0,0,0,0.23)"}`,
-    },
-  };
-  const CN: Record<NonNullable<AdminBtnProps["variant"]>, string> = {
-    primary: "mui-btn mui-contained-primary",
-    outline: "mui-btn mui-outlined-primary",
-    ghost: "mui-btn mui-text-primary",
-    dk: "mui-btn mui-outlined-default",
-  };
-  const IconEl =
-    icon === "Plus" ? (
-      <AddIcon />
-    ) : icon === "Edit" ? (
-      <EditIcon />
-    ) : icon === "Close" ? (
-      <CloseIcon />
-    ) : null;
-  return (
-    <button
-      onClick={disabled ? undefined : onClick}
-      disabled={disabled}
-      className={CN[variant]}
-      style={{ ...V[variant], ...(st || {}) }}
-    >
-      {IconEl}
-      {children}
-    </button>
-  );
-};
-
-type AdminDashboardProps = {
-  courses: Course[];
-  setCourses?: (courses: Course[]) => void;
-  semester: string;
-  setSemester: (semester: string) => void;
-  cSearch: string;
-  setCSearch: (value: string) => void;
-  onEdit: (course: Course) => void;
-  onAdd: () => void;
-  onToggle: (course: Course) => void;
-  appCounts?: Record<string, number>;
-};
+// Brand accent used only where MUI's default theme primary shouldn't apply.
+// If your ThemeProvider's palette.primary.main is already this color, you
+// can drop every `color="brand"` / sx override below and just use
+// color="primary" throughout.
+const brand = "#0099CC";
 
 export const AdminDashboard = ({
   courses,
@@ -160,184 +37,141 @@ export const AdminDashboard = ({
   onAdd,
   onToggle,
   appCounts,
-}: AdminDashboardProps) => {
+}) => {
   const cErr = cSearch.length > 50 ? "字數上限為 50 字" : "";
   const filteredCourse = courses.filter(
-    (c: Course) =>
+    (c) =>
       c.semester === semester &&
       (!cSearch.trim() ||
         c.courseName.toLowerCase().includes(cSearch.toLowerCase())),
   );
+
   return (
-    <div>
-      <h1
-        style={{
-          fontSize: 32,
-          fontWeight: 400,
-          color: "#333",
-          letterSpacing: "-1.5px",
-          marginBottom: 22,
-        }}
-      >
+    <Box>
+      <Typography variant="h4" sx={{ fontWeight: 400, color: "#333", mb: 3 }}>
         停修申請設定
-      </h1>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 12,
-        }}
+      </Typography>
+
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="flex-start"
+        sx={{ mb: 1.5 }}
       >
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <Select
-            label="學期"
-            value={semester}
-            onChange={(event) => setSemester(event.target.value)}
-          >
-            <MenuItem value={"114-2 (2026 Spring)"}>
-              114-2 (2026 Spring)
-            </MenuItem>
-            <MenuItem value={"114-1 (2025 Fall)"}>114-1 (2025 Fall)</MenuItem>
-          </Select>
+        <Stack direction="row" spacing={1.5}>
+          <FormControl size="small" sx={{ minWidth: 220 }}>
+            <InputLabel id="semester-label">學期</InputLabel>
+            <Select
+              labelId="semester-label"
+              label="學期"
+              value={semester}
+              onChange={(event) => setSemester(event.target.value)}
+            >
+              <MenuItem value="114-2 (2026 Spring)">
+                114-2 (2026 Spring)
+              </MenuItem>
+              <MenuItem value="114-1 (2025 Fall)">114-1 (2025 Fall)</MenuItem>
+            </Select>
+          </FormControl>
+
           <TextField
+            size="small"
             label="課程名稱"
             value={cSearch}
             onChange={(ev) => setCSearch(ev.target.value)}
             error={!!cErr}
-            helperText={cErr || ""}
-            style={{ width: 300 }}
+            helperText={cErr || " "}
+            sx={{ width: 300 }}
           />
-        </div>
-        <AdminBtn onClick={onAdd} variant="outline" icon="Plus">
+        </Stack>
+
+        <Button
+          onClick={onAdd}
+          variant="outlined"
+          startIcon={<AddIcon />}
+          sx={{
+            color: brand,
+            borderColor: "rgba(0,153,204,0.5)",
+            "&:hover": { borderColor: brand },
+          }}
+        >
           新增課程
-        </AdminBtn>
-      </div>
-      <div
-        style={{
-          border: "1px solid rgba(0,0,0,0.12)",
-          borderRadius: 4,
-          overflow: "hidden",
-        }}
+        </Button>
+      </Stack>
+
+      <TableContainer
+        component={Paper}
+        variant="outlined"
+        sx={{ borderColor: "rgba(0,0,0,0.12)" }}
       >
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ background: "#f5f5f5", height: 48 }}>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "0 14px",
-                  fontSize: 13,
-                  fontWeight: 500,
-                  width: 165,
-                }}
-              >
-                學期
-              </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "0 14px",
-                  fontSize: 13,
-                  fontWeight: 500,
-                  width: 88,
-                }}
-              >
-                課程 ID
-              </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "0 14px",
-                  fontSize: 13,
-                  fontWeight: 500,
-                }}
-              >
-                課程名稱
-              </th>
-              <th
-                style={{
-                  textAlign: "center",
-                  padding: "0 14px",
-                  fontSize: 13,
-                  fontWeight: 500,
-                  width: 80,
-                }}
-              >
+        <Table>
+          <TableHead>
+            <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+              <TableCell sx={{ fontWeight: 500, width: 165 }}>學期</TableCell>
+              <TableCell sx={{ fontWeight: 500, width: 88 }}>課程 ID</TableCell>
+              <TableCell sx={{ fontWeight: 500 }}>課程名稱</TableCell>
+              <TableCell sx={{ fontWeight: 500, width: 80 }} align="center">
                 申請數
-              </th>
-              <th style={{ width: 100 }} />
-            </tr>
-          </thead>
-          <tbody>
+              </TableCell>
+              <TableCell sx={{ width: 100 }} />
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {filteredCourse.map((c) => (
-              <tr
-                key={c.id}
-                style={{ height: 50, borderTop: "1px solid rgba(0,0,0,0.06)" }}
-              >
-                <td style={{ padding: "0 14px", fontSize: 13 }}>
-                  {c.semester}
-                </td>
-                <td style={{ padding: "0 14px", fontSize: 13 }}>
-                  {c.courseId}
-                </td>
-                <td style={{ padding: "0 14px", fontSize: 13 }}>
-                  {c.courseName}
-                </td>
-                <td
-                  style={{
-                    padding: "0 14px",
-                    fontSize: 13,
-                    textAlign: "center",
-                    fontWeight: 500,
-                  }}
-                >
+              <TableRow key={c.id} hover>
+                <TableCell>{c.semester}</TableCell>
+                <TableCell>{c.courseId}</TableCell>
+                <TableCell>{c.courseName}</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 500 }}>
                   {(appCounts && appCounts[c.id]) || 0}
-                </td>
-                <td style={{ padding: "0 14px", width: 100 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      gap: 8,
-                    }}
+                </TableCell>
+                <TableCell>
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    alignItems="center"
+                    justifyContent="center"
                   >
-                    <button
-                      onClick={() => onEdit(c)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: 5,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        color: "rgba(0,0,0,0.54)",
-                        borderRadius: "50%",
+                    <Tooltip title="編輯">
+                      <IconButton
+                        size="small"
+                        onClick={() => onEdit(c)}
+                        sx={{ color: "rgba(0,0,0,0.54)" }}
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Switch
+                      size="small"
+                      checked={c.vis !== false}
+                      onChange={() => onToggle(c)}
+                      sx={{
+                        "& .MuiSwitch-switchBase.Mui-checked": {
+                          color: brand,
+                        },
+                        "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
+                          {
+                            backgroundColor: brand,
+                          },
                       }}
-                    >
-                      <EditIcon fontSize="small" />
-                    </button>
-                    <Tog on={c.vis !== false} onChange={() => onToggle(c)} />
-                  </div>
-                </td>
-              </tr>
+                    />
+                  </Stack>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
+
         {!cErr && filteredCourse.length === 0 && (
-          <div
-            style={{
-              padding: "16px 14px",
-              fontSize: 14,
-              color: "rgba(0,0,0,0.6)",
-              textAlign: "center",
-            }}
-          >
-            找不到符合搜尋條件的課程
-          </div>
+          <Box sx={{ py: 2, textAlign: "center" }}>
+            <Typography variant="body2" color="text.secondary">
+              找不到符合搜尋條件的課程
+            </Typography>
+          </Box>
         )}
-      </div>
-    </div>
+      </TableContainer>
+    </Box>
   );
 };
+
+export default AdminDashboard;
