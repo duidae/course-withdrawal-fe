@@ -10,7 +10,7 @@ import Radio from "@mui/material/Radio";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
 import { BaseDialog } from "../../cool-ui/components/dialogs/BaseDialog";
-
+import { BaseWithdrawalStatus } from "../../models";
 import { type StudentRow } from "./types";
 import { maxTextInputLength } from "../constants";
 
@@ -38,8 +38,7 @@ export const TicketReviewDialog = ({
   const isReplyOverLimit = reply.length > maxTextInputLength;
 
   console.log(decision);
-  // TODO: handle overdue
-  const isOverdue = true;
+  const isOverdue = withdrawal.status === BaseWithdrawalStatus.OVERDUE;
 
   return (
     <BaseDialog
@@ -116,11 +115,13 @@ export const TicketReviewDialog = ({
               }
             >
               <FormControlLabel
+                disabled={isOverdue}
                 value="approve"
                 control={<Radio />}
                 label={f({ id: "teacherDashboard.withdrawal.approve" })}
               />
               <FormControlLabel
+                disabled={isOverdue}
                 value="decline"
                 control={<Radio />}
                 label={f({ id: "teacherDashboard.withdrawal.decline" })}
@@ -128,6 +129,7 @@ export const TicketReviewDialog = ({
             </RadioGroup>
           </Box>
           <TextField
+            disabled={isOverdue}
             value={reply}
             label={f({ id: "teacherDashboard.ticket.comment" })}
             multiline
