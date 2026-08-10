@@ -5,6 +5,9 @@ import {
   type CourseWithdrawalSettingsInfo,
 } from "../models";
 
+// TODO: remove mock
+import { INIT_STUDENTS } from './mockup'
+
 type CreateWithdrawalInput = {
   reason: string;
 };
@@ -76,11 +79,19 @@ export const getWithdrawals = async (
   courseId: number,
   params: GetWithdrawalsParams = {},
 ): Promise<PaginatedResult<Withdrawal>> => {
+  /*
   const { page = 1, pageSize = defaultPageSize } = params;
   const response = await request.get<PaginatedResult<Withdrawal>>(
     `/api/courses/${courseId}/withdrawals`,
     { params: { page, pageSize } },
   );
+  */
+  const response = {data: {
+    data: INIT_STUDENTS,
+    total: 1,
+    page: 1,
+    pageSize: 10,
+  }};
   return response.data;
 };
 
