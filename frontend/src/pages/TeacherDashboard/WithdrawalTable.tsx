@@ -178,7 +178,7 @@ export const WithdrawalTable = ({
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {s.name}
+                    {s.studentName}
                   </TableCell>
                   <TableCell
                     sx={{
@@ -190,7 +190,7 @@ export const WithdrawalTable = ({
                       overflowWrap: "break-word",
                     }}
                   >
-                    {s.school}
+                    {s.sectionName}
                   </TableCell>
                   <TableCell
                     sx={{
@@ -205,7 +205,7 @@ export const WithdrawalTable = ({
                     {s.studentId}
                   </TableCell>
                   <TableCell sx={{ ...cellSx, verticalAlign: "middle" }}>
-                    <DateTimeCell value={s.applyTime} />
+                    <DateTimeCell value={s.submittedAt} />
                   </TableCell>
                   <TableCell sx={{ ...cellSx }}>
                     <TruncatedReason
@@ -220,7 +220,7 @@ export const WithdrawalTable = ({
                     <DateTimeCell value={s.displayDeadline} />
                   </TableCell>
                   <TableCell sx={{ ...cellSx, verticalAlign: "middle" }}>
-                    <DateTimeCell value={s.reviewTime || ""} />
+                    <DateTimeCell value={s.reviewedAt || ""} />
                   </TableCell>
                   <TableCell
                     sx={{
@@ -232,7 +232,7 @@ export const WithdrawalTable = ({
                       overflowWrap: "break-word",
                     }}
                   >
-                    {s.approver || ""}
+                    {s.reviewerName || ""}
                   </TableCell>
                   <TableCell
                     align="center"

@@ -20,7 +20,7 @@ export type Withdrawal = {
   startAt?: string;
   endAt?: string;
   reviewDeadline?: string;
-  studnetName?: string;
+  studentName?: string;
   loginId?: string;
   studentId?: string;
   reason?: string;

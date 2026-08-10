@@ -99,10 +99,10 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
     const nm =
       searchName === "" ||
       searchErrorType !== null ||
-      s.name.includes(searchName);
+      s.studentName.includes(searchName);
     const cl =
       classFilter === f({ id: "teacherDashboard.filter.all" }) ||
-      s.school === classFilter;
+      s.sectionName === classFilter;
     const st =
       statusFilter === WithdrawalStatus.ALL || statusFilter === s.status;
     return nm && cl && st;
@@ -152,15 +152,15 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
     const rows = withdrawals.map((s) => {
       const deadline = courseSettings?.reviewDeadline;
       return [
-        s.name,
-        s.school,
+        s.studentName,
+        s.sectionName,
         s.studentId,
-        s.applyTime,
+        s.submittedAt,
         s.reason,
         s.status,
         deadline,
-        s.reviewTime || "",
-        s.approver || "",
+        s.reviewedAt || "",
+        s.reviewerName || "",
       ];
     });
     const title = f({ id: "teacherDashboard.title" });

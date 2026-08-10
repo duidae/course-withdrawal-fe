@@ -2,16 +2,16 @@
 export type StudentRow = {
   id: number;
   courseName?: string;
-  name: string;
-  school: string;
+  studentName: string;
+  sectionName: string;
   loginId?: string;
   studentId: string;
-  applyTime: string;
+  submittedAt: string;
   deadline: string;
   reason: string;
   status: BaseWithdrawalStatus;
-  reviewTime?: string;
-  approver?: string;
+  reviewedAt?: string;
+  reviewerName?: string;
   lastModified?: number;
   _orig?: string;
 };
