@@ -17,7 +17,7 @@ type ReviewWithdrawalInput = {
 };
 
 type BatchReviewWithdrawalInput = {
-  studentCanvasIds: string[];
+  withdrawalIds: number[];
   status:
     | typeof BaseWithdrawalStatus.APPROVED
     | typeof BaseWithdrawalStatus.DECLINED;
@@ -25,7 +25,7 @@ type BatchReviewWithdrawalInput = {
 };
 
 type BatchReviewResult = {
-  studentCanvasId: string;
+  withdrawalId: number;
   success: boolean;
   withdrawal?: Withdrawal;
   error?: string;
@@ -86,11 +86,11 @@ export const getWithdrawals = async (
 
 export const reviewWithdrawal = async (
   courseId: number,
-  studentCanvasId: string,
+  withdrawalId: number,
   input: ReviewWithdrawalInput,
 ): Promise<Withdrawal> => {
   const response = await request.patch<Withdrawal>(
-    `/api/courses/${courseId}/students/${studentCanvasId}/withdrawal`,
+    `/api/courses/${courseId}/withdrawals/${withdrawalId}`,
     input,
   );
   return response.data;

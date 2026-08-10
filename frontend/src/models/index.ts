@@ -12,6 +12,7 @@ export type BaseWithdrawalStatus =
   (typeof BaseWithdrawalStatus)[keyof typeof BaseWithdrawalStatus];
 
 export type Withdrawal = {
+  id?: number;
   status: BaseWithdrawalStatus;
   courseName?: string;
   sectionName?: string;
