@@ -10,13 +10,11 @@ import { NotFound } from "./components/NotFound";
 
 const StudentDashboardRoute: FC = () => {
   const { courseId } = useParams();
-
   return <StudentDashboard courseId={Number(courseId)} />;
 };
 
 const TeacherDashboardRoute: FC = () => {
   const { courseId } = useParams();
-
   return <TeacherDashboard courseId={Number(courseId)} />;
 };
 
@@ -31,7 +29,7 @@ const AppRoutes: FC = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/courses/:id">
+        <Route path="/courses/:courseId">
           <Route path="teacher" element={<TeacherDashboardRoute />} />
           <Route path="student" element={<StudentDashboardRoute />} />
         </Route>

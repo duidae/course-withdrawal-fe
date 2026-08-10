@@ -12,8 +12,9 @@ export type CourseSettings = {
 export type Application = {
   status: string;
   reason?: string;
-  applyTime?: string;
+  submittedAt?: string;
   comment?: string;
   approver?: string;
-  reviewTime?: string;
+  reviewerName?: string;
+  reviewedAt?: string;
 };

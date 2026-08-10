@@ -63,10 +63,61 @@ export type {
 const defaultPageSize = 10;
 
 export const getWithdrawal = async (courseId: number): Promise<Withdrawal> => {
+  /*
   const response = await request.get<Withdrawal>(
     `/api/courses/${courseId}/withdrawal`,
   );
   return response.data;
+  */
+  let student = INIT_STUDENTS[0];
+  if (courseId === 1) {
+    student = {
+      ...student,
+      status: BaseWithdrawalStatus.NOTSUBMITTED,
+      teachers: ['彭文孝','陳永昇','謝秉均'],
+      startAt: '2026/05/01 08:00',
+      reviewDeadline: '2026/05/13 08:00'
+    }
+  } else if (courseId === 2) {
+    student = {
+      ...student,
+      status: BaseWithdrawalStatus.PENDING,
+      teachers: ['彭文孝','陳永昇','謝秉均'],
+      startAt: '2026/05/01 08:00',
+      reviewDeadline: '2026/05/13 08:00'
+    }
+  } else if (courseId === 3) {
+    student = {
+      ...student,
+      status: BaseWithdrawalStatus.OVERDUE,
+      teachers: ['彭文孝','陳永昇','謝秉均'],
+      startAt: '2026/05/01 08:00',
+      reviewDeadline: '2026/05/13 08:00',
+      reviewerName: '彭文孝',
+      reviewedAt: '2026/05/13 08:00'
+    }
+  } else if (courseId === 4) {
+    student = {
+      ...student,
+      status: BaseWithdrawalStatus.APPROVED,
+      teachers: ['彭文孝','陳永昇','謝秉均'],
+      startAt: '2026/05/01 08:00',
+      reviewDeadline: '2026/05/13 08:00',
+      reviewerName: '彭文孝',
+      reviewedAt: '2026/05/13 08:00'
+    }
+  } else if (courseId === 5) {
+    student = {
+      ...student,
+      status: BaseWithdrawalStatus.DECLINED,
+      teachers: ['彭文孝','陳永昇','謝秉均'],
+      startAt: '2026/05/01 08:00',
+      reviewDeadline: '2026/05/13 08:00',
+      reviewerName: '彭文孝',
+      reviewedAt: '2026/05/13 08:00'
+    }
+  }
+  return student;
 };
 
 export const createWithdrawal = async (
