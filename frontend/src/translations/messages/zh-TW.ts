@@ -52,6 +52,8 @@ export const messages_Zh: Record<string, string> = {
   "studentDashboard.status.approved": "同意停修",
   "studentDashboard.status.declined": "不同意停修",
   "studentDashboard.status.notSubmitted": "未申請",
+  "studentDashboard.status.notStarted": "尚未開放申請",
+  "studentDashboard.status.notEnabled": "本課程未開放停修申請",
   "studentDashboard.title": "停修申請",
   "studentDashboard.field.courseTitle": "課程名稱",
   "studentDashboard.field.section": "班別",

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -27,6 +26,26 @@ import EditIcon from "@mui/icons-material/Edit";
 // color="primary" throughout.
 const brand = "#0099CC";
 
+type AdminCourse = {
+  id: string;
+  semester: string;
+  courseId: string;
+  courseName: string;
+  vis?: boolean;
+};
+
+type AdminDashboardProps = {
+  courses: AdminCourse[];
+  semester: string;
+  setSemester: (semester: string) => void;
+  cSearch: string;
+  setCSearch: (search: string) => void;
+  onEdit: (course: AdminCourse) => void;
+  onAdd: () => void;
+  onToggle: (course: AdminCourse) => void;
+  appCounts?: Record<string, number>;
+};
+
 export const AdminDashboard = ({
   courses,
   semester,
@@ -37,7 +56,7 @@ export const AdminDashboard = ({
   onAdd,
   onToggle,
   appCounts,
-}) => {
+}: AdminDashboardProps) => {
   const cErr = cSearch.length > 50 ? "字數上限為 50 字" : "";
   const filteredCourse = courses.filter(
     (c) =>
@@ -54,9 +73,7 @@ export const AdminDashboard = ({
 
       <Stack
         direction="row"
-        justifyContent="space-between"
-        alignItems="flex-start"
-        sx={{ mb: 1.5 }}
+        sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 1.5 }}
       >
         <Stack direction="row" spacing={1.5}>
           <FormControl size="small" sx={{ minWidth: 220 }}>
@@ -129,8 +146,7 @@ export const AdminDashboard = ({
                   <Stack
                     direction="row"
                     spacing={1}
-                    alignItems="center"
-                    justifyContent="center"
+                    sx={{ alignItems: "center", justifyContent: "center" }}
                   >
                     <Tooltip title="編輯">
                       <IconButton

@@ -104,11 +104,11 @@ export const initCS = (): Record<string, CourseSection[]> => {
   return o;
 };
 
+/*
 export const INIT_STUDENTS: Withdrawal[] = [
   {
     id: 1,
-    name: "丁O寧",
-    school: "國立臺灣科技大學",
+    studnetName: "丁O寧",
     studentId: "臺科大_B11000000",
     loginId: "B11000000@mail.ntust.edu.tw",
     applyTime: "2026/05/11 08:00",
@@ -305,3 +305,4 @@ export const INIT_STUDENTS: Withdrawal[] = [
     lastModified: new Date("2026/05/08 10:20").getTime(),
   },
 ];
+*/

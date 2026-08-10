@@ -4,11 +4,12 @@ export type StudentRow = {
   courseName?: string;
   name: string;
   school: string;
+  loginId?: string;
   studentId: string;
   applyTime: string;
   deadline: string;
   reason: string;
-  status: string;
+  status: BaseWithdrawalStatus;
   reviewTime?: string;
   approver?: string;
   lastModified?: number;

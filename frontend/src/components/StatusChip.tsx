@@ -8,7 +8,7 @@ type ChipStyle = {
   sx?: SxProps<Theme>;
 };
 
-const getChipStyle = (status: string): ChipStyle => {
+const getChipStyle = (status: BaseWithdrawalStatus): ChipStyle => {
   switch (status) {
     case BaseWithdrawalStatus.PENDING:
       return { color: "primary" };
@@ -25,7 +25,7 @@ const getChipStyle = (status: string): ChipStyle => {
 };
 
 const getStatusI18nKey = (status: BaseWithdrawalStatus, isTeacher: boolean = false) => {
-  const statusLabelIds: Record<BaseWithdrawalStatus, string> = {
+  const statusLabelIds: Partial<Record<BaseWithdrawalStatus, string>> = {
     [BaseWithdrawalStatus.PENDING]: "teacherDashboard.status.pending",
     [BaseWithdrawalStatus.OVERDUE]: "teacherDashboard.status.overdue",
     [BaseWithdrawalStatus.APPROVED]: isTeacher ? "teacherDashboard.status.approved" : "studentDashboard.status.approved",
