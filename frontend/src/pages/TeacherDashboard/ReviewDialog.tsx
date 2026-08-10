@@ -60,10 +60,10 @@ export const TicketReviewDialog = ({
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             <Typography variant="body2">
               {f({ id: "teacherDashboard.field.studentName" })}:{" "}
-              {withdrawal.name}
+              {withdrawal.studentName}
             </Typography>
             <Typography variant="body2">
-              {f({ id: "teacherDashboard.field.section" })}: {withdrawal.school}
+              {f({ id: "teacherDashboard.field.section" })}: {withdrawal.sectionName}
             </Typography>
             <Typography variant="body2">
               {f({ id: "teacherDashboard.field.loginId" })}:{" "}

@@ -118,7 +118,7 @@ export const StudentDashboard = ({ courseId }: StudentDashboardProps) => {
             <Stack spacing={0.5}>
               <Typography variant="caption" sx={{ lineHeight: 1.66 }}>
                 {f({ id: "studentDashboard.field.studentName" })}：
-                {withdrawal.studnetName}
+                {withdrawal.studentName}
               </Typography>
               <Typography variant="caption" sx={{ lineHeight: 1.66 }}>
                 {f({ id: "studentDashboard.field.loginId" })}：

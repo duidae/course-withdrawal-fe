@@ -87,6 +87,7 @@ export const getCourseSettings = async (courseId: number): Promise<CourseSetting
     );
   return response.data;
   */
+ console.log(courseId);
   return {
     sectionOptions: classOptions,
     reviewDeadline: '2026/08/08 23:59',
@@ -105,6 +106,7 @@ export const getWithdrawals = async (
   );
   return response.data;
   */
+  console.log(courseId, params, defaultPageSize);
   return {
     data: INIT_STUDENTS,
     total: 1,
