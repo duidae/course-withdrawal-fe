@@ -30,8 +30,6 @@ export const ApplicationPanel = ({
 }: ApplicationPanelProps) => {
   const { formatMessage: f } = useIntl();
 
-  console.log(application);
-
   if (!sectionEnabled) {
     return (
       <Alert severity="info">
