@@ -21,7 +21,7 @@ export const classOptions = [
   { value: "南臺科技大學", label: "南臺科技大學" },
   { value: "中國醫藥大學", label: "中國醫藥大學" },
   { value: "逢甲大學", label: "逢甲大學" },
-];
+].map(o => o.value);
 
 export const INIT_COURSES = [
   {

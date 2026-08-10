@@ -3,15 +3,6 @@ import { useIntl } from "react-intl";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import * as XLSX from "xlsx";
-
-import { getWithdrawals } from "../../apis/course-withdrawal.api";
-
-import {
-  initCS,
-  classOptions as classUniversityOptions,
-} from "../../apis/mockup";
-
-import { statusOrder, pendingCountFormatter } from "./constants";
 import { FilterBar } from "./FilterBar";
 import { WithdrawalTable, type WithdrawalTableRow } from "./WithdrawalTable";
 import {
@@ -24,6 +15,8 @@ import {
   type StudentRowWithOrig,
   WithdrawalStatus,
 } from "./types";
+import { getCourseSettings, getWithdrawals, type CourseSettings } from "../../apis/course-withdrawal.api";
+import { statusOrder, pendingCountFormatter } from "./constants";
 
 type TeacherDashboardProps = {
   courseId: number;
@@ -31,8 +24,8 @@ type TeacherDashboardProps = {
 
 export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
   const { formatMessage: f } = useIntl();
+  const [courseSettings, setCourseSettings] = useState<CourseSettings | undefined>(undefined);
   const [withdrawals, setWithdrawals] = useState<StudentRow[]>([]);
-  const [adminCS] = useState(initCS());
   const [searchName, setSearchName] = useState("");
   const [searchErrorType, setSearchErrorType] = useState<string | null>(null);
   const [reviewTicket, setReviewTicket] = useState<StudentRow | undefined>(
@@ -79,6 +72,7 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
 
   useEffect(() => {
     const fetchWithdrawals = async () => {
+      const courseSettings = await getCourseSettings(courseId);
       const first = await getWithdrawals(courseId, { page: 1, pageSize: 10 });
       const all = [...(first.data as StudentRow[])];
       const totalPages = Math.ceil(first.total / first.pageSize);
@@ -86,6 +80,7 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
         const next = await getWithdrawals(courseId, { page, pageSize: 10 });
         all.push(...(next.data as StudentRow[]));
       }
+      setCourseSettings(courseSettings);
       setWithdrawals(all);
       setIsLoading(false);
     };
@@ -97,36 +92,10 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
       value: f({ id: "teacherDashboard.filter.all" }),
       label: f({ id: "teacherDashboard.filter.all" }),
     },
-    ...classUniversityOptions,
+    ...(courseSettings?.sectionOptions?.map((option) => ({ value: option, label: option })) ?? []),
   ];
 
-  const getSecForSchool = (school: string) => {
-    const secs = adminCS["1"] || [];
-    return (
-      secs.find((s) => s.name === school) || {
-        st: "2026/07/01 00:00",
-        et: "2026/07/25 23:59",
-        ad: "2026/08/08 23:59",
-        notes: "",
-      }
-    );
-  };
-  const getEffectiveStatus = (withdrawal: StudentRow) => {
-    if (withdrawal.status !== WithdrawalStatus.PENDING)
-      return withdrawal.status;
-    const sec = getSecForSchool(withdrawal.school);
-    if (!sec.ad) return withdrawal.status;
-    const deadline = new Date(sec.ad.replace(/\//g, "-").replace(" ", "T"));
-    return deadline < new Date() ? WithdrawalStatus.OVERDUE : withdrawal.status;
-  };
-
-  const effectiveWithdrawals: Array<StudentRowWithOrig> = withdrawals.map(
-    (w) => {
-      const eff = getEffectiveStatus(w);
-      return { ...w, status: eff, _orig: w.status };
-    },
-  );
-  const baseFiltered = effectiveWithdrawals.filter((s) => {
+  const baseFiltered = withdrawals.filter((s) => {
     const nm =
       searchName === "" ||
       searchErrorType !== null ||
@@ -180,11 +149,8 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
       f({ id: "teacherDashboard.field.reviewTime" }),
       f({ id: "teacherDashboard.field.approver" }),
     ];
-    const rows = effectiveWithdrawals.map((s) => {
-      const deadline =
-        s._orig === WithdrawalStatus.OVERDUE
-          ? s.deadline
-          : getSecForSchool(s.school).ad;
+    const rows = withdrawals.map((s) => {
+      const deadline = courseSettings?.reviewDeadline;
       return [
         s.name,
         s.school,
@@ -261,7 +227,7 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
   const someSelected =
     selected.length > 0 && selected.length < selectableRows.length;
 
-  const pendingCount = effectiveWithdrawals.filter(
+  const pendingCount = withdrawals.filter(
     (s) =>
       s.status === WithdrawalStatus.PENDING ||
       s.status === WithdrawalStatus.OVERDUE,
@@ -274,9 +240,9 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
   const tableRows: WithdrawalTableRow[] = filtered.map((s) => ({
     ...s,
     displayDeadline:
-      s._orig === WithdrawalStatus.OVERDUE
+      s.status === WithdrawalStatus.OVERDUE
         ? s.deadline
-        : getSecForSchool(s.school).ad,
+        : courseSettings?.reviewDeadline ?? "",
   }));
 
   return (
