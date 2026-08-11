@@ -23,7 +23,6 @@ export type ReviewAction =
   (typeof ReviewAction)[keyof typeof ReviewAction];
 
 type TicketDialogProps = {
-  courseName: string;
   withdrawal: StudentRow;
   action: ReviewAction;
   onActionChange: (action: ReviewAction) => void;
@@ -34,7 +33,6 @@ type TicketDialogProps = {
 // TODO: overdue
 
 export const TicketReviewDialog = ({
-  courseName,
   withdrawal,
   action,
   onActionChange,
@@ -62,7 +60,7 @@ export const TicketReviewDialog = ({
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Typography variant="body1">
-            {f({ id: "teacherDashboard.ticket.courseName" })}: {courseName}
+            {f({ id: "teacherDashboard.ticket.courseName" })}: {withdrawal.courseName}
           </Typography>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             <Typography variant="body2">

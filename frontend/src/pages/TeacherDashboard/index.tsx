@@ -33,13 +33,13 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
   const [withdrawals, setWithdrawals] = useState<StudentRow[]>([]);
   const [searchName, setSearchName] = useState("");
   const [searchErrorType, setSearchErrorType] = useState<string | null>(null);
-  const [reviewTicket, setReviewTicket] = useState<StudentRow | undefined>(
+  const [selectedWithdrawal, setSelectedWithdrawal] = useState<StudentRow | undefined>(
     undefined,
   );
   const [batchReviewActionType, setBatchReviewActionType] = useState<
     ReviewAction | undefined
   >(undefined);
-  const [ticketAction, setTicketAction] = useState<ReviewAction>(
+  const [reviewAction, setReviewAction] = useState<ReviewAction>(
     ReviewAction.APPROVE,
   );
   const [classFilter, setClassFilter] = useState(
@@ -140,8 +140,8 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
     );
   };
 
-  const onTicketReview = (withdrawal: StudentRow) => {
-    setReviewTicket(withdrawal);
+  const onWithdrawalReview = (withdrawal: StudentRow) => {
+    setSelectedWithdrawal(withdrawal);
   };
 
   const exportToExcel = () => {
@@ -203,13 +203,12 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
     onBatchDialogClose();
   };
 
-  const onTicketConfirm = () => {
-    console.log("ticket confirm");
-    onTicketDialogClose();
+  const onReviewDialogClose = () => {
+    setSelectedWithdrawal(undefined);
   };
 
-  const onTicketDialogClose = () => {
-    setReviewTicket(undefined);
+  const onReviewActionConfirm = () => {
+    onReviewDialogClose();
   };
 
   const hasSelections = selected.length > 0;
@@ -287,16 +286,15 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
         onSelectAll={handleSelectAll}
         isSelected={isSelected}
         onToggleSelect={toggleSelect}
-        onReview={onTicketReview}
+        onReview={onWithdrawalReview}
       />
-      {reviewTicket !== undefined && (
+      {selectedWithdrawal !== undefined && (
         <TicketReviewDialog
-          courseName={reviewTicket.courseName ?? ""}
-          withdrawal={reviewTicket}
-          action={ticketAction}
-          onActionChange={setTicketAction}
-          onConfirm={onTicketConfirm}
-          onCancel={onTicketDialogClose}
+          withdrawal={selectedWithdrawal}
+          action={reviewAction}
+          onActionChange={setReviewAction}
+          onConfirm={onReviewActionConfirm}
+          onCancel={onReviewDialogClose}
         />
       )}
       {batchReviewActionType !== undefined && (
