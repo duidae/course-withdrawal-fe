@@ -190,7 +190,8 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
     setBatchReviewActionType(undefined);
   };
 
-  const onBatchAction = async (reviewComment: string) => {
+  const onBatchActionConfirm = async (reviewComment: string) => {
+    // TODO: error handling
     await batchReviewWithdrawals(courseId, {
       withdrawalIds: selectedWithdrawals,
       status:
@@ -209,6 +210,7 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
   };
 
   const onReviewActionConfirm = async (reviewComment: string) => {
+    // TODO: error handling
     if (!selectedWithdrawal) return;
 
     await reviewWithdrawal(courseId, selectedWithdrawal.id, {
@@ -311,7 +313,7 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
       {batchReviewActionType !== undefined && (
         <BatchReviewDialog
           actionType={batchReviewActionType}
-          onConfirm={onBatchAction}
+          onConfirm={onBatchActionConfirm}
           onCancel={onBatchDialogClose}
         />
       )}

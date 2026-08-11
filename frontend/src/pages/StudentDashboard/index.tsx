@@ -9,7 +9,7 @@ import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import CircularProgress from "@mui/material/CircularProgress";
-import { getWithdrawal } from "../../apis/course-withdrawal.api";
+import { getWithdrawal, createWithdrawal } from "../../apis/course-withdrawal.api";
 import { StatusChip } from "../../components/StatusChip";
 import { NoticeContent } from "./NoticeContent";
 import { CourseTimeline } from "./CourseTimeline";
@@ -77,8 +77,10 @@ export const StudentDashboard = ({ courseId }: StudentDashboardProps) => {
 
   const canSubmit = !hasSubmitted && !isAppExpired && isSectionEnabled;
 
-  const onSubmit = () => {
-    console.log("submit");
+  const onSubmit = async () => {
+    // TODO: error handling
+    const result = await createWithdrawal(courseId, { reason });
+    setWithdrawal(result);
   };
 
   return (
