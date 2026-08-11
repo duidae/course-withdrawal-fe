@@ -8,7 +8,7 @@ import { WithdrawalTable, type WithdrawalTableRow } from "./WithdrawalTable";
 import {
   TicketReviewDialog,
   BatchReviewDialog,
-  BatchReviewActionType,
+  ReviewAction,
 } from "./ReviewDialog";
 import {
   type StudentRow,
@@ -32,10 +32,10 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
     undefined,
   );
   const [batchReviewActionType, setBatchReviewActionType] = useState<
-    BatchReviewActionType | undefined
+    ReviewAction | undefined
   >(undefined);
-  const [ticketDecision, setTicketDecision] = useState<"approve" | "decline">(
-    "approve",
+  const [ticketAction, setTicketAction] = useState<ReviewAction>(
+    ReviewAction.APPROVE,
   );
   const [classFilter, setClassFilter] = useState(
     f({ id: "teacherDashboard.filter.all" }),
@@ -189,11 +189,11 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
     );
     setSelected([]);
     */
-    setBatchReviewActionType(BatchReviewActionType.APPROVE);
+    setBatchReviewActionType(ReviewAction.APPROVE);
   };
 
   const onBatchDeclineClick = () => {
-    setBatchReviewActionType(BatchReviewActionType.DECLINE);
+    setBatchReviewActionType(ReviewAction.DECLINE);
   };
 
   const onBatchApprove = () => {
@@ -300,8 +300,8 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
         <TicketReviewDialog
           courseName={reviewTicket.courseName ?? ""}
           withdrawal={reviewTicket}
-          decision={ticketDecision}
-          onDecisionChange={setTicketDecision}
+          action={ticketAction}
+          onActionChange={setTicketAction}
           onConfirm={onTicketConfirm}
           onCancel={onTicketDialogClose}
         />
@@ -310,7 +310,7 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
         <BatchReviewDialog
           actionType={batchReviewActionType}
           onConfirm={
-            batchReviewActionType === BatchReviewActionType.APPROVE
+            batchReviewActionType === ReviewAction.APPROVE
               ? onBatchApprove
               : onBatchDecline
           }

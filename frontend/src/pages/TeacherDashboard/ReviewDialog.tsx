@@ -14,11 +14,19 @@ import { BaseWithdrawalStatus } from "../../models";
 import { type StudentRow } from "./types";
 import { maxTextInputLength } from "../constants";
 
+export const ReviewAction = {
+  APPROVE: "approve",
+  DECLINE: "decline",
+} as const;
+
+export type ReviewAction =
+  (typeof ReviewAction)[keyof typeof ReviewAction];
+
 type TicketDialogProps = {
   courseName: string;
   withdrawal: StudentRow;
-  decision: "approve" | "decline";
-  onDecisionChange: (decision: "approve" | "decline") => void;
+  action: ReviewAction;
+  onActionChange: (action: ReviewAction) => void;
   onConfirm: () => void;
   onCancel: () => void;
 };
@@ -28,8 +36,8 @@ type TicketDialogProps = {
 export const TicketReviewDialog = ({
   courseName,
   withdrawal,
-  decision,
-  onDecisionChange,
+  action,
+  onActionChange,
   onConfirm,
   onCancel,
 }: TicketDialogProps) => {
@@ -37,7 +45,7 @@ export const TicketReviewDialog = ({
   const { formatMessage: f } = useIntl();
   const isReplyOverLimit = reply.length > maxTextInputLength;
 
-  console.log(decision);
+  console.log(action);
   const isOverdue = withdrawal.status === BaseWithdrawalStatus.OVERDUE;
 
   return (
@@ -111,18 +119,18 @@ export const TicketReviewDialog = ({
               row
               value={undefined} // TODO: fix logic in radio button
               onChange={(e) =>
-                onDecisionChange(e.target.value as "approve" | "decline")
+                onActionChange(e.target.value as ReviewAction)
               }
             >
               <FormControlLabel
                 disabled={isOverdue}
-                value="approve"
+                value={ReviewAction.APPROVE}
                 control={<Radio />}
                 label={f({ id: "teacherDashboard.withdrawal.approve" })}
               />
               <FormControlLabel
                 disabled={isOverdue}
-                value="decline"
+                value={ReviewAction.DECLINE}
                 control={<Radio />}
                 label={f({ id: "teacherDashboard.withdrawal.decline" })}
               />
@@ -152,16 +160,8 @@ export const TicketReviewDialog = ({
   );
 };
 
-export const BatchReviewActionType = {
-  APPROVE: "approve",
-  DECLINE: "decline",
-} as const;
-
-export type BatchReviewActionType =
-  (typeof BatchReviewActionType)[keyof typeof BatchReviewActionType];
-
 type BatchReviewDialog = {
-  actionType: BatchReviewActionType;
+  actionType: ReviewAction;
   onConfirm: () => void;
   onCancel: () => void;
 };
@@ -181,7 +181,7 @@ export const BatchReviewDialog = ({
       size="sm"
       title={f({
         id:
-          actionType === BatchReviewActionType.APPROVE
+          actionType === ReviewAction.APPROVE
             ? "teacherDashboard.batch.approve.title"
             : "teacherDashboard.batch.decline.title",
       })}
@@ -203,7 +203,7 @@ export const BatchReviewDialog = ({
           {f(
             {
               id:
-                actionType === BatchReviewActionType.APPROVE
+                actionType === ReviewAction.APPROVE
                   ? "teacherDashboard.batch.approve.msg"
                   : "teacherDashboard.batch.decline.msg",
             },
