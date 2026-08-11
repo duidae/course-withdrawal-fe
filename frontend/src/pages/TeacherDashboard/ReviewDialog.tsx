@@ -162,7 +162,7 @@ export const TicketReviewDialog = ({
 
 type BatchReviewDialog = {
   actionType: ReviewAction;
-  onConfirm: () => void;
+  onConfirm: (reviewComment: string) => void;
   onCancel: () => void;
 };
 
@@ -185,7 +185,7 @@ export const BatchReviewDialog = ({
             ? "teacherDashboard.batch.approve.title"
             : "teacherDashboard.batch.decline.title",
       })}
-      onConfirm={onConfirm}
+      onConfirm={() => onConfirm(reply)}
       confirmBtnText={f({ id: "teacherDashboard.batch.confirm" })}
       onCancel={onCancel}
       cancelBtnText={f({ id: "teacherDashboard.ticket.cancel" })}

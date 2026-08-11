@@ -15,7 +15,12 @@ import {
   type StudentRowWithOrig,
   WithdrawalStatus,
 } from "./types";
-import { getCourseSettings, getWithdrawals, type CourseSettings } from "../../apis/course-withdrawal.api";
+import {
+  getCourseSettings,
+  getWithdrawals,
+  batchReviewWithdrawals,
+  type CourseSettings,
+} from "../../apis/course-withdrawal.api";
 import { statusOrder, pendingCountFormatter } from "./constants";
 
 type TeacherDashboardProps = {
@@ -70,20 +75,21 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
     },
   ];
 
+  const fetchWithdrawals = async () => {
+    const courseSettings = await getCourseSettings(courseId);
+    const first = await getWithdrawals(courseId, { page: 1, pageSize: 10 });
+    const all = [...(first.data as StudentRow[])];
+    const totalPages = Math.ceil(first.total / first.pageSize);
+    for (let page = 2; page <= totalPages; page++) {
+      const next = await getWithdrawals(courseId, { page, pageSize: 10 });
+      all.push(...(next.data as StudentRow[]));
+    }
+    setCourseSettings(courseSettings);
+    setWithdrawals(all);
+    setIsLoading(false);
+  };
+
   useEffect(() => {
-    const fetchWithdrawals = async () => {
-      const courseSettings = await getCourseSettings(courseId);
-      const first = await getWithdrawals(courseId, { page: 1, pageSize: 10 });
-      const all = [...(first.data as StudentRow[])];
-      const totalPages = Math.ceil(first.total / first.pageSize);
-      for (let page = 2; page <= totalPages; page++) {
-        const next = await getWithdrawals(courseId, { page, pageSize: 10 });
-        all.push(...(next.data as StudentRow[]));
-      }
-      setCourseSettings(courseSettings);
-      setWithdrawals(all);
-      setIsLoading(false);
-    };
     fetchWithdrawals();
   }, [courseId]);
 
@@ -171,24 +177,6 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
   };
 
   const onBatchApproveClick = () => {
-    /*
-    if (selected.length === 0) return;
-    setWithdrawals((prev) =>
-      prev.map((withdrawal) =>
-        selected.includes(withdrawal.id)
-          ? {
-              ...withdrawal,
-              status: "同意",
-              reviewTime: withdrawal.reviewTime || "2026/05/11 00:00",
-              approver:
-                withdrawal.approver ||
-                f({ id: "teacherDashboard.defaultApprover" }),
-            }
-          : withdrawal,
-      ),
-    );
-    setSelected([]);
-    */
     setBatchReviewActionType(ReviewAction.APPROVE);
   };
 
@@ -196,18 +184,30 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
     setBatchReviewActionType(ReviewAction.DECLINE);
   };
 
-  const onBatchApprove = () => {
-    // TODO: finish approve from api call
-    onBatchDialogClose();
-  };
-
-  const onBatchDecline = () => {
-    // TODO: finish decline from api call
-    onBatchDialogClose();
-  };
-
   const onBatchDialogClose = () => {
     setBatchReviewActionType(undefined);
+  };
+
+  const onBatchApprove = async (reviewComment: string) => {
+    await batchReviewWithdrawals(courseId, {
+      withdrawalIds: selected,
+      status: WithdrawalStatus.APPROVED,
+      reviewComment,
+    });
+    setSelected([]);
+    await fetchWithdrawals();
+    onBatchDialogClose();
+  };
+
+  const onBatchDecline = async (reviewComment: string) => {
+    await batchReviewWithdrawals(courseId, {
+      withdrawalIds: selected,
+      status: WithdrawalStatus.DECLINED,
+      reviewComment,
+    });
+    setSelected([]);
+    await fetchWithdrawals();
+    onBatchDialogClose();
   };
 
   const onTicketConfirm = () => {
