@@ -76,6 +76,7 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
   ];
 
   const fetchWithdrawals = async () => {
+    setIsLoading(true);
     const courseSettings = await getCourseSettings(courseId);
     const first = await getWithdrawals(courseId, { page: 1, pageSize: 10 });
     const all = [...(first.data as StudentRow[])];
@@ -188,21 +189,13 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
     setBatchReviewActionType(undefined);
   };
 
-  const onBatchApprove = async (reviewComment: string) => {
+  const onBatchAction = async (reviewComment: string) => {
     await batchReviewWithdrawals(courseId, {
       withdrawalIds: selected,
-      status: WithdrawalStatus.APPROVED,
-      reviewComment,
-    });
-    setSelected([]);
-    await fetchWithdrawals();
-    onBatchDialogClose();
-  };
-
-  const onBatchDecline = async (reviewComment: string) => {
-    await batchReviewWithdrawals(courseId, {
-      withdrawalIds: selected,
-      status: WithdrawalStatus.DECLINED,
+      status:
+        batchReviewActionType === ReviewAction.APPROVE
+          ? WithdrawalStatus.APPROVED
+          : WithdrawalStatus.DECLINED,
       reviewComment,
     });
     setSelected([]);
@@ -309,11 +302,7 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
       {batchReviewActionType !== undefined && (
         <BatchReviewDialog
           actionType={batchReviewActionType}
-          onConfirm={
-            batchReviewActionType === ReviewAction.APPROVE
-              ? onBatchApprove
-              : onBatchDecline
-          }
+          onConfirm={onBatchAction}
           onCancel={onBatchDialogClose}
         />
       )}
