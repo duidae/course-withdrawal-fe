@@ -26,7 +26,7 @@ type WithdrawalReviewDialogProps = {
   withdrawal: StudentRow;
   action: ReviewAction;
   onActionChange: (action: ReviewAction) => void;
-  onConfirm: () => void;
+  onConfirm: (reviewComment: string) => void;
   onCancel: () => void;
 };
 
@@ -51,7 +51,7 @@ export const WithdrawalReviewDialog = ({
       open={withdrawal !== undefined}
       size="sm"
       title={f({ id: "teacherDashboard.ticket.title" })}
-      onConfirm={onConfirm}
+      onConfirm={() => onConfirm(reply)}
       confirmBtnText={f({ id: "teacherDashboard.ticket.confirm" })}
       onCancel={onCancel}
       cancelBtnText={f({ id: "teacherDashboard.ticket.cancel" })}

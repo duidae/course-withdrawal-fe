@@ -19,6 +19,7 @@ import {
   getCourseSettings,
   getWithdrawals,
   batchReviewWithdrawals,
+  reviewWithdrawal,
   type CourseSettings,
 } from "../../apis/course-withdrawal.api";
 import { statusOrder, pendingCountFormatter } from "./constants";
@@ -207,7 +208,17 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
     setSelectedWithdrawal(undefined);
   };
 
-  const onReviewActionConfirm = () => {
+  const onReviewActionConfirm = async (reviewComment: string) => {
+    if (!selectedWithdrawal) return;
+
+    await reviewWithdrawal(courseId, selectedWithdrawal.id, {
+      status:
+        reviewAction === ReviewAction.APPROVE
+          ? WithdrawalStatus.APPROVED
+          : WithdrawalStatus.DECLINED,
+      reviewComment,
+    });
+    await fetchWithdrawals();
     onReviewDialogClose();
   };
 
