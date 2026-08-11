@@ -37,12 +37,13 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
   const [selectedWithdrawal, setSelectedWithdrawal] = useState<StudentRow | undefined>(
     undefined,
   );
-  const [batchReviewActionType, setBatchReviewActionType] = useState<
-    ReviewAction | undefined
-  >(undefined);
+  const [selectedWithdrawals, setSelectedWithdrawals] = useState<number[]>([]);
   const [reviewAction, setReviewAction] = useState<ReviewAction>(
     ReviewAction.APPROVE,
   );
+  const [batchReviewActionType, setBatchReviewActionType] = useState<
+    ReviewAction | undefined
+  >(undefined);
   const [classFilter, setClassFilter] = useState(
     f({ id: "teacherDashboard.filter.all" }),
   );
@@ -50,7 +51,6 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
     WithdrawalStatus.PENDING,
   );
   const [frozenOrder, setFrozenOrder] = useState<number[] | null>(null);
-  const [selected, setSelected] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const statusOptions = [
@@ -131,12 +131,12 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
     (s) => s.status !== WithdrawalStatus.OVERDUE,
   );
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) setSelected(selectableRows.map((s) => s.id));
-    else setSelected([]);
+    if (e.target.checked) setSelectedWithdrawals(selectableRows.map((s) => s.id));
+    else setSelectedWithdrawals([]);
   };
 
   const toggleSelect = (id: number) => {
-    setSelected((prev) =>
+    setSelectedWithdrawals((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   };
@@ -192,14 +192,14 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
 
   const onBatchAction = async (reviewComment: string) => {
     await batchReviewWithdrawals(courseId, {
-      withdrawalIds: selected,
+      withdrawalIds: selectedWithdrawals,
       status:
         batchReviewActionType === ReviewAction.APPROVE
           ? WithdrawalStatus.APPROVED
           : WithdrawalStatus.DECLINED,
       reviewComment,
     });
-    setSelected([]);
+    setSelectedWithdrawals([]);
     await fetchWithdrawals();
     onBatchDialogClose();
   };
@@ -222,13 +222,13 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
     onReviewDialogClose();
   };
 
-  const hasSelections = selected.length > 0;
+  const hasSelections = selectedWithdrawals.length > 0;
   const allSelected =
-    selectableRows.length > 0 && selected.length === selectableRows.length;
+    selectableRows.length > 0 && selectedWithdrawals.length === selectableRows.length;
 
-  const isSelected = (id: number) => selected.includes(id);
+  const isSelected = (id: number) => selectedWithdrawals.includes(id);
   const someSelected =
-    selected.length > 0 && selected.length < selectableRows.length;
+    selectedWithdrawals.length > 0 && selectedWithdrawals.length < selectableRows.length;
 
   const pendingCount = withdrawals.filter(
     (s) =>
@@ -277,10 +277,10 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
           showRefresh={!!frozenOrder}
           onRefresh={() => {
             setFrozenOrder(null);
-            setSelected([]);
+            setSelectedWithdrawals([]);
           }}
           onExport={exportToExcel}
-          selectedCount={selected.length}
+          selectedCount={selectedWithdrawals.length}
           hasSelections={hasSelections}
           onApprove={onBatchApproveClick}
           onDecline={onBatchDeclineClick}
