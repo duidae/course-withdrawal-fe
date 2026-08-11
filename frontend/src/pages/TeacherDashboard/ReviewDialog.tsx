@@ -22,7 +22,7 @@ export const ReviewAction = {
 export type ReviewAction =
   (typeof ReviewAction)[keyof typeof ReviewAction];
 
-type TicketDialogProps = {
+type WithdrawalReviewDialogProps = {
   withdrawal: StudentRow;
   action: ReviewAction;
   onActionChange: (action: ReviewAction) => void;
@@ -32,13 +32,13 @@ type TicketDialogProps = {
 
 // TODO: overdue
 
-export const TicketReviewDialog = ({
+export const WithdrawalReviewDialog = ({
   withdrawal,
   action,
   onActionChange,
   onConfirm,
   onCancel,
-}: TicketDialogProps) => {
+}: WithdrawalReviewDialogProps) => {
   const [reply, setReply] = useState("");
   const { formatMessage: f } = useIntl();
   const isReplyOverLimit = reply.length > maxTextInputLength;

@@ -6,7 +6,7 @@ import * as XLSX from "xlsx";
 import { FilterBar } from "./FilterBar";
 import { WithdrawalTable, type WithdrawalTableRow } from "./WithdrawalTable";
 import {
-  TicketReviewDialog,
+  WithdrawalReviewDialog,
   BatchReviewDialog,
   ReviewAction,
 } from "./ReviewDialog";
@@ -289,7 +289,7 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
         onReview={onWithdrawalReview}
       />
       {selectedWithdrawal !== undefined && (
-        <TicketReviewDialog
+        <WithdrawalReviewDialog
           withdrawal={selectedWithdrawal}
           action={reviewAction}
           onActionChange={setReviewAction}
