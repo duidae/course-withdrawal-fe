@@ -1,16 +1,26 @@
 import { useIntl } from "react-intl";
 import Stack from "@mui/material/Stack";
+import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
 import { AccordionItem } from "./AccordionItem";
-import { type Application } from "./types";
 import { maxTextInputLength } from "../constants";
+import { formatDate } from "../util";
+
+type Application = {
+  reason?: string;
+  submittedAt?: string;
+  reviewComment?: string;
+  reviewerName?: string;
+  reviewedAt?: string;
+};
 
 type ApplicationPanelProps = {
-  sectionEnabled: boolean;
+  isSectionDisabled: boolean;
+  isNotStarted: boolean;
   hasSubmitted: boolean;
   isAppExpired: boolean;
   isReviewed: boolean;
@@ -20,7 +30,8 @@ type ApplicationPanelProps = {
 };
 
 export const ApplicationPanel = ({
-  sectionEnabled,
+  isSectionDisabled,
+  isNotStarted,
   hasSubmitted,
   isAppExpired,
   isReviewed,
@@ -30,73 +41,26 @@ export const ApplicationPanel = ({
 }: ApplicationPanelProps) => {
   const { formatMessage: f } = useIntl();
 
-  if (!sectionEnabled) {
-    return (
-      <Alert severity="info">
-        <AlertTitle>
-          {f({ id: "studentDashboard.panel.disabledTitle" })}
-        </AlertTitle>
-        {f({ id: "studentDashboard.panel.disabledDesc" })}
-      </Alert>
-    );
-  }
+  const notEnabledAlertJSX = (
+    <Alert severity="info" variant="outlined">
+      <AlertTitle>
+        {f({ id: "studentDashboard.panel.disabledTitle" })}
+      </AlertTitle>
+      {f({ id: "studentDashboard.panel.disabledDesc" })}
+    </Alert>
+  );
 
-  if (hasSubmitted) {
-    const reasonAccordion = (
-      <AccordionItem title={f({ id: "studentDashboard.field.reason" })}>
-        <Stack spacing={1}>
-          <Typography variant="body2" sx={{ color: "text.secondary" }}>
-            {application.reason}
-          </Typography>
-          {application.submittedAt && (
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              {f(
-                { id: "studentDashboard.panel.submittedAt" },
-                { time: application.submittedAt },
-              )}
-            </Typography>
-          )}
-        </Stack>
-      </AccordionItem>
-    );
-
-    return (
-      <Paper variant="outlined" sx={{ boxShadow: 1 }}>
-        {reasonAccordion}
-        {isReviewed && (
-          <AccordionItem
-            title={f({ id: "studentDashboard.panel.reviewComment" })}
-          >
-            <Stack spacing={0.5}>
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                {application.comment ||
-                  f({ id: "studentDashboard.panel.noComment" })}
-              </Typography>
-              {application.reviewerName && (
-                <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  {f(
-                    { id: "studentDashboard.panel.reviewer" },
-                    { name: application.reviewerName },
-                  )}
-                </Typography>
-              )}
-              {application.reviewedAt && (
-                <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  {f(
-                    { id: "studentDashboard.panel.reviewedAt" },
-                    { time: application.reviewedAt },
-                  )}
-                </Typography>
-              )}
-            </Stack>
-          </AccordionItem>
-        )}
-      </Paper>
-    );
-  }
+  const notStartedAlertJSX = (
+    <Alert severity="info" variant="outlined">
+      <AlertTitle>
+        {f({ id: "studentDashboard.panel.notStartedTitle" })}
+      </AlertTitle>
+      {f({ id: "studentDashboard.panel.notStartedDesc" })}
+    </Alert>
+  );
 
   const expireAlertJSX = (
-    <Alert severity="error">
+    <Alert severity="error" variant="outlined">
       <AlertTitle>
         {f({ id: "studentDashboard.panel.expiredTitle" })}
       </AlertTitle>
@@ -104,8 +68,61 @@ export const ApplicationPanel = ({
     </Alert>
   );
 
-  const isReasonOverLimit = reason.length > maxTextInputLength;
+  const reasonAccordion = (
+    <AccordionItem title={f({ id: "studentDashboard.field.reason" })}>
+      <Stack spacing={1}>
+        <Typography variant="body2" sx={{ color: "text.secondary" }}>
+          {application.reason}
+        </Typography>
+        {application.submittedAt && (
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            {f(
+              { id: "studentDashboard.panel.submittedAt" },
+              { time: formatDate(application.submittedAt), br: () => <br /> },
+            )}
+          </Typography>
+        )}
+      </Stack>
+    </AccordionItem>
+  );
 
+  const reviewCommentJSX = (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Paper variant="outlined">{reasonAccordion}</Paper>
+      {isReviewed && (
+        <Paper variant="outlined">
+          <AccordionItem
+            title={f({ id: "studentDashboard.panel.reviewComment" })}
+          >
+            <Stack spacing={0.5}>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                {application.reviewComment ||
+                  f({ id: "studentDashboard.panel.noComment" })}
+              </Typography>
+              {application.reviewerName && (
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  {f(
+                    { id: "studentDashboard.panel.reviewer" },
+                    { name: application.reviewerName, br: () => <br /> },
+                  )}
+                </Typography>
+              )}
+              {application.reviewedAt && (
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  {f(
+                    { id: "studentDashboard.panel.reviewedAt" },
+                    { time: formatDate(application.reviewedAt) },
+                  )}
+                </Typography>
+              )}
+            </Stack>
+          </AccordionItem>
+        </Paper>
+      )}
+    </Box>
+  );
+
+  const isReasonOverLimit = reason.length > maxTextInputLength;
   const applicationEditorJSX = (
     <Stack spacing={1}>
       <TextField
@@ -129,5 +146,15 @@ export const ApplicationPanel = ({
     </Stack>
   );
 
-  return isAppExpired ? expireAlertJSX : applicationEditorJSX;
+  if (isSectionDisabled) {
+    return notEnabledAlertJSX;
+  } else if (isNotStarted) {
+    return notStartedAlertJSX;
+  } else if (isAppExpired) {
+    return expireAlertJSX;
+  } else if (hasSubmitted) {
+    return reviewCommentJSX;
+  } else {
+    return applicationEditorJSX;
+  }
 };

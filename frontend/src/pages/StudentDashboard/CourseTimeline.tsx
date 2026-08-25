@@ -4,13 +4,14 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { Box, Typography } from "@mui/material";
+import { Box, Skeleton, Typography } from "@mui/material";
+import { formatDate } from "../util";
 
 type CourseTimelineProps = {
-  sectionEnabled: boolean;
-  startAt: string;
-  endAt: string;
-  reviewDeadline: string;
+  isLoading?: boolean;
+  startAt: string | undefined;
+  endAt: string | undefined;
+  reviewDeadline: string | undefined;
 };
 
 const tableCellStyle = {
@@ -22,25 +23,28 @@ const tableCellStyle = {
 };
 
 export const CourseTimeline = ({
-  sectionEnabled,
+  isLoading,
   startAt,
   endAt,
   reviewDeadline,
 }: CourseTimelineProps) => {
   const { formatMessage: f } = useIntl();
+  const skeleton = (
+    <Skeleton variant="text" width={120} sx={{ display: "inline-block" }} />
+  );
 
   const items = [
     {
       label: f({ id: "studentDashboard.timeline.start" }),
-      value: sectionEnabled ? startAt : "-",
+      value: startAt ? formatDate(startAt) : "-",
     },
     {
       label: f({ id: "studentDashboard.timeline.end" }),
-      value: sectionEnabled ? endAt : "-",
+      value: endAt ? formatDate(endAt) : "-",
     },
     {
       label: f({ id: "studentDashboard.timeline.teacherDeadline" }),
-      value: sectionEnabled ? reviewDeadline : "-",
+      value: reviewDeadline ? formatDate(reviewDeadline) : "-",
     },
   ];
 
@@ -66,7 +70,9 @@ export const CourseTimeline = ({
             <TableRow>
               {items.map((item) => (
                 <TableCell key={item.label} sx={tableCellStyle}>
-                  <Typography variant="caption">{item.value}</Typography>
+                  <Typography variant="caption">
+                    {isLoading ? skeleton : item.value}
+                  </Typography>
                 </TableCell>
               ))}
             </TableRow>
@@ -83,7 +89,9 @@ export const CourseTimeline = ({
                   <Typography variant="caption">{item.label}</Typography>
                 </TableCell>
                 <TableCell sx={tableCellStyle}>
-                  <Typography variant="caption">{item.value}</Typography>
+                  <Typography variant="caption">
+                    {isLoading ? skeleton : item.value}
+                  </Typography>
                 </TableCell>
               </TableRow>
             ))}

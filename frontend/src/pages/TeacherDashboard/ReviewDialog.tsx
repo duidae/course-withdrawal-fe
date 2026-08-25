@@ -19,48 +19,61 @@ export const ReviewAction = {
   DECLINE: "decline",
 } as const;
 
-export type ReviewAction =
-  (typeof ReviewAction)[keyof typeof ReviewAction];
+export type ReviewAction = (typeof ReviewAction)[keyof typeof ReviewAction];
+
+const getInitialAction = (
+  status: BaseWithdrawalStatus,
+): ReviewAction | undefined => {
+  if (status === BaseWithdrawalStatus.NOTSUBMITTED) {
+    return undefined;
+  }
+  if (status === BaseWithdrawalStatus.APPROVED) {
+    return ReviewAction.APPROVE;
+  }
+  if (status === BaseWithdrawalStatus.DECLINED) {
+    return ReviewAction.DECLINE;
+  }
+  return undefined;
+};
 
 type WithdrawalReviewDialogProps = {
   withdrawal: StudentRow;
-  action: ReviewAction;
-  onActionChange: (action: ReviewAction) => void;
-  onConfirm: (reviewComment: string) => void;
+  onConfirm: (reviewAction: ReviewAction, reviewComment: string) => void;
   onCancel: () => void;
 };
 
-// TODO: overdue
-
 export const WithdrawalReviewDialog = ({
   withdrawal,
-  action,
-  onActionChange,
   onConfirm,
   onCancel,
 }: WithdrawalReviewDialogProps) => {
-  const [reply, setReply] = useState("");
   const { formatMessage: f } = useIntl();
+  const initialAction = getInitialAction(withdrawal.status);
+  const [action, setAction] = useState<ReviewAction | undefined>(initialAction);
+  const [reply, setReply] = useState("");
   const isReplyOverLimit = reply.length > maxTextInputLength;
 
-  console.log(action);
   const isOverdue = withdrawal.status === BaseWithdrawalStatus.OVERDUE;
+  const isDirty = action !== initialAction || reply !== "";
+  const disableConfirmBtn =
+    action === undefined || !isDirty || isOverdue || isReplyOverLimit;
 
   return (
     <BaseDialog
       open={withdrawal !== undefined}
       size="sm"
       title={f({ id: "teacherDashboard.ticket.title" })}
-      onConfirm={() => onConfirm(reply)}
+      onConfirm={() => action && onConfirm(action, reply)}
       confirmBtnText={f({ id: "teacherDashboard.ticket.confirm" })}
       onCancel={onCancel}
       cancelBtnText={f({ id: "teacherDashboard.ticket.cancel" })}
-      disableConfirmBtn={isOverdue || isReplyOverLimit}
+      disableConfirmBtn={disableConfirmBtn}
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Typography variant="body1">
-            {f({ id: "teacherDashboard.ticket.courseName" })}: {withdrawal.courseName}
+            {f({ id: "teacherDashboard.ticket.courseName" })}:{" "}
+            {withdrawal.courseName}
           </Typography>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             <Typography variant="body2">
@@ -68,7 +81,8 @@ export const WithdrawalReviewDialog = ({
               {withdrawal.studentName}
             </Typography>
             <Typography variant="body2">
-              {f({ id: "teacherDashboard.field.section" })}: {withdrawal.sectionName}
+              {f({ id: "teacherDashboard.field.section" })}:{" "}
+              {withdrawal.sectionName}
             </Typography>
             <Typography variant="body2">
               {f({ id: "teacherDashboard.field.loginId" })}:{" "}
@@ -115,10 +129,8 @@ export const WithdrawalReviewDialog = ({
             </Typography>
             <RadioGroup
               row
-              value={undefined} // TODO: fix logic in radio button
-              onChange={(e) =>
-                onActionChange(e.target.value as ReviewAction)
-              }
+              value={action}
+              onChange={(e) => setAction(e.target.value as ReviewAction)}
             >
               <FormControlLabel
                 disabled={isOverdue}
@@ -139,7 +151,7 @@ export const WithdrawalReviewDialog = ({
             value={reply}
             label={f({ id: "teacherDashboard.ticket.comment" })}
             multiline
-            minRows={3}
+            rows={4}
             onChange={(e) => setReply(e.target.value)}
             fullWidth
             error={isReplyOverLimit}
@@ -169,8 +181,8 @@ export const BatchReviewDialog = ({
   onConfirm,
   onCancel,
 }: BatchReviewDialog) => {
-  const [reply, setReply] = useState("");
   const { formatMessage: f } = useIntl();
+  const [reply, setReply] = useState("");
   const isReplyOverLimit = reply.length > maxTextInputLength;
 
   return (
@@ -225,25 +237,16 @@ export const BatchReviewDialog = ({
             onChange={(e) => setReply(e.target.value)}
             fullWidth
             error={isReplyOverLimit}
+            rows={11}
             slotProps={{
               inputLabel: { shrink: true },
             }}
-            sx={{
-              flex: 1,
-              "& .MuiInputBase-root": {
-                height: "100%",
-                alignItems: "flex-start",
-              },
-              "& .MuiInputBase-input": {
-                height: "100% !important",
-                overflow: "auto",
-              },
-            }}
           />
+
           <Typography
             variant="caption"
             color={isReplyOverLimit ? "error" : "textSecondary"}
-            sx={{ alignSelf: "flex-end" }}
+            sx={{ alignSelf: "flex-end", flexShrink: 0 }}
           >
             {reply.length} / {maxTextInputLength}
           </Typography>

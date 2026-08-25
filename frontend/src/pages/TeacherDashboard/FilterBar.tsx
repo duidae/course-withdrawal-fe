@@ -1,27 +1,37 @@
 import { useIntl } from "react-intl";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import { SelectField } from "./SelectField";
-import { type SelectOption, WithdrawalStatus } from "./types";
+import Typography from "@mui/material/Typography";
+import { SelectField, type SelectOption } from "./SelectField";
+import { BaseWithdrawalStatus } from "../../models";
+
+export const WithdrawalStatusOption = {
+  ALL: "all",
+  ...BaseWithdrawalStatus,
+} as const;
+
+export type WithdrawalStatusOption =
+  (typeof WithdrawalStatusOption)[keyof typeof WithdrawalStatusOption];
+
+const hasInvalidCharacter = /[^一-鿿㐀-䶿豈-﫿ꀀ-꒏A-Za-z]/;
 
 type FilterBarProps = {
   disabled?: boolean;
   searchName: string;
   searchErrorType: string | null;
-  onSearchNameChange: (value: string) => void;
-  onSearchErrorTypeChange: (errorType: string | null) => void;
-  classFilter: string;
-  onClassFilterChange: (value: string) => void;
-  classOptions: SelectOption[];
-  statusFilter: WithdrawalStatus;
-  onStatusFilterChange: (value: WithdrawalStatus) => void;
+  sectionFilter: string;
+  sectionOptions: SelectOption[];
+  statusFilter: WithdrawalStatusOption;
   statusOptions: SelectOption[];
-  showRefresh: boolean;
-  onRefresh: () => void;
-  onExport: () => void;
   selectedCount: number;
   hasSelections: boolean;
+  onSearchNameChange: (value: string) => void;
+  onSearchErrorTypeChange: (errorType: string | null) => void;
+  onSectionFilterChange: (value: string) => void;
+  onStatusFilterChange: (value: WithdrawalStatusOption) => void;
+  onExport: () => void;
   onApprove: () => void;
   onDecline: () => void;
 };
@@ -30,19 +40,17 @@ export const FilterBar = ({
   disabled,
   searchName,
   searchErrorType,
-  onSearchNameChange,
-  onSearchErrorTypeChange,
-  classFilter,
-  onClassFilterChange,
-  classOptions,
+  sectionFilter,
+  sectionOptions,
   statusFilter,
-  onStatusFilterChange,
   statusOptions,
-  showRefresh,
-  onRefresh,
-  onExport,
   selectedCount,
   hasSelections,
+  onSearchNameChange,
+  onSearchErrorTypeChange,
+  onSectionFilterChange,
+  onStatusFilterChange,
+  onExport,
   onApprove,
   onDecline,
 }: FilterBarProps) => {
@@ -50,15 +58,15 @@ export const FilterBar = ({
 
   return (
     <>
-      <div
-        style={{
+      <Box
+        sx={{
           display: "flex",
           alignItems: "flex-start",
           justifyContent: "space-between",
-          gap: 12,
+          gap: 1.5,
         }}
       >
-        <div style={{ display: "flex", gap: 24, alignItems: "flex-start" }}>
+        <Stack direction="row" spacing={3} sx={{ alignItems: "flex-start" }}>
           <TextField
             disabled={disabled}
             label={f({ id: "teacherDashboard.filter.studentName" })}
@@ -70,7 +78,7 @@ export const FilterBar = ({
                 onSearchErrorTypeChange(null);
               } else if (val.length > 50) {
                 onSearchErrorTypeChange("tooLong");
-              } else if (/[^一-鿿㐀-䶿豈-﫿ꀀ-꒏A-Za-z]/.test(val)) {
+              } else if (hasInvalidCharacter.test(val)) {
                 onSearchErrorTypeChange("invalidChars");
               } else {
                 onSearchErrorTypeChange(null);
@@ -84,14 +92,14 @@ export const FilterBar = ({
                   ? f({ id: "teacherDashboard.filter.nameTooLong" })
                   : ""
             }
-            style={{ width: 220 }}
+            sx={{ width: 220 }}
           />
           <SelectField
             disabled={disabled}
             label={f({ id: "teacherDashboard.field.section" })}
-            value={classFilter}
-            onChange={onClassFilterChange}
-            options={classOptions}
+            value={sectionFilter}
+            onChange={onSectionFilterChange}
+            options={sectionOptions}
             width={220}
           />
           <SelectField
@@ -99,52 +107,26 @@ export const FilterBar = ({
             label={f({ id: "teacherDashboard.field.decision" })}
             value={statusFilter}
             onChange={(value) =>
-              onStatusFilterChange(value as WithdrawalStatus)
+              onStatusFilterChange(value as WithdrawalStatusOption)
             }
             options={statusOptions}
             width={220}
           />
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {showRefresh && (
-            <button
-              onClick={onRefresh}
-              className="mui-btn mui-outlined-default"
-              style={{
-                color: "#555",
-                border: "1px solid rgba(0,0,0,0.23)",
-                background: "transparent",
-                borderRadius: 4,
-                padding: "6px 14px",
-                fontSize: 14,
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-              }}
-            >
-              <RefreshIcon /> {f({ id: "teacherDashboard.actions.refresh" })}
-            </button>
-          )}
+        </Stack>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
           <Button variant="outlined" disabled={disabled} onClick={onExport}>
             {f({ id: "teacherDashboard.actions.exportAll" })}
           </Button>
-        </div>
-      </div>
+        </Stack>
+      </Box>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 16,
-        }}
-      >
-        <span style={{ fontSize: 14, fontWeight: 500, color: "#333" }}>
+      <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+        <Typography sx={{ fontSize: 14, fontWeight: 500, color: "#333" }}>
           {f(
             { id: "teacherDashboard.selection.count" },
             { count: selectedCount },
           )}
-        </span>
+        </Typography>
         <Button
           size="small"
           variant="outlined"
@@ -165,7 +147,7 @@ export const FilterBar = ({
         >
           {f({ id: "teacherDashboard.withdrawal.decline" })}
         </Button>
-      </div>
+      </Stack>
     </>
   );
 };

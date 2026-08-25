@@ -1,14 +1,14 @@
 import { request } from "./request";
 import {
   BaseWithdrawalStatus,
-  type Withdrawal,
-  type CourseWithdrawalSettingsInfo,
+  type WithdrawalDto,
+  type CourseWithdrawalSettingsInfoDto,
+  type CourseWithdrawalSettingsDetailDto,
 } from "../models";
-
-// TODO: remove mock
-import { INIT_STUDENTS, classOptions } from './mockup'
+import { defaultPageSize } from "../pages/constants";
 
 type CreateWithdrawalInput = {
+  sectionId: number;
   reason: string;
 };
 
@@ -20,22 +20,15 @@ type ReviewWithdrawalInput = {
 };
 
 type BatchReviewWithdrawalInput = {
-  withdrawalIds: number[];
+  withdrawalIds: string[];
   status:
     | typeof BaseWithdrawalStatus.APPROVED
     | typeof BaseWithdrawalStatus.DECLINED;
   reviewComment?: string;
 };
 
-type BatchReviewResult = {
-  withdrawalId: number;
-  success: boolean;
-  withdrawal?: Withdrawal;
-  error?: string;
-};
-
 type PaginatedResult<T> = {
-  data: T[];
+  data: T[] | null; // null represents not enabled
   total: number;
   page: number;
   pageSize: number;
@@ -46,8 +39,40 @@ type GetWithdrawalsParams = {
   pageSize?: number;
 };
 
-export type CourseSettings = {
-  sectionOptions: string[],
+type CreateCourseWithdrawalSettingsInput = {
+  sectionId: number;
+  startAt: string;
+  endAt: string;
+  reviewDeadline?: string;
+  noticeDelta?: object;
+  enabled?: boolean;
+};
+
+type UpdateCourseWithdrawalSettingsInput =
+  Partial<CreateCourseWithdrawalSettingsInput>;
+
+type BatchUpdateCourseWithdrawalSettingsInput = {
+  sectionIds: number[];
+} & Partial<Omit<CreateCourseWithdrawalSettingsInput, "sectionId">>;
+
+type CreateSectionWithdrawalSettingsInput = Omit<
+  CreateCourseWithdrawalSettingsInput,
+  "sectionId"
+>;
+
+type UpdateSectionWithdrawalSettingsInput = Omit<
+  UpdateCourseWithdrawalSettingsInput,
+  "sectionId"
+>;
+
+export type SectionOption = {
+  label: string;
+  id: string;
+};
+
+export type CourseSettingsDto = {
+  isEnabled: boolean;
+  sectionOptions: SectionOption[];
   reviewDeadline: string;
 };
 
@@ -55,162 +80,132 @@ export type {
   CreateWithdrawalInput,
   ReviewWithdrawalInput,
   BatchReviewWithdrawalInput,
-  BatchReviewResult,
   PaginatedResult,
   GetWithdrawalsParams,
+  CreateCourseWithdrawalSettingsInput,
+  UpdateCourseWithdrawalSettingsInput,
+  BatchUpdateCourseWithdrawalSettingsInput,
+  CreateSectionWithdrawalSettingsInput,
+  UpdateSectionWithdrawalSettingsInput,
 };
 
-const defaultPageSize = 10;
-
-export const getWithdrawal = async (courseId: number): Promise<Withdrawal> => {
-  /*
-  const response = await request.get<Withdrawal>(
+export const getWithdrawal = async (
+  courseId: number,
+): Promise<WithdrawalDto> => {
+  const response = await request.get<WithdrawalDto>(
     `/api/courses/${courseId}/withdrawal`,
   );
   return response.data;
-  */
-  let student = INIT_STUDENTS[0];
-  if (courseId === 1) {
-    student = {
-      ...student,
-      status: BaseWithdrawalStatus.NOTSUBMITTED,
-      teachers: ['彭文孝','陳永昇','謝秉均'],
-      startAt: '2026/05/01 08:00',
-      reviewDeadline: '2026/05/13 08:00'
-    }
-  } else if (courseId === 2) {
-    student = {
-      ...student,
-      status: BaseWithdrawalStatus.PENDING,
-      teachers: ['彭文孝','陳永昇','謝秉均'],
-      startAt: '2026/05/01 08:00',
-      reviewDeadline: '2026/05/13 08:00'
-    }
-  } else if (courseId === 3) {
-    student = {
-      ...student,
-      status: BaseWithdrawalStatus.OVERDUE,
-      teachers: ['彭文孝','陳永昇','謝秉均'],
-      startAt: '2026/05/01 08:00',
-      reviewDeadline: '2026/05/13 08:00',
-      reviewerName: '彭文孝',
-      reviewedAt: '2026/05/13 08:00'
-    }
-  } else if (courseId === 4) {
-    student = {
-      ...student,
-      status: BaseWithdrawalStatus.APPROVED,
-      teachers: ['彭文孝','陳永昇','謝秉均'],
-      startAt: '2026/05/01 08:00',
-      reviewDeadline: '2026/05/13 08:00',
-      reviewerName: '彭文孝',
-      reviewedAt: '2026/05/13 08:00'
-    }
-  } else if (courseId === 5) {
-    student = {
-      ...student,
-      status: BaseWithdrawalStatus.DECLINED,
-      teachers: ['彭文孝','陳永昇','謝秉均'],
-      startAt: '2026/05/01 08:00',
-      reviewDeadline: '2026/05/13 08:00',
-      reviewerName: '彭文孝',
-      reviewedAt: '2026/05/13 08:00'
-    }
-  }
-  return student;
 };
 
 export const createWithdrawal = async (
   courseId: number,
   input: CreateWithdrawalInput,
-): Promise<Withdrawal> => {
-  const response = await request.post<Withdrawal>(
+): Promise<WithdrawalDto> => {
+  const response = await request.post<WithdrawalDto>(
     `/api/courses/${courseId}/withdrawal`,
     input,
   );
   return response.data;
 };
 
-export const getCourseSettings = async (courseId: number): Promise<CourseSettings> => {
-  /*
-  const response = await request.get<CourseSettings>(
-      `/api/courses/${courseId}/courseSettings`,
-    );
-  return response.data;
-  */
- console.log(courseId);
-  return {
-    sectionOptions: classOptions,
-    reviewDeadline: '2026/08/08 23:59',
-  };
-};
-
 export const getWithdrawals = async (
   courseId: number,
   params: GetWithdrawalsParams = {},
-): Promise<PaginatedResult<Withdrawal>> => {
-  /*
+): Promise<PaginatedResult<WithdrawalDto>> => {
   const { page = 1, pageSize = defaultPageSize } = params;
-  const response = await request.get<PaginatedResult<Withdrawal>>(
+  const response = await request.get<PaginatedResult<WithdrawalDto>>(
     `/api/courses/${courseId}/withdrawals`,
     { params: { page, pageSize } },
   );
   return response.data;
-  */
-  console.log(courseId, params, defaultPageSize);
-  return {
-    data: INIT_STUDENTS,
-    total: 1,
-    page: 1,
-    pageSize: 10,
-  };
 };
 
 export const reviewWithdrawal = async (
   courseId: number,
-  withdrawalId: number,
+  withdrawalId: string,
   input: ReviewWithdrawalInput,
-): Promise<Withdrawal> => {
-  const response = await request.patch<Withdrawal>(
+): Promise<void> => {
+  await request.patch(
     `/api/courses/${courseId}/withdrawals/${withdrawalId}`,
     input,
   );
-  return response.data;
 };
 
 export const batchReviewWithdrawals = async (
   courseId: number,
   input: BatchReviewWithdrawalInput,
-): Promise<BatchReviewResult[]> => {
-  const response = await request.patch<BatchReviewResult[]>(
-    `/api/courses/${courseId}/withdrawals/batch-review`,
-    input,
-  );
-  return response.data;
+): Promise<void> => {
+  await request.patch(`/api/courses/${courseId}/withdrawals/batch`, input);
 };
 
-export const getAllCourseSettings = async (): Promise<
-  CourseWithdrawalSettingsInfo[]
-> => {
-  const response =
-    await request.get<CourseWithdrawalSettingsInfo[]>(`/api/admin/courses`);
+export const getCourseSettings = async (
+  courseId: number,
+): Promise<CourseWithdrawalSettingsInfoDto[]> => {
+  const response = await request.get<CourseWithdrawalSettingsInfoDto[]>(
+    `/api/admin/courses/${courseId}/withdrawal-settings`,
+  );
   return response.data;
 };
 
 export const createCourseSettings = async (
   courseId: number,
-): Promise<CourseWithdrawalSettingsInfo> => {
-  const response = await request.post<CourseWithdrawalSettingsInfo>(
-    `/api/admin/courses/${courseId}`,
+  input: CreateCourseWithdrawalSettingsInput,
+): Promise<void> => {
+  await request.post(
+    `/api/admin/courses/${courseId}/withdrawal-settings`,
+    input,
   );
-  return response.data;
 };
 
 export const updateCourseSettings = async (
   courseId: number,
-): Promise<CourseWithdrawalSettingsInfo> => {
-  const response = await request.patch<CourseWithdrawalSettingsInfo>(
-    `/api/admin/courses/${courseId}`,
+  input: UpdateCourseWithdrawalSettingsInput,
+): Promise<void> => {
+  await request.patch(
+    `/api/admin/courses/${courseId}/withdrawal-settings`,
+    input,
+  );
+};
+
+export const batchUpdateCourseSettings = async (
+  courseId: number,
+  input: BatchUpdateCourseWithdrawalSettingsInput,
+): Promise<void> => {
+  await request.patch(
+    `/api/admin/courses/${courseId}/withdrawal-settings/batch`,
+    input,
+  );
+};
+
+export const getSectionSettings = async (
+  courseId: number,
+  sectionId: number,
+): Promise<CourseWithdrawalSettingsDetailDto> => {
+  const response = await request.get<CourseWithdrawalSettingsDetailDto>(
+    `/api/admin/courses/${courseId}/sections/${sectionId}/withdrawal-settings`,
   );
   return response.data;
+};
+
+export const createSectionSettings = async (
+  courseId: number,
+  sectionId: number,
+  input: CreateSectionWithdrawalSettingsInput,
+): Promise<void> => {
+  await request.post(
+    `/api/admin/courses/${courseId}/sections/${sectionId}/withdrawal-settings`,
+    input,
+  );
+};
+
+export const updateSectionSettings = async (
+  courseId: number,
+  sectionId: number,
+  input: UpdateSectionWithdrawalSettingsInput,
+): Promise<void> => {
+  await request.patch(
+    `/api/admin/courses/${courseId}/sections/${sectionId}/withdrawal-settings`,
+    input,
+  );
 };

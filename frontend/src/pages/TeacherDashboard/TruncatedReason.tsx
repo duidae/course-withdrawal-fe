@@ -1,6 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useIntl } from "react-intl";
-import { type TruncatedReasonProps } from "./types";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+
+type TruncatedReasonProps = {
+  text: string;
+  onReadMore: () => void;
+};
 
 export const TruncatedReason = ({ text, onReadMore }: TruncatedReasonProps) => {
   const { formatMessage: f } = useIntl();
@@ -35,34 +41,35 @@ export const TruncatedReason = ({ text, onReadMore }: TruncatedReasonProps) => {
   }, [text]);
 
   return (
-    <div>
-      <div
+    <Box>
+      <Box
         ref={measRef}
         aria-hidden="true"
-        style={{
+        sx={{
           fontSize: 14,
-          lineHeight: "1.43",
+          lineHeight: 1.43,
           height: 0,
           overflow: "hidden",
           wordBreak: "break-all",
         }}
       >
         {text}
-      </div>
+      </Box>
 
       {isOver ? (
-        <div
-          style={{
+        <Box
+          sx={{
             fontSize: 14,
             color: "#333",
-            lineHeight: "1.43",
+            lineHeight: 1.43,
             overflow: "hidden",
             maxHeight: "2.86em",
             wordBreak: "break-all",
           }}
         >
-          <span
-            style={{
+          <Box
+            component="span"
+            sx={{
               float: "right",
               clear: "right",
               height: "1.43em",
@@ -70,38 +77,43 @@ export const TruncatedReason = ({ text, onReadMore }: TruncatedReasonProps) => {
               display: "block",
             }}
           />
-          <span style={{ float: "right", clear: "right" }}>
+          <Box component="span" sx={{ float: "right", clear: "right" }}>
             {"... "}
-            <button
+            <Button
               onClick={onReadMore}
-              style={{
+              disableRipple
+              sx={{
                 background: "none",
                 border: "none",
                 cursor: "pointer",
                 padding: 0,
+                minWidth: 0,
                 fontSize: 14,
+                fontWeight: 400,
+                textTransform: "none",
                 color: "#757575",
                 fontFamily: "inherit",
                 whiteSpace: "nowrap",
+                "&:hover": { background: "none" },
               }}
             >
               &lt;{f({ id: "teacherDashboard.reason.readMore" })}&gt;
-            </button>
-          </span>
+            </Button>
+          </Box>
           {text}
-        </div>
+        </Box>
       ) : (
-        <div
-          style={{
+        <Box
+          sx={{
             fontSize: 14,
             color: "#333",
-            lineHeight: "1.43",
+            lineHeight: 1.43,
             wordBreak: "break-all",
           }}
         >
           {text}
-        </div>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 };

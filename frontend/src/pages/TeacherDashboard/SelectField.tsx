@@ -2,7 +2,20 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import { type FilterSelectProps } from "./types";
+
+export type SelectOption = {
+  value: string;
+  label: string;
+};
+
+type FilterSelectProps = {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: SelectOption[];
+  width: number;
+  disabled?: boolean;
+};
 
 export const SelectField = ({
   label,

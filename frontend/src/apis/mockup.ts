@@ -1,4 +1,4 @@
-import { type Withdrawal } from "../models";
+import { type WithdrawalDto } from "../models";
 
 export const statusOptions = [
   { value: "待審核", label: "待審核" },
@@ -8,20 +8,20 @@ export const statusOptions = [
 ];
 
 export const classOptions = [
-  { value: "國立臺灣大學", label: "國立臺灣大學" },
-  { value: "國立臺灣科技大學", label: "國立臺灣科技大學" },
-  { value: "國立清華大學", label: "國立清華大學" },
-  { value: "國立陽明交通大學", label: "國立陽明交通大學" },
-  { value: "國立成功大學", label: "國立成功大學" },
-  { value: "國立中山大學", label: "國立中山大學" },
-  { value: "國立中央大學", label: "國立中央大學" },
-  { value: "國立臺灣師範大學", label: "國立臺灣師範大學" },
-  { value: "國立政治大學", label: "國立政治大學" },
-  { value: "國立中興大學", label: "國立中興大學" },
-  { value: "南臺科技大學", label: "南臺科技大學" },
-  { value: "中國醫藥大學", label: "中國醫藥大學" },
-  { value: "逢甲大學", label: "逢甲大學" },
-].map(o => o.value);
+  "國立臺灣大學",
+  "國立臺灣科技大學",
+  "國立清華大學",
+  "國立陽明交通大學",
+  "國立成功大學",
+  "國立中山大學",
+  "國立中央大學",
+  "國立臺灣師範大學",
+  "國立政治大學",
+  "國立中興大學",
+  "南臺科技大學",
+  "中國醫藥大學",
+  "逢甲大學",
+].map((name) => ({ label: name, id: name }));
 
 export const INIT_COURSES = [
   {
@@ -104,9 +104,9 @@ export const initCS = (): Record<string, CourseSection[]> => {
   return o;
 };
 
-export const INIT_STUDENTS: Withdrawal[] = [
+export const INIT_STUDENTS: WithdrawalDto[] = [
   {
-    id: 1,
+    id: "1",
     studentName: "丁O寧",
     sectionName: "國立臺灣科技大學",
     studentId: "臺科大_B11000000",
@@ -116,9 +116,34 @@ export const INIT_STUDENTS: Withdrawal[] = [
     reason:
       "本課程《大型語言模型與資訊安全系統》內容極具前瞻性，惟修讀後發現個人在 Transformer 架構與對抗性攻擊（Adversarial Attacks）的數學基礎尚不完備，導致在實作 LLM 弱點掃描與防禦機制時，進度明顯落後。為確保學習品質，本人決定先補強相關先修知識，待準備充分後再行挑戰，故申請停修。",
     status: "pending",
+    notice: {
+      ops: [
+        { insert: "-" },
+        /*
+        { insert: "各位同學好：\n" },
+        {
+          insert:
+            "依據系所規範，本課程如欲申請停修，需經過主授教師同意，請確認以下事項：\n",
+        },
+        { insert: "1. " },
+        {
+          insert: "停修申請送出後將無法撤回",
+          attributes: { color: "#d32f2f" },
+        },
+        { insert: "，請務必確認課程名稱與內容無誤。\n" },
+        { insert: "2. " },
+        {
+          insert: "經教師核准後，停修手續即完成",
+          attributes: { color: "#d32f2f" },
+        },
+        { insert: "，後續請自行至教務系統完成正式退選。\n" },
+        { insert: "3. 若有任何問題，請聯繫課程授課教師或教務處。\n" },
+        */
+      ],
+    },
   },
   {
-    id: 2,
+    id: "2",
     studentName: "李O豪",
     studentId: "清大_s113065535",
     sectionName: "國立清華大學",
@@ -130,7 +155,7 @@ export const INIT_STUDENTS: Withdrawal[] = [
     status: "pending",
   },
   {
-    id: 3,
+    id: "3",
     studentName: "陳O淳",
     studentId: "南臺科大_4A9G0123",
     sectionName: "南臺科技大學",
@@ -141,7 +166,7 @@ export const INIT_STUDENTS: Withdrawal[] = [
     status: "overdue",
   },
   {
-    id: 4,
+    id: "4",
     studentName: "方O弘",
     studentId: "中山_b123022030",
     sectionName: "國立中山大學",
@@ -155,7 +180,7 @@ export const INIT_STUDENTS: Withdrawal[] = [
     reviewerName: "林俊叡 (教師)",
   },
   {
-    id: 5,
+    id: "5",
     studentName: "王O寓",
     studentId: "中國醫_u114003804",
     sectionName: "中國醫藥大學",
@@ -169,7 +194,7 @@ export const INIT_STUDENTS: Withdrawal[] = [
     reviewerName: "林俊叡 (教師)",
   },
   {
-    id: 6,
+    id: "6",
     studentName: "張O翔",
     studentId: "臺大_b11902135",
     sectionName: "國立臺灣大學",
@@ -183,7 +208,7 @@ export const INIT_STUDENTS: Withdrawal[] = [
     reviewerName: "林俊叡 (教師)",
   },
   {
-    id: 7,
+    id: "7",
     studentName: "林O婷",
     studentId: "成大_F34097391",
     sectionName: "國立成功大學",
@@ -197,7 +222,7 @@ export const INIT_STUDENTS: Withdrawal[] = [
     reviewerName: "林俊叡 (教師)",
   },
   {
-    id: 8,
+    id: "8",
     studentName: "吳O宏",
     studentId: "陽明交大_0516032",
     sectionName: "國立陽明交通大學",
@@ -209,7 +234,7 @@ export const INIT_STUDENTS: Withdrawal[] = [
     status: "pending",
   },
   {
-    id: 9,
+    id: "9",
     studentName: "蔡O珊",
     studentId: "中央_109522047",
     sectionName: "國立中央大學",
@@ -221,7 +246,7 @@ export const INIT_STUDENTS: Withdrawal[] = [
     status: "pending",
   },
   {
-    id: 10,
+    id: "10",
     studentName: "黃O浩",
     studentId: "師大_41175004H",
     sectionName: "國立師範大學",
@@ -235,7 +260,7 @@ export const INIT_STUDENTS: Withdrawal[] = [
     reviewerName: "林俊叡 (教師)",
   },
   {
-    id: 11,
+    id: "11",
     studentName: "劉O雯",
     studentId: "政大_109703021",
     sectionName: "國立政治大學",
@@ -247,7 +272,7 @@ export const INIT_STUDENTS: Withdrawal[] = [
     status: "pending",
   },
   {
-    id: 12,
+    id: "12",
     studentName: "謝O哲",
     studentId: "中興_M11256021",
     sectionName: "國立中興大學",
@@ -261,7 +286,7 @@ export const INIT_STUDENTS: Withdrawal[] = [
     reviewerName: "林俊叡 (教師)",
   },
   {
-    id: 13,
+    id: "13",
     studentName: "許O欣",
     studentId: "逢甲_D0902453",
     sectionName: "逢甲大學",
@@ -272,7 +297,7 @@ export const INIT_STUDENTS: Withdrawal[] = [
     status: "overdue",
   },
   {
-    id: 14,
+    id: "14",
     studentName: "陳O瑋",
     studentId: "臺科大_B12100055",
     sectionName: "國立臺灣科技大學",
@@ -284,7 +309,7 @@ export const INIT_STUDENTS: Withdrawal[] = [
     status: "pending",
   },
   {
-    id: 15,
+    id: "15",
     studentName: "鄭O萱",
     studentId: "清大_s113044218",
     sectionName: "國立清華大學",

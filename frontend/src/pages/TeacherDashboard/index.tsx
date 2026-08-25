@@ -1,181 +1,267 @@
-import { type FC, useEffect, useState } from "react";
+import { type ReactNode, type FC, useEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
+import * as XLSX from "xlsx";
+import { useSnackbar } from "notistack";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import * as XLSX from "xlsx";
-import { FilterBar } from "./FilterBar";
-import { WithdrawalTable, type WithdrawalTableRow } from "./WithdrawalTable";
+import CancelIcon from "@mui/icons-material/Cancel";
+import { withSnackbar } from "../../cool-ui/components/alert/SnackbarAlert";
+import {
+  BaseDialog,
+  BaseDialogMode,
+} from "../../cool-ui/components/dialogs/BaseDialog";
+import { LTILoadingSpinner } from "../../cool-ui/components/loading-spinner/LTILoadingSpinner";
+import { FilterBar, WithdrawalStatusOption } from "./FilterBar";
+import { WithdrawalTable, type EmptyMessageType } from "./WithdrawalTable";
 import {
   WithdrawalReviewDialog,
   BatchReviewDialog,
   ReviewAction,
 } from "./ReviewDialog";
+import { type StudentRow } from "./types";
 import {
-  type StudentRow,
-  type StudentRowWithOrig,
-  WithdrawalStatus,
-} from "./types";
-import {
-  getCourseSettings,
   getWithdrawals,
   batchReviewWithdrawals,
   reviewWithdrawal,
-  type CourseSettings,
 } from "../../apis/course-withdrawal.api";
-import { statusOrder, pendingCountFormatter } from "./constants";
+import { statusOrder, defaultPageSize } from "../constants";
+
+const pendingCountFormatter = {
+  red: (chunks: ReactNode[]) => (
+    <span style={{ color: "#cc0000" }}>{chunks}</span>
+  ),
+};
 
 type TeacherDashboardProps = {
   courseId: number;
 };
 
-export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
+const TeacherDashboardContent: FC<TeacherDashboardProps> = ({ courseId }) => {
   const { formatMessage: f } = useIntl();
-  const [courseSettings, setCourseSettings] = useState<CourseSettings | undefined>(undefined);
-  const [withdrawals, setWithdrawals] = useState<StudentRow[]>([]);
-  const [searchName, setSearchName] = useState("");
-  const [searchErrorType, setSearchErrorType] = useState<string | null>(null);
-  const [selectedWithdrawal, setSelectedWithdrawal] = useState<StudentRow | undefined>(
-    undefined,
-  );
-  const [selectedWithdrawals, setSelectedWithdrawals] = useState<number[]>([]);
-  const [reviewAction, setReviewAction] = useState<ReviewAction>(
-    ReviewAction.APPROVE,
-  );
-  const [batchReviewActionType, setBatchReviewActionType] = useState<
-    ReviewAction | undefined
-  >(undefined);
-  const [classFilter, setClassFilter] = useState(
-    f({ id: "teacherDashboard.filter.all" }),
-  );
-  const [statusFilter, setStatusFilter] = useState<WithdrawalStatus>(
-    WithdrawalStatus.PENDING,
-  );
-  const [frozenOrder, setFrozenOrder] = useState<number[] | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
+  const { enqueueSnackbar } = useSnackbar();
+  const optionAllI18n = f({ id: "teacherDashboard.filter.all" });
   const statusOptions = [
     {
-      value: WithdrawalStatus.ALL,
-      label: f({ id: "teacherDashboard.filter.all" }),
+      value: WithdrawalStatusOption.ALL,
+      label: optionAllI18n,
     },
     {
-      value: WithdrawalStatus.PENDING,
+      value: WithdrawalStatusOption.PENDING,
       label: f({ id: "teacherDashboard.status.pending" }),
     },
     {
-      value: WithdrawalStatus.OVERDUE,
+      value: WithdrawalStatusOption.OVERDUE,
       label: f({ id: "teacherDashboard.status.overdue" }),
     },
     {
-      value: WithdrawalStatus.APPROVED,
+      value: WithdrawalStatusOption.APPROVED,
       label: f({ id: "teacherDashboard.status.approved" }),
     },
     {
-      value: WithdrawalStatus.DECLINED,
+      value: WithdrawalStatusOption.DECLINED,
       label: f({ id: "teacherDashboard.status.declined" }),
     },
   ];
 
-  const fetchWithdrawals = async () => {
-    setIsLoading(true);
-    const courseSettings = await getCourseSettings(courseId);
-    const first = await getWithdrawals(courseId, { page: 1, pageSize: 10 });
-    const all = [...(first.data as StudentRow[])];
-    const totalPages = Math.ceil(first.total / first.pageSize);
-    for (let page = 2; page <= totalPages; page++) {
-      const next = await getWithdrawals(courseId, { page, pageSize: 10 });
-      all.push(...(next.data as StudentRow[]));
+  // Action status
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingFailed, setIsLoadingFailed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitFailed, setIsSubmitFailed] = useState(false);
+
+  // Filter bar
+  const [searchName, setSearchName] = useState("");
+  const [searchErrorType, setSearchErrorType] = useState<string | null>(null);
+  const [sectionFilter, setSectionFilter] = useState(optionAllI18n);
+  const [statusFilter, setStatusFilter] = useState<WithdrawalStatusOption>(
+    WithdrawalStatusOption.PENDING,
+  );
+
+  const [withdrawals, setWithdrawals] = useState<StudentRow[] | null>([]);
+  const [selectedSingleWithdrawal, setSelectedSingleWithdrawal] = useState<
+    StudentRow | undefined
+  >(undefined);
+  const [selectedBatchWithdrawals, setSelectedBatchWithdrawals] = useState<
+    string[]
+  >([]);
+  const [batchReviewActionType, setBatchReviewActionType] = useState<
+    ReviewAction | undefined
+  >(undefined);
+
+  // Pagination
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(defaultPageSize);
+  const [total, setTotal] = useState(0);
+  const latestRequestId = useRef(0);
+
+  useEffect(() => {
+    if (isLoadingFailed) {
+      enqueueSnackbar(f({ id: "studentDashboard.error.fetchFailed" }), {
+        variant: "error",
+      });
     }
-    setCourseSettings(courseSettings);
-    setWithdrawals(all);
-    setIsLoading(false);
+  }, [isLoadingFailed, enqueueSnackbar, f]);
+
+  const fetchWithdrawals = async () => {
+    const requestId = ++latestRequestId.current;
+    setIsLoading(true);
+    setIsLoadingFailed(false);
+    try {
+      const result = await getWithdrawals(courseId, {
+        page: page + 1,
+        pageSize: rowsPerPage,
+      });
+      if (latestRequestId.current !== requestId) return;
+      setWithdrawals(result.data as StudentRow[] | null);
+      setTotal(result.total);
+    } catch {
+      if (latestRequestId.current === requestId) setIsLoadingFailed(true);
+    } finally {
+      if (latestRequestId.current === requestId) setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchWithdrawals();
-  }, [courseId]);
+  }, [courseId, page, rowsPerPage]);
 
-  const classOptions = [
+  useEffect(() => {
+    setSelectedBatchWithdrawals([]);
+  }, [searchName, sectionFilter, statusFilter, rowsPerPage, page]);
+
+  const handleChangePage = (newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (newRowsPerPage: number) => {
+    setRowsPerPage(newRowsPerPage);
+    setPage(0);
+  };
+
+  const sectionOptionsFromWithdrawals = Array.from(
+    new Map(
+      (withdrawals ?? [])
+        .filter(
+          (s): s is StudentRow & { sectionId: number; sectionName: string } =>
+            s.sectionId !== undefined && s.sectionName !== undefined,
+        )
+        .map((s) => [s.sectionId, s.sectionName] as const),
+    ),
+  ).map(([sectionId, sectionName]) => ({
+    value: String(sectionId),
+    label: sectionName,
+  }));
+
+  const sectionOptions = [
     {
-      value: f({ id: "teacherDashboard.filter.all" }),
-      label: f({ id: "teacherDashboard.filter.all" }),
+      value: optionAllI18n,
+      label: optionAllI18n,
     },
-    ...(courseSettings?.sectionOptions?.map((option) => ({ value: option, label: option })) ?? []),
+    ...sectionOptionsFromWithdrawals,
   ];
 
-  const baseFiltered = withdrawals.filter((s) => {
-    const nm =
+  const baseFiltered = (withdrawals ?? []).filter((s) => {
+    const isNameMatch =
       searchName === "" ||
       searchErrorType !== null ||
       s.studentName.includes(searchName);
-    const cl =
-      classFilter === f({ id: "teacherDashboard.filter.all" }) ||
-      s.sectionName === classFilter;
-    const st =
-      statusFilter === WithdrawalStatus.ALL || statusFilter === s.status;
-    return nm && cl && st;
+    const isSectionMatch =
+      sectionFilter === optionAllI18n || String(s.sectionId) === sectionFilter;
+    const isStatusMatch =
+      statusFilter === WithdrawalStatusOption.ALL || statusFilter === s.status;
+    return isNameMatch && isSectionMatch && isStatusMatch;
   });
-  const filtered = frozenOrder
-    ? [
-        ...frozenOrder
-          .map((id) => baseFiltered.find((s) => s.id === id))
-          .filter((entry): entry is StudentRowWithOrig => entry !== undefined),
-        ...baseFiltered.filter((s) => !frozenOrder.includes(s.id)),
-      ]
-    : [...baseFiltered].sort((a, b) => {
-        const d = statusOrder[a.status] - statusOrder[b.status];
-        if (d === 0) return (b.lastModified || 0) - (a.lastModified || 0);
-        return d;
-      });
+  const filtered = [...baseFiltered].sort((a, b) => {
+    const d = statusOrder[a.status] - statusOrder[b.status];
+    if (d === 0) return (b.lastModified || 0) - (a.lastModified || 0);
+    return d;
+  });
   const selectableRows = filtered.filter(
-    (s) => s.status !== WithdrawalStatus.OVERDUE,
+    (s) => s.status !== WithdrawalStatusOption.OVERDUE,
   );
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) setSelectedWithdrawals(selectableRows.map((s) => s.id));
-    else setSelectedWithdrawals([]);
+    if (e.target.checked)
+      setSelectedBatchWithdrawals(selectableRows.map((s) => s.id));
+    else setSelectedBatchWithdrawals([]);
   };
 
-  const toggleSelect = (id: number) => {
-    setSelectedWithdrawals((prev) =>
+  const toggleSelect = (id: string) => {
+    setSelectedBatchWithdrawals((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   };
 
-  const onWithdrawalReview = (withdrawal: StudentRow) => {
-    setSelectedWithdrawal(withdrawal);
+  const onSingleWithdrawalReview = (withdrawal: StudentRow) => {
+    setSelectedSingleWithdrawal(withdrawal);
   };
 
   const exportToExcel = () => {
-    const headers = [
-      f({ id: "teacherDashboard.field.studentName" }),
-      f({ id: "teacherDashboard.field.section" }),
-      f({ id: "teacherDashboard.field.studentId" }),
-      f({ id: "teacherDashboard.field.applyTime" }),
-      f({ id: "teacherDashboard.field.reason" }),
-      f({ id: "teacherDashboard.field.decision" }),
-      f({ id: "teacherDashboard.field.deadline" }),
-      f({ id: "teacherDashboard.field.reviewTime" }),
-      f({ id: "teacherDashboard.field.approver" }),
-    ];
-    const rows = withdrawals.map((s) => {
-      const deadline = courseSettings?.reviewDeadline;
-      return [
-        s.studentName,
-        s.sectionName,
-        s.studentId,
-        s.submittedAt,
-        s.reason,
-        s.status,
-        deadline,
-        s.reviewedAt || "",
-        s.reviewerName || "",
+    try {
+      const headers = [
+        f({ id: "teacherDashboard.field.studentName" }),
+        f({ id: "teacherDashboard.field.section" }),
+        f({ id: "teacherDashboard.field.studentId" }),
+        f({ id: "teacherDashboard.field.submittedAt" }),
+        f({ id: "teacherDashboard.field.reason" }),
+        f({ id: "teacherDashboard.field.decision" }),
+        f({ id: "teacherDashboard.field.deadline" }),
+        f({ id: "teacherDashboard.field.reviewedAt" }),
+        f({ id: "teacherDashboard.field.reviewer" }),
       ];
-    });
-    const title = f({ id: "teacherDashboard.title" });
-    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, title);
-    XLSX.writeFile(workbook, `${title}.xlsx`);
+      const rows = (withdrawals ?? []).map((s) => {
+        return [
+          s.studentName,
+          s.sectionName,
+          s.studentId,
+          s.submittedAt,
+          s.reason,
+          s.status,
+          s.reviewDeadline,
+          s.reviewedAt || "",
+          s.reviewerName || "",
+        ];
+      });
+      const title = f({ id: "teacherDashboard.title" });
+      const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, title);
+      XLSX.writeFile(workbook, `${title}.xlsx`);
+      enqueueSnackbar(f({ id: "teacherDashboard.export.success" }), {
+        variant: "success",
+      });
+    } catch {
+      enqueueSnackbar(f({ id: "teacherDashboard.export.failed" }), {
+        variant: "error",
+      });
+    }
+  };
+
+  const onSingleReviewDialogClose = () => {
+    setSelectedSingleWithdrawal(undefined);
+  };
+
+  const onSingleReviewConfirm = async (
+    reviewAction: ReviewAction,
+    reviewComment: string,
+  ) => {
+    if (!selectedSingleWithdrawal?.id) return;
+
+    setIsSubmitting(true);
+    try {
+      await reviewWithdrawal(courseId, selectedSingleWithdrawal.id, {
+        status:
+          reviewAction === ReviewAction.APPROVE
+            ? WithdrawalStatusOption.APPROVED
+            : WithdrawalStatusOption.DECLINED,
+        reviewComment,
+      });
+      await fetchWithdrawals();
+      onSingleReviewDialogClose();
+    } catch {
+      setIsSubmitFailed(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const onBatchApproveClick = () => {
@@ -186,139 +272,161 @@ export const TeacherDashboard: FC<TeacherDashboardProps> = ({ courseId }) => {
     setBatchReviewActionType(ReviewAction.DECLINE);
   };
 
-  const onBatchDialogClose = () => {
+  const onBatchReviewDialogClose = () => {
     setBatchReviewActionType(undefined);
   };
 
-  const onBatchActionConfirm = async (reviewComment: string) => {
-    // TODO: error handling
-    await batchReviewWithdrawals(courseId, {
-      withdrawalIds: selectedWithdrawals,
-      status:
-        batchReviewActionType === ReviewAction.APPROVE
-          ? WithdrawalStatus.APPROVED
-          : WithdrawalStatus.DECLINED,
-      reviewComment,
-    });
-    setSelectedWithdrawals([]);
-    await fetchWithdrawals();
-    onBatchDialogClose();
+  const onBatchReviewConfirm = async (reviewComment: string) => {
+    setIsSubmitting(true);
+    try {
+      await batchReviewWithdrawals(courseId, {
+        withdrawalIds: selectedBatchWithdrawals,
+        status:
+          batchReviewActionType === ReviewAction.APPROVE
+            ? WithdrawalStatusOption.APPROVED
+            : WithdrawalStatusOption.DECLINED,
+        reviewComment,
+      });
+      setSelectedBatchWithdrawals([]);
+      await fetchWithdrawals();
+      onBatchReviewDialogClose();
+    } catch {
+      setIsSubmitFailed(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const onReviewDialogClose = () => {
-    setSelectedWithdrawal(undefined);
-  };
+  const hasSelections = selectedBatchWithdrawals.length > 0;
+  const isAllSelected =
+    selectableRows.length > 0 &&
+    selectedBatchWithdrawals.length === selectableRows.length;
 
-  const onReviewActionConfirm = async (reviewComment: string) => {
-    // TODO: error handling
-    if (!selectedWithdrawal) return;
+  const isSelected = (id: string) => selectedBatchWithdrawals.includes(id);
+  const isSomeSelected =
+    selectedBatchWithdrawals.length > 0 &&
+    selectedBatchWithdrawals.length < selectableRows.length;
 
-    await reviewWithdrawal(courseId, selectedWithdrawal.id, {
-      status:
-        reviewAction === ReviewAction.APPROVE
-          ? WithdrawalStatus.APPROVED
-          : WithdrawalStatus.DECLINED,
-      reviewComment,
-    });
-    await fetchWithdrawals();
-    onReviewDialogClose();
-  };
-
-  const hasSelections = selectedWithdrawals.length > 0;
-  const allSelected =
-    selectableRows.length > 0 && selectedWithdrawals.length === selectableRows.length;
-
-  const isSelected = (id: number) => selectedWithdrawals.includes(id);
-  const someSelected =
-    selectedWithdrawals.length > 0 && selectedWithdrawals.length < selectableRows.length;
-
-  const pendingCount = withdrawals.filter(
+  const pendingCount = (withdrawals ?? []).filter(
     (s) =>
-      s.status === WithdrawalStatus.PENDING ||
-      s.status === WithdrawalStatus.OVERDUE,
+      s.status === WithdrawalStatusOption.PENDING ||
+      s.status === WithdrawalStatusOption.OVERDUE,
   ).length;
 
   const noPendingStudents =
-    withdrawals.filter((s) => s.status === WithdrawalStatus.PENDING).length ===
-    0;
+    (withdrawals ?? []).filter(
+      (s) => s.status === WithdrawalStatusOption.PENDING,
+    ).length === 0;
 
-  const tableRows: WithdrawalTableRow[] = filtered.map((s) => ({
-    ...s,
-    displayDeadline:
-      s.status === WithdrawalStatus.OVERDUE
-        ? s.deadline
-        : courseSettings?.reviewDeadline ?? "",
-  }));
+  const emptyMessageType: EmptyMessageType =
+    withdrawals === null
+      ? "notEnabled"
+      : total === 0
+        ? "submission"
+        : statusFilter === WithdrawalStatusOption.PENDING && noPendingStudents
+          ? "pending"
+          : "filtered";
+
+  const disabled =
+    isLoading || isLoadingFailed || !withdrawals || withdrawals?.length === 0;
+
+  const headerJSX = (
+    <>
+      <Typography variant="h1">
+        {f({ id: "teacherDashboard.title" })}
+      </Typography>
+      <Typography variant="caption" component="p">
+        {f(
+          { id: "teacherDashboard.pending.count" },
+          { count: pendingCount, ...pendingCountFormatter },
+        )}
+      </Typography>
+    </>
+  );
+
+  const submitErrorDialogJSX = (
+    <BaseDialog
+      open={isSubmitFailed}
+      size="xs"
+      mode={BaseDialogMode.Info}
+      title={f({ id: "teacherDashboard.actionError.title" })}
+      confirmBtnText={f({ id: "teacherDashboard.actionError.confirm" })}
+      onConfirm={() => setIsSubmitFailed(false)}
+    >
+      <Typography
+        variant="body1"
+        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+      >
+        <CancelIcon color="error" fontSize="small" />
+        {f({ id: "teacherDashboard.actionError.message" })}
+      </Typography>
+    </BaseDialog>
+  );
 
   return (
     <Box
-      sx={{ display: "flex", flexDirection: "column", gap: 3, paddingRight: 1 }}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 3,
+      }}
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <Typography variant="h1">
-          {f({ id: "teacherDashboard.title" })}
-        </Typography>
-        <Typography variant="caption" component="p">
-          {f(
-            { id: "teacherDashboard.pending.count" },
-            { count: pendingCount, ...pendingCountFormatter },
-          )}
-        </Typography>
+        {headerJSX}
         <FilterBar
-          disabled={isLoading}
+          disabled={disabled}
           searchName={searchName}
           searchErrorType={searchErrorType}
           onSearchNameChange={setSearchName}
           onSearchErrorTypeChange={setSearchErrorType}
-          classFilter={classFilter}
-          onClassFilterChange={setClassFilter}
-          classOptions={classOptions}
+          sectionFilter={sectionFilter}
+          onSectionFilterChange={setSectionFilter}
+          sectionOptions={sectionOptions}
           statusFilter={statusFilter}
           onStatusFilterChange={setStatusFilter}
           statusOptions={statusOptions}
-          showRefresh={!!frozenOrder}
-          onRefresh={() => {
-            setFrozenOrder(null);
-            setSelectedWithdrawals([]);
-          }}
           onExport={exportToExcel}
-          selectedCount={selectedWithdrawals.length}
+          selectedCount={selectedBatchWithdrawals.length}
           hasSelections={hasSelections}
           onApprove={onBatchApproveClick}
           onDecline={onBatchDeclineClick}
         />
       </Box>
       <WithdrawalTable
-        rows={tableRows}
+        disabled={disabled}
         isLoading={isLoading}
-        showEmptyPendingMessage={
-          statusFilter === WithdrawalStatus.PENDING && noPendingStudents
-        }
-        allSelected={allSelected}
-        someSelected={someSelected}
+        rows={filtered}
+        emptyMessageType={emptyMessageType}
+        isAllSelected={isAllSelected}
+        isSomeSelected={isSomeSelected}
         onSelectAll={handleSelectAll}
         isSelected={isSelected}
         onToggleSelect={toggleSelect}
-        onReview={onWithdrawalReview}
+        onReview={onSingleWithdrawalReview}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        total={total}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
       />
-      {selectedWithdrawal !== undefined && (
+      {selectedSingleWithdrawal !== undefined && (
         <WithdrawalReviewDialog
-          withdrawal={selectedWithdrawal}
-          action={reviewAction}
-          onActionChange={setReviewAction}
-          onConfirm={onReviewActionConfirm}
-          onCancel={onReviewDialogClose}
+          withdrawal={selectedSingleWithdrawal}
+          onConfirm={onSingleReviewConfirm}
+          onCancel={onSingleReviewDialogClose}
         />
       )}
       {batchReviewActionType !== undefined && (
         <BatchReviewDialog
           actionType={batchReviewActionType}
-          onConfirm={onBatchActionConfirm}
-          onCancel={onBatchDialogClose}
+          onConfirm={onBatchReviewConfirm}
+          onCancel={onBatchReviewDialogClose}
         />
       )}
+      {submitErrorDialogJSX}
+      <LTILoadingSpinner show={isSubmitting} />
     </Box>
   );
 };
 
-export default TeacherDashboard;
+export const TeacherDashboard = withSnackbar(TeacherDashboardContent);
