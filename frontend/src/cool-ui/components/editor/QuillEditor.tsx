@@ -8,12 +8,13 @@ import "katex/dist/katex.min.css";
 import "quill/dist/quill.snow.css";
 import "highlight.js/styles/github-dark.css";
 
-interface QuillEditorProps {
+export interface QuillEditorProps {
   defaultContent?: string;
   placeholder?: string;
   helperText?: string;
   disabled?: boolean;
   error?: boolean;
+  height?: number | string;
   toolbarOptions?: any;
   onBlur?: () => void;
   onFocus?: () => void;
@@ -35,14 +36,11 @@ interface QuillEditorProps {
 // QuillEditor toolbar options
 export type ToolbarOption = string[] | { [key: string]: any }[];
 const defaultToolbarOptions: ToolbarOption[] = [
-  [{ header: [1, 2, 3] }],
-  [{ size: ["small", false, "large", "huge"] }],
   ["bold", "italic", "underline", "strike"],
   [{ color: [] }, { background: [] }],
-  [{ list: "ordered" }, { list: "bullet" }], // list
-  [{ align: [] }, { indent: "-1" }, { indent: "+1" }],
-  ["link", "video", "image", "formula", "code-block"],
-  ["clean"],
+  [{ list: "ordered" }, { list: "bullet" }],
+  [{ indent: "-1" }, { indent: "+1" }],
+  ["link"],
 ];
 const ERROR_CLASS = "error";
 
@@ -104,6 +102,7 @@ Quill.register(CustomImageBlot);
  * @param defaultContent
  * @param placeholder
  * @param helperText
+ * @param height 編輯區域高度，超出時可垂直滾動；預設為自動依內容延伸
  * @param toolbarOptions 預設為 defaultToolbarContainer
  * @param disabled 禁用時，輸入框會無法編輯。工具列上的按鈕會沒有反應。
  * @param error
@@ -119,6 +118,7 @@ export const QuillEditor = forwardRef<Quill, QuillEditorProps>(
       defaultContent,
       placeholder,
       helperText,
+      height,
       toolbarOptions = defaultToolbarOptions,
       disabled,
       error,
@@ -157,6 +157,12 @@ export const QuillEditor = forwardRef<Quill, QuillEditorProps>(
         bounds: container,
       });
 
+      if (height !== undefined) {
+        editor.root.style.height =
+          typeof height === "number" ? `${height}px` : height;
+        editor.root.style.overflowY = "auto";
+      }
+
       // Customize tooltip placeholder
       // ref: https://github.com/zenoamaro/react-quill/issues/546
       try {
@@ -176,11 +182,25 @@ export const QuillEditor = forwardRef<Quill, QuillEditorProps>(
         editor.setContents(delta);
       }
 
+      // Quill only refreshes the "ql-blank" class (which shows the CSS
+      // placeholder) on TEXT_CHANGE. For CJK input methods, that event only
+      // fires once composition is confirmed (e.g. pressing Enter), so the
+      // placeholder stays visually overlapping the in-progress composition
+      // until then. Hide it as soon as composition starts.
+      const handleCompositionStart = () => {
+        editor.root.classList.remove("ql-blank");
+      };
+      editor.root.addEventListener("compositionstart", handleCompositionStart);
+
       if (!ref) return;
       (ref as RefObject<Quill | null>).current = editor;
 
       return () => {
         if (ref) (ref as RefObject<Quill | null>).current = null;
+        editor.root.removeEventListener(
+          "compositionstart",
+          handleCompositionStart,
+        );
         container.innerHTML = "";
       };
     }, []);
